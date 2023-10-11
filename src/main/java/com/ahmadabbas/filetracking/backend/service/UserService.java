@@ -12,8 +12,8 @@ public class UserService {
     private UserRepository userRepository;
 
     public UserDto createUser(UserDto userDto) {
-        User user = UserDto.toEntity(userDto);
-        var saved = userRepository.save(user);
-        return UserDto.fromEntity(saved);
+        User user = userDto.toEntity();
+        var savedUser = userRepository.save(user);
+        return savedUser.toDto();
     }
 }

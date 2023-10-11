@@ -8,24 +8,17 @@ import lombok.NonNull;
 
 @Builder
 @Getter
-public class UserDto {
+public class UserDto implements DtoEntityMapper<User> {
     private Integer id;
     private String loginId;
     private Role role;
 
-    public static UserDto fromEntity(@NonNull User user) {
-        return UserDto.builder()
-                .id(user.getId())
-                .loginId(user.getLoginId())
-                .role(user.getRole())
-                .build();
-    }
-
-    public static User toEntity(@NonNull UserDto userDto) {
+    @Override
+    public User toEntity() {
         return User.builder()
-                .id(userDto.getId())
-                .loginId(userDto.getLoginId())
-                .role(userDto.getRole())
+                .id(getId())
+                .loginId(getLoginId())
+                .role(getRole())
                 .build();
     }
 }

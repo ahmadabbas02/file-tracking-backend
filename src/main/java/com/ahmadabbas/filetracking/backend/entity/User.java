@@ -1,5 +1,6 @@
 package com.ahmadabbas.filetracking.backend.entity;
 
+import com.ahmadabbas.filetracking.backend.dto.UserDto;
 import com.ahmadabbas.filetracking.backend.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +18,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Builder
 @Entity
-public class User implements UserDetails {
+public class User implements UserDetails, EntityDtoMapper<UserDto> {
 
     @Id
     @GeneratedValue
@@ -80,5 +81,14 @@ public class User implements UserDetails {
     @Override
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
+
+    @Override
+    public UserDto toDto() {
+        return UserDto.builder()
+                .id(getId())
+                .loginId(getLoginId())
+                .role(getRole())
+                .build();
     }
 }
