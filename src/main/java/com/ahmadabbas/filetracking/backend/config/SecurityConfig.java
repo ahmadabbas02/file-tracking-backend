@@ -29,14 +29,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(req ->
                                 req.requestMatchers(WHITE_LIST_URL)
                                         .permitAll()
-// TODO: implement route locking
                                         .anyRequest()
                                         .authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-//        TODO: implement logout functionality
         ;
 
         return http.build();

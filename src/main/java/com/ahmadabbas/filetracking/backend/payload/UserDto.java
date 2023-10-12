@@ -1,10 +1,9 @@
-package com.ahmadabbas.filetracking.backend.dto;
+package com.ahmadabbas.filetracking.backend.payload;
 
 import com.ahmadabbas.filetracking.backend.entity.User;
 import com.ahmadabbas.filetracking.backend.enums.Role;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NonNull;
 
 @Builder
 @Getter

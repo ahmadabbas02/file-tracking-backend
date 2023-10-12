@@ -1,6 +1,6 @@
 package com.ahmadabbas.filetracking.backend.entity;
 
-import com.ahmadabbas.filetracking.backend.dto.UserDto;
+import com.ahmadabbas.filetracking.backend.payload.UserDto;
 import com.ahmadabbas.filetracking.backend.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,6 +18,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Builder
 @Entity
+@Table(name = "users")
 public class User implements UserDetails, EntityDtoMapper<UserDto> {
 
     @Id
@@ -30,7 +31,7 @@ public class User implements UserDetails, EntityDtoMapper<UserDto> {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role = Role.STUDENT;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

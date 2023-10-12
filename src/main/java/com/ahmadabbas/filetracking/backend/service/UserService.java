@@ -1,6 +1,6 @@
 package com.ahmadabbas.filetracking.backend.service;
 
-import com.ahmadabbas.filetracking.backend.dto.UserDto;
+import com.ahmadabbas.filetracking.backend.payload.UserDto;
 import com.ahmadabbas.filetracking.backend.entity.User;
 import com.ahmadabbas.filetracking.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
