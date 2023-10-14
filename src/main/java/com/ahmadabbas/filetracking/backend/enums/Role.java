@@ -12,11 +12,12 @@ public enum Role {
     SECRETARY,
     CHAIR,
     VICE_CHAR,
-    ;
+    ADMINISTRATOR;
 
     public List<SimpleGrantedAuthority> getAuthorities() {
         var authorities = new ArrayList<SimpleGrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority("ROLE_" + this.name()));
         return authorities;
     }
+
 }

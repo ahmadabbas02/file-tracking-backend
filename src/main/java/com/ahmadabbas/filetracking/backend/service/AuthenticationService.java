@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.service;
 
 import com.ahmadabbas.filetracking.backend.entity.User;
+import com.ahmadabbas.filetracking.backend.enums.Role;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.payload.AuthenticationRequest;
 import com.ahmadabbas.filetracking.backend.payload.AuthenticationResponse;

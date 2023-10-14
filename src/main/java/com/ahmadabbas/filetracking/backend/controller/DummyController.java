@@ -14,4 +14,5 @@ public class DummyController {
     public ResponseEntity<String> dummyEndpoint() {
         return ResponseEntity.ok("Access successful!");
     }
+
 }

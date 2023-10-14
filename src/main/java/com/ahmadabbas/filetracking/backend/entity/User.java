@@ -25,13 +25,15 @@ public class User implements UserDetails, EntityDtoMapper<UserDto> {
     @GeneratedValue
     private Integer id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String loginId;
 
+    @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role role = Role.STUDENT;
+    private Role role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

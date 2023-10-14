@@ -4,4 +4,5 @@ import lombok.NonNull;
 
 public interface EntityDtoMapper<Dto> {
     Dto toDto();
+
 }
