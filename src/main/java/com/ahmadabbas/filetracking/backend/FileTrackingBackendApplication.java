@@ -1,12 +1,7 @@
 package com.ahmadabbas.filetracking.backend;
 
-import com.ahmadabbas.filetracking.backend.enums.Role;
-import com.ahmadabbas.filetracking.backend.payload.RegisterRequest;
-import com.ahmadabbas.filetracking.backend.service.AuthenticationService;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class FileTrackingBackendApplication {

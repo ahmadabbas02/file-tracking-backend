@@ -1,6 +1,6 @@
 package com.ahmadabbas.filetracking.backend.validator;
 
-import com.ahmadabbas.filetracking.backend.enums.Role;
+import com.ahmadabbas.filetracking.backend.user.Role;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

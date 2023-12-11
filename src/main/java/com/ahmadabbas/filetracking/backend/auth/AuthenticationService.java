@@ -1,13 +1,10 @@
 package com.ahmadabbas.filetracking.backend.auth;
 
-import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.payload.AuthenticationRequest;
 import com.ahmadabbas.filetracking.backend.payload.AuthenticationResponse;
-import com.ahmadabbas.filetracking.backend.payload.RegisterRequest;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;

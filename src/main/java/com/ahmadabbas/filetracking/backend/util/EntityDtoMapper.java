@@ -1,6 +1,4 @@
-package com.ahmadabbas.filetracking.backend.entity;
-
-import lombok.NonNull;
+package com.ahmadabbas.filetracking.backend.util;
 
 public interface EntityDtoMapper<Dto> {
     Dto toDto();
