@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.service;
+package com.ahmadabbas.filetracking.backend.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +25,8 @@ public class JwtService {
     private String secretKey;
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
+    @Value("${application.security.jwt.issuer}")
+    private String issuer;
 
     public String extractUserLoginId(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -44,6 +48,13 @@ public class JwtService {
         return buildToken(extraClaims, authentication, jwtExpiration);
     }
 
+    public String generateToken(
+            Map<String, Object> extraClaims,
+            String subject
+    ) {
+        return buildToken(extraClaims, subject, jwtExpiration);
+    }
+
     private String buildToken(
             Map<String, Object> extraClaims,
             Authentication authentication,
@@ -53,8 +64,29 @@ public class JwtService {
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(authentication.getName())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setIssuer(issuer)
+                .setIssuedAt(Date.from(Instant.now()))
+                .setExpiration(
+                        Date.from(Instant.now().plus(expiration, ChronoUnit.DAYS))
+                )
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    private String buildToken(
+            Map<String, Object> extraClaims,
+            String subject,
+            long expiration
+    ) {
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(subject)
+                .setIssuedAt(Date.from(Instant.now()))
+                .setExpiration(
+                        Date.from(Instant.now().plus(expiration, ChronoUnit.DAYS))
+                )
+                .setIssuer(issuer)
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

@@ -1,33 +1,34 @@
-package com.ahmadabbas.filetracking.backend.entity;
+package com.ahmadabbas.filetracking.backend.user;
 
-import com.ahmadabbas.filetracking.backend.payload.UserDto;
-import com.ahmadabbas.filetracking.backend.enums.Role;
+import com.ahmadabbas.filetracking.backend.util.EntityDtoMapper;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
-import org.hibernate.proxy.HibernateProxy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Objects;
 
-@Getter
 @Setter
+@Getter
 @ToString
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Builder
 @Entity
-@Table(name = "User")
+@Table(name = "_user")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User implements UserDetails, EntityDtoMapper<UserDto> {
 
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String loginId;
+    @Column(nullable = false, unique = true)
+    private String name;
+
+    @Column(nullable = false, unique = true)
+    private String email;
 
     @Column(nullable = false)
     private String password;
@@ -48,7 +49,7 @@ public class User implements UserDetails, EntityDtoMapper<UserDto> {
 
     @Override
     public String getUsername() {
-        return loginId;
+        return email;
     }
 
     @Override
@@ -74,25 +75,25 @@ public class User implements UserDetails, EntityDtoMapper<UserDto> {
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return getId() != null && Objects.equals(getId(), user.getId());
+        return Objects.equals(id, user.getId()) && Objects.equals(name, user.getName())
+                && Objects.equals(email, user.getEmail()) && Objects.equals(password, user.password)
+                && role.equals(user.role);
     }
 
     @Override
-    public final int hashCode() {
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    public int hashCode() {
+        return Objects.hash(id, name, email, password, role);
     }
 
     @Override
     public UserDto toDto() {
-        return UserDto.builder()
-                .id(getId())
-                .loginId(getLoginId())
-                .role(getRole())
-                .build();
+        return new UserDto(
+                getId(),
+                getName(),
+                getEmail(),
+                getRole()
+        );
     }
 }

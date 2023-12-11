@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.enums;
+package com.ahmadabbas.filetracking.backend.user;
 
 import lombok.Getter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,6 +9,7 @@ import java.util.List;
 @Getter
 public enum Role {
     STUDENT,
+    ADVISOR,
     SECRETARY,
     CHAIR,
     VICE_CHAR,

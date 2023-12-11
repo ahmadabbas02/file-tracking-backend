@@ -1,14 +1,11 @@
 package com.ahmadabbas.filetracking.backend.exception;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-
-@ResponseStatus(code = HttpStatus.NOT_FOUND)
-public class ResourceNotFoundException extends RuntimeException {
-
-    public ResourceNotFoundException(String message) {
+@ResponseStatus(code = HttpStatus.CONFLICT)
+public class DuplicateResourceException extends RuntimeException {
+    public DuplicateResourceException(String message) {
         super(message);
     }
 }

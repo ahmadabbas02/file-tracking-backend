@@ -1,12 +1,11 @@
-package com.ahmadabbas.filetracking.backend.service;
+package com.ahmadabbas.filetracking.backend.auth;
 
-import com.ahmadabbas.filetracking.backend.entity.User;
-import com.ahmadabbas.filetracking.backend.enums.Role;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.payload.AuthenticationRequest;
 import com.ahmadabbas.filetracking.backend.payload.AuthenticationResponse;
 import com.ahmadabbas.filetracking.backend.payload.RegisterRequest;
-import com.ahmadabbas.filetracking.backend.repository.UserRepository;
+import com.ahmadabbas.filetracking.backend.user.User;
+import com.ahmadabbas.filetracking.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,6 +13,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -23,22 +24,6 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public String register(RegisterRequest request) {
-        if (userRepository.existsByLoginId(request.getLoginId())) {
-            throw new APIException(HttpStatus.BAD_REQUEST, "Login Id already exists!");
-        }
-
-        var user = User.builder()
-                .loginId(request.getLoginId())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
-                .build();
-
-        userRepository.save(user);
-
-        return "User registered successfully!";
-    }
-
     public AuthenticationResponse login(AuthenticationRequest request) {
         var authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -47,7 +32,11 @@ public class AuthenticationService {
                 )
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        var jwtToken = jwtService.generateToken(authentication);
+        var user = (User) authentication.getPrincipal();
+        var jwtToken = jwtService.generateToken(
+                Map.of("role", user.getRole()),
+                authentication
+        );
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .build();

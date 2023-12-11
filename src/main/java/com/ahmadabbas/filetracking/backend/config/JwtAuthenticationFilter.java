@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.config;
 
-import com.ahmadabbas.filetracking.backend.service.JwtService;
+import com.ahmadabbas.filetracking.backend.auth.JwtService;
+import com.ahmadabbas.filetracking.backend.user.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +23,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Override
     protected void doFilterInternal(
