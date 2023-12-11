@@ -1,6 +1,6 @@
 package com.ahmadabbas.filetracking.backend.repository;
 
-import com.ahmadabbas.filetracking.backend.entity.User;
+import com.ahmadabbas.filetracking.backend.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

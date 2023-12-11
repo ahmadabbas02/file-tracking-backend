@@ -4,6 +4,7 @@ import com.ahmadabbas.filetracking.backend.payload.UserDto;
 import com.ahmadabbas.filetracking.backend.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,7 +19,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Builder
 @Entity
-@Table(name = "users")
+@Table(name = "User")
 public class User implements UserDetails, EntityDtoMapper<UserDto> {
 
     @Id
