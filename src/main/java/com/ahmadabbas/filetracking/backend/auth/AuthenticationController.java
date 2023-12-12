@@ -1,7 +1,7 @@
 package com.ahmadabbas.filetracking.backend.auth;
 
-import com.ahmadabbas.filetracking.backend.payload.AuthenticationRequest;
-import com.ahmadabbas.filetracking.backend.payload.AuthenticationResponse;
+import com.ahmadabbas.filetracking.backend.auth.payload.AuthenticationRequest;
+import com.ahmadabbas.filetracking.backend.auth.payload.AuthenticationResponse;
 import com.ahmadabbas.filetracking.backend.user.UserDto;
 import com.ahmadabbas.filetracking.backend.user.UserDtoMapper;
 import com.ahmadabbas.filetracking.backend.user.UserService;

@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.payload;
+package com.ahmadabbas.filetracking.backend.auth.payload;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,11 +1,14 @@
 package com.ahmadabbas.filetracking.backend.student;
 
+import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
+import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +27,14 @@ public class StudentService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public Student getStudent(String id) {
+        return studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "student with id [%s] not found".formatted(id)
+                ));
+    }
+
+    @Transactional
     public Student addStudent(StudentRegistrationRequest studentRegistrationRequest) {
         if (userRepository.existsByEmail(studentRegistrationRequest.email())) {
             throw new DuplicateResourceException(
@@ -31,17 +42,17 @@ public class StudentService {
             );
         }
 
-        var advisor = advisorService.findAdvisorByAdvisorId(studentRegistrationRequest.advisorId());
+        Advisor advisor = advisorService.findAdvisorByAdvisorId(studentRegistrationRequest.advisorId());
 
-        var user = User.builder()
+        User user = User.builder()
                 .name(studentRegistrationRequest.name())
                 .email(studentRegistrationRequest.email())
                 .password(passwordEncoder.encode(studentRegistrationRequest.password()))
                 .role(Role.STUDENT)
                 .build();
-        var savedUser = userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
-        var student = Student.builder()
+        Student student = Student.builder()
                 .advisor(advisor)
                 .department(studentRegistrationRequest.department())
                 .year(studentRegistrationRequest.year())

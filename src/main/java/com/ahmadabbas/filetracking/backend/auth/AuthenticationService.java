@@ -1,7 +1,7 @@
 package com.ahmadabbas.filetracking.backend.auth;
 
-import com.ahmadabbas.filetracking.backend.payload.AuthenticationRequest;
-import com.ahmadabbas.filetracking.backend.payload.AuthenticationResponse;
+import com.ahmadabbas.filetracking.backend.auth.payload.AuthenticationRequest;
+import com.ahmadabbas.filetracking.backend.auth.payload.AuthenticationResponse;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;

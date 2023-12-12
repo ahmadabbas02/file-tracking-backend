@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.student;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
+import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.util.Date;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -38,6 +40,9 @@ public class Student {
     @ManyToOne()
     @JoinColumn(name = "advisor_id", nullable = false)
     private Advisor advisor;
+
+    @OneToMany(mappedBy = "student")
+    private Set<Document> documents;
 
     @CreationTimestamp
     private Date createdAt;

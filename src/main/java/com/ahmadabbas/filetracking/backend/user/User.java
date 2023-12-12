@@ -73,13 +73,13 @@ public class User implements UserDetails, EntityDtoMapper<UserDto> {
     }
 
     @Override
-    public final boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.getId()) && Objects.equals(name, user.getName())
-                && Objects.equals(email, user.getEmail()) && Objects.equals(password, user.password)
-                && role.equals(user.role);
+        return Objects.equals(id, user.id) && Objects.equals(name, user.name)
+                && Objects.equals(email, user.email) && Objects.equals(password, user.password)
+                && role == user.role;
     }
 
     @Override

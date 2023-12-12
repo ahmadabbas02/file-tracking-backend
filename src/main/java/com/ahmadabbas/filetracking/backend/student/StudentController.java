@@ -3,13 +3,10 @@ package com.ahmadabbas.filetracking.backend.student;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/student")
+@RequestMapping("/api/v1/students")
 public class StudentController {
     private final StudentService studentService;
     private final StudentDtoMapper studentDtoMapper;
@@ -17,6 +14,12 @@ public class StudentController {
     public StudentController(StudentService studentService, StudentDtoMapper studentDtoMapper) {
         this.studentService = studentService;
         this.studentDtoMapper = studentDtoMapper;
+    }
+
+    @GetMapping("{studentId}")
+    public ResponseEntity<StudentDto> getStudent(@PathVariable String studentId) {
+        Student student = studentService.getStudent(studentId);
+        return ResponseEntity.ok(studentDtoMapper.apply(student));
     }
 
     @PostMapping

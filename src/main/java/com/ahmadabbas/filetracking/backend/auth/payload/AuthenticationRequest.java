@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.payload;
+package com.ahmadabbas.filetracking.backend.auth.payload;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;

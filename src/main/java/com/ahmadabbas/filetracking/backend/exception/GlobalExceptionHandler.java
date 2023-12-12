@@ -1,6 +1,6 @@
 package com.ahmadabbas.filetracking.backend.exception;
 
-import com.ahmadabbas.filetracking.backend.payload.ErrorDetails;
+import com.ahmadabbas.filetracking.backend.exception.payload.ErrorDetails;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;

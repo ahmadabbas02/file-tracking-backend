@@ -6,6 +6,7 @@ import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,7 @@ public class AdvisorService {
                 ));
     }
 
+    @Transactional
     public Advisor addAdvisor(AdvisorRegistrationRequest advisorRegistrationRequest) {
         if (userRepository.existsByEmail(advisorRegistrationRequest.email())) {
             throw new DuplicateResourceException(
@@ -44,13 +46,14 @@ public class AdvisorService {
             );
         }
 
-        var user = User.builder()
-                .name(advisorRegistrationRequest.name())
-                .email(advisorRegistrationRequest.email())
-                .password(passwordEncoder.encode(advisorRegistrationRequest.password()))
-                .role(Role.ADVISOR)
-                .build();
-        var savedUser = userRepository.save(user);
+        User savedUser = userRepository.save(
+                User.builder()
+                        .name(advisorRegistrationRequest.name())
+                        .email(advisorRegistrationRequest.email())
+                        .password(passwordEncoder.encode(advisorRegistrationRequest.password()))
+                        .role(Role.ADVISOR)
+                        .build()
+        );
 
         return advisorRepository.save(
                 Advisor.builder()
