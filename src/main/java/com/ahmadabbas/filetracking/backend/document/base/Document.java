@@ -14,6 +14,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Builder
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Document {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
