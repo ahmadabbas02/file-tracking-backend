@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.document;
+package com.ahmadabbas.filetracking.backend.document.medical;
 
 import com.ahmadabbas.filetracking.backend.document.base.Document;
 import jakarta.persistence.Entity;

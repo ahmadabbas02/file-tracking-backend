@@ -18,10 +18,10 @@ import java.util.StringJoiner;
 @IdClass(SubCategoryPK.class)
 public class Category {
     @Id
-    private Integer parentCategoryId;
+    private Long parentCategoryId;
     @Id
     @GeneratedValue
-    private Integer categoryId;
+    private Long categoryId;
     private String name;
 
     @Override

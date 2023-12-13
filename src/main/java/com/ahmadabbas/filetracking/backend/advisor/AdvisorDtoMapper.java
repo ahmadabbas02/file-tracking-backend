@@ -8,7 +8,6 @@ import java.util.function.Function;
 @Service
 public class AdvisorDtoMapper implements Function<Advisor, AdvisorDto> {
 
-
     private final UserDtoMapper userDtoMapper;
 
     public AdvisorDtoMapper(UserDtoMapper userDtoMapper) {

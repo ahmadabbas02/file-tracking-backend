@@ -21,8 +21,6 @@ public class AdvisorController {
 
     @PostMapping
     public ResponseEntity<AdvisorDto> registerAdvisor(@RequestBody AdvisorRegistrationRequest advisorRegistrationRequest) {
-
-
         Advisor addedAdvisor = advisorService.addAdvisor(advisorRegistrationRequest);
         return new ResponseEntity<>(advisorDtoMapper.apply(addedAdvisor), HttpStatus.CREATED);
     }

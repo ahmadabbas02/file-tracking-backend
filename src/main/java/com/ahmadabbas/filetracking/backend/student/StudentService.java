@@ -5,12 +5,19 @@ import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
+import com.ahmadabbas.filetracking.backend.student.payload.StudentResponse;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class StudentService {
@@ -18,20 +25,41 @@ public class StudentService {
     private final UserRepository userRepository;
     private final AdvisorService advisorService;
     private final PasswordEncoder passwordEncoder;
+    private final StudentDtoMapper studentDtoMapper;
 
     public StudentService(StudentRepository studentRepository, UserRepository userRepository,
-                          AdvisorService advisorService, PasswordEncoder passwordEncoder) {
+                          AdvisorService advisorService, PasswordEncoder passwordEncoder, StudentDtoMapper studentDtoMapper) {
         this.studentRepository = studentRepository;
         this.userRepository = userRepository;
         this.advisorService = advisorService;
         this.passwordEncoder = passwordEncoder;
+        this.studentDtoMapper = studentDtoMapper;
     }
 
     public Student getStudent(String id) {
         return studentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "student with id [%s] not found".formatted(id)
+                        "student with id %s not found".formatted(id)
                 ));
+    }
+
+    public StudentResponse getAllStudents(int pageNo, int pageSize, String sortBy, String order) {
+        Sort sort = order.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+
+        Page<Student> studentPage = studentRepository.findAll(pageable);
+        List<StudentDto> content = studentPage.getContent().stream().map(studentDtoMapper).toList();
+        return new StudentResponse(
+                content,
+                pageNo,
+                pageSize,
+                studentPage.getTotalElements(),
+                studentPage.getTotalPages(),
+                studentPage.isLast()
+        );
     }
 
     @Transactional

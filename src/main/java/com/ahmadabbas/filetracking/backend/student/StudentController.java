@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.student;
 
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
+import com.ahmadabbas.filetracking.backend.student.payload.StudentResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,16 @@ public class StudentController {
     public ResponseEntity<StudentDto> getStudent(@PathVariable String studentId) {
         Student student = studentService.getStudent(studentId);
         return ResponseEntity.ok(studentDtoMapper.apply(student));
+    }
+
+    @GetMapping
+    public ResponseEntity<StudentResponse> getAllStudents(
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy,
+            @RequestParam(value = "order", defaultValue = "asc", required = false) String order
+    ) {
+        return ResponseEntity.ok(studentService.getAllStudents(pageNo, pageSize, sortBy, order));
     }
 
     @PostMapping

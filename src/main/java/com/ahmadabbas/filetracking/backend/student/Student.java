@@ -3,6 +3,7 @@ package com.ahmadabbas.filetracking.backend.student;
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.user.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -10,10 +11,10 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.StringJoiner;
 
 @Getter
 @Setter
-@ToString
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Builder
@@ -47,4 +48,22 @@ public class Student {
     @CreationTimestamp
     private Date createdAt;
 
+    @JsonBackReference
+    public Set<Document> getDocuments() {
+        return documents;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Student.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("department='" + department + "'")
+                .add("year=" + year)
+                .add("picture='" + picture + "'")
+                .add("user=" + user)
+                .add("advisor=" + advisor)
+                .add("documents=" + documents)
+                .add("createdAt=" + createdAt)
+                .toString();
+    }
 }
