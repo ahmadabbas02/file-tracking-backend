@@ -17,8 +17,8 @@ public class DocumentController {
     public ResponseEntity<DocumentResponse> getAllDocuments(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
-            @RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy,
-            @RequestParam(value = "order", defaultValue = "asc", required = false) String order
+            @RequestParam(value = "sortBy", defaultValue = "uploadedAt", required = false) String sortBy,
+            @RequestParam(value = "order", defaultValue = "desc", required = false) String order
     ) {
         return ResponseEntity.ok(documentService.getAllDocuments(pageNo, pageSize, sortBy, order));
     }
@@ -27,8 +27,8 @@ public class DocumentController {
     public ResponseEntity<DocumentResponse> getAllDocuments(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
-            @RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy,
-            @RequestParam(value = "order", defaultValue = "asc", required = false) String order,
+            @RequestParam(value = "sortBy", defaultValue = "uploadedAt", required = false) String sortBy,
+            @RequestParam(value = "order", defaultValue = "desc", required = false) String order,
             @PathVariable String studentId
     ) {
         return ResponseEntity.ok(documentService.getAllDocuments(pageNo, pageSize, sortBy, order, studentId));

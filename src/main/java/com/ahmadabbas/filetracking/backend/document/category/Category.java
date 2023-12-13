@@ -18,7 +18,8 @@ import java.util.StringJoiner;
 @IdClass(SubCategoryPK.class)
 public class Category {
     @Id
-    private Long parentCategoryId;
+    @Builder.Default
+    private Long parentCategoryId = -1L;
     @Id
     @GeneratedValue
     private Long categoryId;

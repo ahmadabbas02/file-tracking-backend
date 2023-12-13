@@ -7,6 +7,7 @@ import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.document.base.DocumentRepository;
 import com.ahmadabbas.filetracking.backend.document.category.Category;
 import com.ahmadabbas.filetracking.backend.document.category.CategoryRepository;
+import com.ahmadabbas.filetracking.backend.document.contact.ContactDocument;
 import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocument;
 import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportStatus;
 import com.ahmadabbas.filetracking.backend.student.Student;
@@ -18,6 +19,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @RequiredArgsConstructor
@@ -33,7 +35,6 @@ public class DataLoader implements ApplicationRunner {
         // Add category and sub categories
         Category savedMainCategory = categoryRepository.save(
                 Category.builder()
-                        .parentCategoryId((long) -1)
                         .name("Main Cat. 1")
                         .build()
         );
@@ -47,6 +48,18 @@ public class DataLoader implements ApplicationRunner {
                 Category.builder()
                         .parentCategoryId(savedMainCategory.getCategoryId())
                         .name("Sub Cat. 2")
+                        .build()
+        );
+
+        Category medicalReportCategory = categoryRepository.save(
+                Category.builder()
+                        .name("Medical Reports")
+                        .build()
+        );
+
+        Category contactCategory = categoryRepository.save(
+                Category.builder()
+                        .name("Contact Forms")
                         .build()
         );
 
@@ -67,22 +80,58 @@ public class DataLoader implements ApplicationRunner {
                         "ahmad",
                         "CMSE",
                         (short) 4,
-                        "",
+                        "picture url",
                         savedAdvisor.getId()
                 )
         );
 
-        Document document = new MedicalReportDocument(
+        Student student2 = studentService.addStudent(
+                new StudentRegistrationRequest(
+                        "Hussein",
+                        "hussein@email.com",
+                        "hussein",
+                        "CMSE",
+                        (short) 4,
+                        "picture url",
+                        savedAdvisor.getId()
+                )
+        );
+
+        Document medicalReportDocument = new MedicalReportDocument(
                 Date.from(Instant.now()),
                 "Test",
                 MedicalReportStatus.APPROVED
         );
+        medicalReportDocument.setStudent(student1);
+        medicalReportDocument.setCategory(medicalReportCategory);
+        documentRepository.save(medicalReportDocument);
 
-        document.setStudent(student1);
-        document.setCategory(savedSubCategory1);
-
-        documentRepository.save(
-                document
+        Document medicalReportDocument2 = new MedicalReportDocument(
+                Date.from(Instant.now()),
+                "Test2",
+                MedicalReportStatus.REJECTED
         );
+        medicalReportDocument2.setStudent(student2);
+        medicalReportDocument2.setCategory(medicalReportCategory);
+        documentRepository.save(medicalReportDocument2);
+
+        Document medicalReportDocument3 = new MedicalReportDocument(
+                Date.from(Instant.now().minus(7, ChronoUnit.DAYS)),
+                "Test2",
+                MedicalReportStatus.REJECTED
+        );
+        medicalReportDocument3.setStudent(student1);
+        medicalReportDocument3.setCategory(medicalReportCategory);
+        documentRepository.save(medicalReportDocument3);
+
+        Document contactDocument = new ContactDocument(
+                "email@mail.com",
+                "+905331233211",
+                "Emergency Name",
+                "+905331123321"
+        );
+        contactDocument.setStudent(student1);
+        contactDocument.setCategory(contactCategory);
+        documentRepository.save(contactDocument);
     }
 }

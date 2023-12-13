@@ -28,7 +28,7 @@ public class Document {
 
     private String path;
 
-    @OneToOne
+    @ManyToOne
     private Category category;
 
     @ManyToOne
