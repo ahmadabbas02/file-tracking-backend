@@ -1,6 +1,6 @@
 package com.ahmadabbas.filetracking.backend.student;
 
-import com.ahmadabbas.filetracking.backend.advisor.AdvisorDtoMapper;
+import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorDtoMapper;
 import com.ahmadabbas.filetracking.backend.user.UserDtoMapper;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,7 @@ public class StudentDtoMapper implements Function<Student, StudentDto> {
                 student.getYear(),
                 student.getPicture(),
                 userDtoMapper.apply(student.getUser()),
-                advisorDtoMapper.apply(student.getAdvisor()),
+                student.getAdvisor() == null ? null : advisorDtoMapper.apply(student.getAdvisor()),
                 student.getCreatedAt()
         );
     }

@@ -7,10 +7,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.util.Date;
+import java.util.Objects;
+import java.util.StringJoiner;
 
-@Getter
 @Setter
-@ToString
+@Getter
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Builder
@@ -27,4 +28,26 @@ public class Advisor {
 
     @CreationTimestamp
     private Date createdAt;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Advisor advisor)) return false;
+        return Objects.equals(id, advisor.id) && Objects.equals(user, advisor.user)
+                && Objects.equals(createdAt, advisor.createdAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, user, createdAt);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Advisor.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("user=" + user)
+                .add("createdAt=" + createdAt)
+                .toString();
+    }
 }

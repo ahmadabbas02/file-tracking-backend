@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.document.base;
 
-import com.ahmadabbas.filetracking.backend.document.payload.DocumentResponse;
+import com.ahmadabbas.filetracking.backend.util.PageableUtil;
+import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,28 +16,27 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final DocumentDtoMapper documentDtoMapper;
 
+    private final PageableUtil pageableUtil;
 
-    public DocumentService(DocumentRepository documentRepository, DocumentDtoMapper documentDtoMapper) {
+
+    public DocumentService(DocumentRepository documentRepository, DocumentDtoMapper documentDtoMapper, PageableUtil pageableUtil) {
         this.documentRepository = documentRepository;
         this.documentDtoMapper = documentDtoMapper;
+        this.pageableUtil = pageableUtil;
     }
 
-    public DocumentResponse getAllDocuments(int pageNo, int pageSize, String sortBy, String order) {
+    public PaginatedResponse<DocumentDto> getAllDocuments(int pageNo, int pageSize, String sortBy, String order) {
         return getAllDocuments(pageNo, pageSize, sortBy, order, "-1");
     }
 
-    public DocumentResponse getAllDocuments(int pageNo, int pageSize, String sortBy, String order, String studentId) {
-        Sort sort = order.equalsIgnoreCase("asc")
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-
-        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+    public PaginatedResponse<DocumentDto> getAllDocuments(int pageNo, int pageSize, String sortBy, String order, String studentId) {
+        Pageable pageable = pageableUtil.getPageable(pageNo, pageSize, sortBy, order);
 
         Page<Document> documentPage = studentId.equals("-1")
                 ? documentRepository.findAll(pageable)
                 : documentRepository.findByStudent_Id(studentId, pageable);
         List<DocumentDto> content = documentPage.getContent().stream().map(documentDtoMapper).toList();
-        return new DocumentResponse(
+        return new PaginatedResponse<>(
                 content,
                 pageNo,
                 pageSize,

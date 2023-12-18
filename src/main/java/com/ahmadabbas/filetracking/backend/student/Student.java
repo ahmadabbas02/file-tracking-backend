@@ -39,7 +39,7 @@ public class Student {
     private User user;
 
     @ManyToOne()
-    @JoinColumn(name = "advisor_id", nullable = false)
+    @JoinColumn(name = "advisor_id")
     private Advisor advisor;
 
     @OneToMany(mappedBy = "student")

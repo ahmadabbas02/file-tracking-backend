@@ -24,17 +24,10 @@ public class AdvisorService {
         this.userRepository = userRepository;
     }
 
-    public Advisor findAdvisorByUserId(Long userId) {
-        return advisorRepository.findAdvisorByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "advisor with user id [%s] not found".formatted(userId)
-                ));
-    }
-
     public Advisor findAdvisorByAdvisorId(String advisorId) {
         return advisorRepository.findById(advisorId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "advisor with id [%s] not found".formatted(advisorId)
+                        "advisor with id `%s` not found".formatted(advisorId)
                 ));
     }
 
@@ -43,6 +36,12 @@ public class AdvisorService {
         if (userRepository.existsByEmail(advisorRegistrationRequest.email())) {
             throw new DuplicateResourceException(
                     "email already taken"
+            );
+        }
+
+        if (userRepository.existsByName(advisorRegistrationRequest.name())) {
+            throw new DuplicateResourceException(
+                    "name already taken"
             );
         }
 

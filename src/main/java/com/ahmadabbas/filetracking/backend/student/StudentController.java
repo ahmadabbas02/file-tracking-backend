@@ -1,10 +1,14 @@
 package com.ahmadabbas.filetracking.backend.student;
 
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
-import com.ahmadabbas.filetracking.backend.student.payload.StudentResponse;
+import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
+import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/students")
@@ -24,7 +28,7 @@ public class StudentController {
     }
 
     @GetMapping
-    public ResponseEntity<StudentResponse> getAllStudents(
+    public ResponseEntity<PaginatedResponse<StudentDto>> getAllStudents(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy,
@@ -37,6 +41,11 @@ public class StudentController {
     public ResponseEntity<StudentDto> registerStudent(@RequestBody StudentRegistrationRequest studentRegistrationRequest) {
         Student createdStudent = studentService.addStudent(studentRegistrationRequest);
         return new ResponseEntity<>(studentDtoMapper.apply(createdStudent), HttpStatus.CREATED);
+    }
+
+    @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
+    public ResponseEntity<CsvUploadResponse> uploadStudents(@RequestPart("file") MultipartFile file) throws IOException {
+        return ResponseEntity.ok(studentService.uploadStudents(file));
     }
 
 //    @GetMapping

@@ -1,6 +1,6 @@
 package com.ahmadabbas.filetracking.backend.document.base;
 
-import com.ahmadabbas.filetracking.backend.document.payload.DocumentResponse;
+import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +14,7 @@ public class DocumentController {
     }
 
     @GetMapping
-    public ResponseEntity<DocumentResponse> getAllDocuments(
+    public ResponseEntity<PaginatedResponse<DocumentDto>> getAllDocuments(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = "uploadedAt", required = false) String sortBy,
@@ -24,7 +24,7 @@ public class DocumentController {
     }
 
     @GetMapping("{studentId}")
-    public ResponseEntity<DocumentResponse> getAllDocuments(
+    public ResponseEntity<PaginatedResponse<DocumentDto>> getAllDocuments(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
             @RequestParam(value = "sortBy", defaultValue = "uploadedAt", required = false) String sortBy,

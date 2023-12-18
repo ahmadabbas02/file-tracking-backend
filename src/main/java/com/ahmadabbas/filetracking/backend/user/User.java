@@ -37,6 +37,10 @@ public class User implements UserDetails, EntityDtoMapper<UserDto> {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean isEnabled = true;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return role.getAuthorities();
@@ -69,7 +73,7 @@ public class User implements UserDetails, EntityDtoMapper<UserDto> {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isEnabled;
     }
 
     @Override

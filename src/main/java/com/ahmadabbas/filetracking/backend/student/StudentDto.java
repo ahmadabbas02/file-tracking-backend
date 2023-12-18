@@ -1,6 +1,6 @@
 package com.ahmadabbas.filetracking.backend.student;
 
-import com.ahmadabbas.filetracking.backend.advisor.AdvisorDto;
+import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorDto;
 import com.ahmadabbas.filetracking.backend.user.UserDto;
 
 import java.io.Serializable;

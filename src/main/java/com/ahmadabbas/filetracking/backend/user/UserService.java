@@ -2,7 +2,6 @@ package com.ahmadabbas.filetracking.backend.user;
 
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,5 +1,7 @@
 package com.ahmadabbas.filetracking.backend.advisor;
 
+import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorDto;
+import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorDtoMapper;
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorRegistrationRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/advisor")
+@RequestMapping("/api/v1/advisors")
 public class AdvisorController {
     private final AdvisorService advisorService;
     private final AdvisorDtoMapper advisorDtoMapper;

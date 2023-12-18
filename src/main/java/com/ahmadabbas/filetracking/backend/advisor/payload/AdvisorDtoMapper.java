@@ -1,5 +1,6 @@
-package com.ahmadabbas.filetracking.backend.advisor;
+package com.ahmadabbas.filetracking.backend.advisor.payload;
 
+import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.ahmadabbas.filetracking.backend.user.UserDtoMapper;
 import org.springframework.stereotype.Service;
 

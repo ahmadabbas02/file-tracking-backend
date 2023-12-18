@@ -1,5 +1,6 @@
 package com.ahmadabbas.filetracking.backend.util;
 
+import com.ahmadabbas.filetracking.backend.student.Student;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
@@ -17,39 +18,33 @@ public class StudentIdGenerator implements IdentifierGenerator {
         LocalDate localDate = LocalDate.now();
         int currentYear = localDate.getYear() - 2000;
         String query = "SELECT id FROM student ORDER BY created_at DESC";
-        System.out.println("---------------------");
-        try (Connection connection = session.getJdbcConnectionAccess().obtainConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet rs = statement.executeQuery()
-        ) {
-            if (rs.next()) {
-                String lastId = rs.getString(1);
-                System.out.println("lastId: " + lastId);
-                if (lastId != null) {
-                    // 20801142
-                    // 20331340
-                    int year = Integer.parseInt(lastId.substring(0, 2));
-                    System.out.println("year: " + year);
-                    int uniqueId = Integer.parseInt(lastId.substring(2, 8));
-                    System.out.println("uniqueId: " + uniqueId);
-                    if (currentYear == year) {
-                        return currentYear + addZeroPadding(uniqueId + 1);
-                    } else {
-                        return currentYear + addZeroPadding(1);
-                    }
-                }
+        if (o instanceof Student student) {
+            if (student.getId() != null && !student.getId().isBlank()) {
+                return student.getId();
             }
-
-        } catch (SQLException e) {
-            throw new HibernateException("Unable to generate ID", e);
+            try (Connection connection = session.getJdbcConnectionAccess().obtainConnection();
+                 PreparedStatement statement = connection.prepareStatement(query);
+                 ResultSet rs = statement.executeQuery()
+            ) {
+                if (rs.next()) {
+                    String lastId = rs.getString(1);
+                    int uniqueId = (lastId != null)
+                            ? Integer.parseInt(lastId.substring(2, 8)) + 1
+                            : 1;
+                    return currentYear + addZeroPadding(uniqueId);
+                } else {
+                    return currentYear + addZeroPadding(1);
+                }
+            } catch (SQLException e) {
+                throw new HibernateException("Unable to generate ID", e);
+            }
         }
-        return currentYear + addZeroPadding(1);
+        throw new HibernateException("Unable to generate ID for some reason.");
     }
 
     private String addZeroPadding(int number) {
         String numberStr = String.valueOf(number);
         int zerosToAdd = 6 - numberStr.length();
-        return "0".repeat(Math.max(0, zerosToAdd)) +
-                numberStr;
+        return "0".repeat(Math.max(0, zerosToAdd)) + numberStr;
     }
 }

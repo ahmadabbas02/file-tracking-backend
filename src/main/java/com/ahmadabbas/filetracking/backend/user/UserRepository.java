@@ -9,8 +9,10 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
-    Boolean existsByEmail(String email);
-
     @Query("select u from User u where u.role != 'CHAIR' and u.role != 'VICE_CHAIR'")
     Optional<List<User>> findAllNonAdminUsers();
+
+    boolean existsByEmail(String email);
+
+    boolean existsByName(String name);
 }
