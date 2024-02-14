@@ -1,5 +1,6 @@
-package com.ahmadabbas.filetracking.backend.user;
+package com.ahmadabbas.filetracking.backend.user.payload;
 
+import com.ahmadabbas.filetracking.backend.user.User;
 import org.springframework.stereotype.Service;
 
 import java.util.function.Function;

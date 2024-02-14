@@ -16,6 +16,10 @@ import java.util.StringJoiner;
 @RequiredArgsConstructor
 @Builder
 @Entity
+@NamedEntityGraph(
+        name = "Advisor.eagerlyFetchUser",
+        attributeNodes = @NamedAttributeNode("user")
+)
 public class Advisor {
     @Id
     @GenericGenerator(name = "advisor_id", type = com.ahmadabbas.filetracking.backend.util.AdvisorIdGenerator.class)

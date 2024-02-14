@@ -10,7 +10,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     @Query("select u from User u where u.role != 'CHAIR' and u.role != 'VICE_CHAIR'")
-    Optional<List<User>> findAllNonAdminUsers();
+    List<User> findAllNonAdminUsers();
 
     boolean existsByEmail(String email);
 

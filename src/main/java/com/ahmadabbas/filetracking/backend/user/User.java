@@ -1,6 +1,5 @@
 package com.ahmadabbas.filetracking.backend.user;
 
-import com.ahmadabbas.filetracking.backend.util.EntityDtoMapper;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -8,20 +7,26 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 @Setter
 @Getter
-@ToString
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Builder
 @Entity
-@Table(name = "_user")
+@Table(
+        name = "_user",
+        indexes = {
+                @Index(name = "idx_user_name", columnList = "name")
+        }
+)
 @Inheritance(strategy = InheritanceType.JOINED)
-public class User implements UserDetails, EntityDtoMapper<UserDto> {
+public class User implements UserDetails {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_generator")
+    @SequenceGenerator(name = "user_generator", sequenceName = "_user_seq", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false, unique = true)
@@ -92,12 +97,13 @@ public class User implements UserDetails, EntityDtoMapper<UserDto> {
     }
 
     @Override
-    public UserDto toDto() {
-        return new UserDto(
-                getId(),
-                getName(),
-                getEmail(),
-                getRole()
-        );
+    public String toString() {
+        return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("name='" + name + "'")
+                .add("email='" + email + "'")
+                .add("role=" + role)
+                .add("isEnabled=" + isEnabled)
+                .toString();
     }
 }

@@ -1,13 +1,12 @@
 package com.ahmadabbas.filetracking.backend.advisor.payload;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
-import com.ahmadabbas.filetracking.backend.user.UserDto;
+import lombok.Value;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * DTO for {@link Advisor}
  */
-public record AdvisorDto(String id, UserDto user, Date createdAt) implements Serializable {
+public record AdvisorDto(String id, String name) implements Serializable {
 }
