@@ -1,9 +1,6 @@
-package com.ahmadabbas.filetracking.backend.document.category;
+package com.ahmadabbas.filetracking.backend.category;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Objects;
@@ -18,11 +15,15 @@ import java.util.StringJoiner;
 @IdClass(SubCategoryPK.class)
 public class Category {
     @Id
+    @Column(updatable = false)
     @Builder.Default
     private Long parentCategoryId = -1L;
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "category_generator")
+    @SequenceGenerator(name = "category_generator", sequenceName = "category_seq", allocationSize = 1)
+    @Column(updatable = false)
     private Long categoryId;
+    @Column(nullable = false, unique = true)
     private String name;
 
     @Override
