@@ -71,7 +71,7 @@ public class DocumentService {
 
     public byte[] getDocumentPreview(UUID uuid) throws IOException {
         Document document = getDocument(uuid);
-        try (InputStream inputStream = azureBlobService.downloadBlob(document.getPath())) {
+        try (InputStream inputStream = azureBlobService.getInputStream(document.getPath())) {
             return inputStream.readAllBytes();
         }
     }

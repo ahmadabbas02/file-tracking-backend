@@ -17,21 +17,17 @@ public class AdvisorIdGenerator implements IdentifierGenerator {
         LocalDate localDate = LocalDate.now();
         int currentYear = localDate.getYear() - 2000;
         String prefix = "AP";
-        String query = "SELECT id FROM advisor ORDER BY created_at DESC";
+        String query = "SELECT max(CAST((substring(id,3)) AS DECIMAL)) FROM advisor WHERE id LIKE '" + prefix + currentYear + "%'";
         try (Connection connection = session.getJdbcConnectionAccess().obtainConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet rs = statement.executeQuery()
         ) {
             if (rs.next()) {
                 String lastId = rs.getString(1);
-                System.out.println("lastId: " + lastId);
                 if (lastId != null) {
-                    lastId = lastId.split("AP")[1];
-                    System.out.println("lastId not null");
+                    lastId = lastId.replace("AP", "");
                     int year = Integer.parseInt(lastId.substring(0, 2));
-                    System.out.println("year: " + year);
                     int uniqueId = Integer.parseInt(lastId.substring(2, 8));
-                    System.out.println("uniqueId: " + uniqueId);
                     if (currentYear == year) {
                         return prefix + currentYear + addZeroPadding(uniqueId + 1);
                     }

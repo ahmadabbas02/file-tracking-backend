@@ -19,6 +19,10 @@ import java.util.StringJoiner;
 @RequiredArgsConstructor
 @Builder
 @Entity
+@NamedEntityGraph(
+        name = "Student.eagerlyFetchUser",
+        attributeNodes = @NamedAttributeNode("user")
+)
 public class Student {
     @Id
     @GenericGenerator(name = "student_id", type = com.ahmadabbas.filetracking.backend.util.StudentIdGenerator.class)
@@ -38,7 +42,7 @@ public class Student {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "advisor_id")
     private Advisor advisor;
 

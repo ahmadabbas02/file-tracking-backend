@@ -1,12 +1,17 @@
 package com.ahmadabbas.filetracking.backend.student.payload;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+
 public record StudentRegistrationRequest(
-        String name,
-        String email,
-        String password,
-        String department,
-        Short year,
-        String picture,
-        String advisorId
+        @NotBlank String name,
+        @Email String email,
+        @NotBlank String password,
+        @NotBlank String department,
+        @Positive @Min(1) Short year,
+        @NotBlank String picture,
+        @NotBlank String advisorId
 ) {
 }

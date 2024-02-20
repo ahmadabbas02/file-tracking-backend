@@ -1,61 +1,63 @@
 package com.ahmadabbas.filetracking.backend.student;
 
+import com.ahmadabbas.filetracking.backend.student.payload.StudentDto;
+import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/students")
 public class StudentController {
     private final StudentService studentService;
-    private final StudentDtoMapper studentDtoMapper;
 
-    public StudentController(StudentService studentService, StudentDtoMapper studentDtoMapper) {
-        this.studentService = studentService;
-        this.studentDtoMapper = studentDtoMapper;
-    }
-
+    @Operation(summary = "Student information", description = "Returns the student's personal information.")
     @GetMapping("{studentId}")
     public ResponseEntity<StudentDto> getStudent(@PathVariable String studentId) {
         Student student = studentService.getStudent(studentId);
-        return ResponseEntity.ok(studentDtoMapper.apply(student));
+        return ResponseEntity.ok(StudentMapper.INSTANCE.toDto(student));
     }
 
+    @Operation(
+            summary = "Get all students",
+            description = "Returns a pagination result of all students in the database sorted by default on id and ascending order."
+    )
     @GetMapping
     public ResponseEntity<PaginatedResponse<StudentDto>> getAllStudents(
-            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
-            @RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy,
-            @RequestParam(value = "order", defaultValue = "asc", required = false) String order
+            @RequestParam(defaultValue = "1", required = false) int pageNo,
+            @RequestParam(defaultValue = "10", required = false) int pageSize,
+            @RequestParam(defaultValue = "id", required = false) String sortBy,
+            @RequestParam(defaultValue = "asc", required = false) String order,
+            @RequestParam(defaultValue = "", required = false) String searchQuery,
+            Authentication authentication
     ) {
-        return ResponseEntity.ok(studentService.getAllStudents(pageNo, pageSize, sortBy, order));
+        return ResponseEntity.ok(studentService.getAllStudents(authentication, pageNo, pageSize, sortBy, order, searchQuery));
     }
 
+    @Operation(summary = "Add new student", description = "Adds a new student to the database with the specified information.")
     @PostMapping
     public ResponseEntity<StudentDto> registerStudent(@RequestBody StudentRegistrationRequest studentRegistrationRequest) {
         Student createdStudent = studentService.addStudent(studentRegistrationRequest);
-        return new ResponseEntity<>(studentDtoMapper.apply(createdStudent), HttpStatus.CREATED);
+        StudentDto dto = StudentMapper.INSTANCE.toDto(createdStudent);
+        return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 
+    @Operation(
+            summary = "Batch add students",
+            description = "Adds the students in the csv to the database with their specified IDs.\nThe csv should have the following format: `studentId,advisorId,name,email,password,department,year,picture,isEnabled` as headers."
+    )
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
     public ResponseEntity<CsvUploadResponse> uploadStudents(@RequestPart("file") MultipartFile file) throws IOException {
-        return ResponseEntity.ok(studentService.uploadStudents(file));
+        return new ResponseEntity<>(studentService.uploadStudents(file), HttpStatus.CREATED);
     }
-
-//    @GetMapping
-//    public ResponseEntity<List<Student>> getStudents() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        User user = (User) authentication.getPrincipal();
-//        System.out.println(authentication.getDetails());
-//        System.out.println(authentication.getAuthorities());
-//        System.out.println(authentication.getCredentials());
-//
-//        return ResponseEntity.ok(studentRepository.findAllByAdvisor_User_Id(user.getId()));
-//    }
 }

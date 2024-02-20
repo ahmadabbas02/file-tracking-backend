@@ -17,7 +17,7 @@ public class StudentIdGenerator implements IdentifierGenerator {
     public Serializable generate(SharedSessionContractImplementor session, Object o) {
         LocalDate localDate = LocalDate.now();
         int currentYear = localDate.getYear() - 2000;
-        String query = "SELECT id FROM student ORDER BY created_at DESC";
+        String query = "SELECT MAX(CAST(id AS DECIMAL)) FROM student WHERE id LIKE '" + currentYear + "%'";
         if (o instanceof Student student) {
             if (student.getId() != null && !student.getId().isBlank()) {
                 return student.getId();
