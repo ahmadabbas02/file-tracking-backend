@@ -35,7 +35,10 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -122,7 +125,7 @@ public class StudentService {
                 .name(studentRegistrationRequest.name())
                 .email(studentRegistrationRequest.email())
                 .password(passwordEncoder.encode(studentRegistrationRequest.password()))
-                .roles(Collections.singleton(Role.STUDENT))
+                .roles(Role.STUDENT)
                 .build();
         User savedUser = userRepository.save(user);
 
@@ -179,7 +182,7 @@ public class StudentService {
                             .name(s.getName())
                             .email(s.getEmail())
                             .password(passwordEncoder.encode(s.getPassword()))
-                            .roles(Collections.singleton(Role.STUDENT))
+                            .roles(Role.STUDENT)
                             .isEnabled(s.isEnabled())
                             .build();
                     if (!s.getAdvisorId().isBlank()) {

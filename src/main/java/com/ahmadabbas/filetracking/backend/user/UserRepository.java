@@ -4,7 +4,6 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 //    List<User> findAllNonAdminUsers();
 
     default List<User> findAllNonAdminUsers() {
-        return findByRolesNotIn(List.of(Role.CHAIR, Role.VICE_CHAR));
+        return findByRolesNotIn(Role.CHAIR, Role.VICE_CHAR);
     }
 
     @Query("""
@@ -24,7 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             join fetch u.roles roles
             where roles not in :roles
             """)
-    List<User> findByRolesNotIn(Collection<Role> roles);
+    List<User> findByRolesNotIn(Role... roles);
 
     boolean existsByEmail(String email);
 

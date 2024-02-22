@@ -55,6 +55,10 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean isEnabled = true;
 
+    public void setRoles(Role... roles) {
+        this.roles = Stream.of(roles).collect(Collectors.toSet());
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Stream<List<SimpleGrantedAuthority>> stream = roles.stream().map(Role::getAuthorities);
@@ -118,4 +122,12 @@ public class User implements UserDetails {
                 .add("isEnabled=" + isEnabled)
                 .toString();
     }
+
+    public static class UserBuilder {
+        public UserBuilder roles(Role... roles) {
+            this.roles = Stream.of(roles).collect(Collectors.toSet());
+            return this;
+        }
+    }
+
 }

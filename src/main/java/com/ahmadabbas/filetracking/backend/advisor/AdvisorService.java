@@ -55,7 +55,7 @@ public class AdvisorService {
                         .name(advisorRegistrationRequest.name())
                         .email(advisorRegistrationRequest.email())
                         .password(passwordEncoder.encode(advisorRegistrationRequest.password()))
-                        .roles(Collections.singleton(Role.ADVISOR))
+                        .roles(Role.ADVISOR)
                         .build()
         );
 
