@@ -1,9 +1,11 @@
 package com.ahmadabbas.filetracking.backend.config;
 
 import com.ahmadabbas.filetracking.backend.exception.AuthEntryPoint;
+import com.ahmadabbas.filetracking.backend.user.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,10 +33,10 @@ public class SecurityConfig {
             "/webjars/**",
             "/swagger-ui.html",
             "/api/v1/auth/login",
-            "/api/v1/students/**",
-            "/api/v1/advisors/**",
-            "/api/v1/categories/**",
-            "/api/v1/documents/**"
+//            "/api/v1/students/**",
+//            "/api/v1/advisors/**",
+//            "/api/v1/categories/**",
+//            "/api/v1/documents/**"
     };
 
     private final JwtAuthenticationFilter jwtAuthFilter;
@@ -47,11 +49,32 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(e -> e.authenticationEntryPoint(authEntryPoint))
                 .authorizeHttpRequests(req ->
-                                req.requestMatchers(WHITE_LIST_URL)
-                                        .permitAll()
-//                                .requestMatchers("/api/v1/auth/roles").authenticated()
-                                        .anyRequest()
-                                        .authenticated()
+                        req.requestMatchers(WHITE_LIST_URL)
+                                .permitAll()
+                                // Adding new students or advisor
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/api/v1/students",
+                                        "/api/v1/students/upload",
+                                        "/api/v1/advisors"
+                                ).hasRole(Role.ADMINISTRATOR.name())
+                                // Modifying/changing category of a document
+                                .requestMatchers("/api/v1/documents/modify-category")
+                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.SECRETARY.name())
+                                // Getting advisors and all students
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/api/v1/advisors",
+                                        "/api/v1/students",
+                                        "/api/v1/students/"
+                                )
+                                .hasAnyRole(
+                                        Role.ADMINISTRATOR.name(), Role.CHAIR.name(),
+                                        Role.VICE_CHAR.name(), Role.SECRETARY.name(),
+                                        Role.ADVISOR.name()
+                                )
+                                .anyRequest()
+                                .authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

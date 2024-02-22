@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 
@@ -54,7 +55,7 @@ public class AdvisorService {
                         .name(advisorRegistrationRequest.name())
                         .email(advisorRegistrationRequest.email())
                         .password(passwordEncoder.encode(advisorRegistrationRequest.password()))
-                        .role(Role.ADVISOR)
+                        .roles(Collections.singleton(Role.ADVISOR))
                         .build()
         );
 

@@ -1,13 +1,15 @@
 package com.ahmadabbas.filetracking.backend.user;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Setter
 @Getter
@@ -22,6 +24,10 @@ import java.util.StringJoiner;
         }
 )
 @Inheritance(strategy = InheritanceType.JOINED)
+@NamedEntityGraph(
+        name = "User.eagerlyFetchRoles",
+        attributeNodes = @NamedAttributeNode("roles")
+)
 public class User implements UserDetails {
 
     @Id
@@ -38,9 +44,12 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @NotEmpty(message = "At least one role must be specified")
+    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(nullable = false, name = "role")
+    private Set<Role> roles;
 
     @Builder.Default
     @Column(nullable = false)
@@ -48,7 +57,10 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return role.getAuthorities();
+        Stream<List<SimpleGrantedAuthority>> stream = roles.stream().map(Role::getAuthorities);
+        List<SimpleGrantedAuthority> authorities = stream.flatMap(List::stream).collect(Collectors.toList());
+        return authorities;
+//        return role.getAuthorities();
     }
 
     @Override
@@ -88,12 +100,12 @@ public class User implements UserDetails {
         User user = (User) o;
         return Objects.equals(id, user.id) && Objects.equals(name, user.name)
                 && Objects.equals(email, user.email) && Objects.equals(password, user.password)
-                && role == user.role;
+                && roles.equals(user.roles);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email, password, role);
+        return Objects.hash(id, name, email, password, roles);
     }
 
     @Override
@@ -102,7 +114,7 @@ public class User implements UserDetails {
                 .add("id=" + id)
                 .add("name='" + name + "'")
                 .add("email='" + email + "'")
-                .add("role=" + role)
+                .add("roles=" + roles)
                 .add("isEnabled=" + isEnabled)
                 .toString();
     }

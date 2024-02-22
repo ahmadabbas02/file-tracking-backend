@@ -28,7 +28,7 @@ public class AuthenticationService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         User user = (User) authentication.getPrincipal();
         String jwtToken = jwtService.generateToken(
-                Map.of("role", user.getRole()),
+                Map.of("role", user.getRoles()),
                 authentication
         );
         return AuthenticationResponse.builder()

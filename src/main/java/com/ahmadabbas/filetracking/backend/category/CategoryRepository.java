@@ -16,5 +16,4 @@ public interface CategoryRepository extends JpaRepository<Category, SubCategoryP
     @Query("select c from Category c where c.categoryId = :categoryId and c.parentCategoryId = :parentCategoryId")
     Optional<Category> findByCategoryIdAndParentCategoryId(Long categoryId, Long parentCategoryId);
 
-
 }

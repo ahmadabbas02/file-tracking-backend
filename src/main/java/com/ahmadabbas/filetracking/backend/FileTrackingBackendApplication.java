@@ -10,5 +10,4 @@ public class FileTrackingBackendApplication {
         SpringApplication.run(FileTrackingBackendApplication.class, args);
     }
 
-
 }

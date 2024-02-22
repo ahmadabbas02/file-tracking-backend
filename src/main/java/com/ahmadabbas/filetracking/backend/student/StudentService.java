@@ -35,10 +35,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,9 +48,6 @@ public class StudentService {
     private final AdvisorRepository advisorRepository;
     private final AdvisorService advisorService;
     private final UserService userService;
-
-//    private final PageableUtil pageableUtil;
-
     private final PasswordEncoder passwordEncoder;
 
     public Student getStudent(String id) {
@@ -128,7 +122,7 @@ public class StudentService {
                 .name(studentRegistrationRequest.name())
                 .email(studentRegistrationRequest.email())
                 .password(passwordEncoder.encode(studentRegistrationRequest.password()))
-                .role(Role.STUDENT)
+                .roles(Collections.singleton(Role.STUDENT))
                 .build();
         User savedUser = userRepository.save(user);
 
@@ -185,7 +179,7 @@ public class StudentService {
                             .name(s.getName())
                             .email(s.getEmail())
                             .password(passwordEncoder.encode(s.getPassword()))
-                            .role(Role.STUDENT)
+                            .roles(Collections.singleton(Role.STUDENT))
                             .isEnabled(s.isEnabled())
                             .build();
                     if (!s.getAdvisorId().isBlank()) {
