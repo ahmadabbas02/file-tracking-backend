@@ -2,6 +2,7 @@ package com.ahmadabbas.filetracking.backend.user.payload;
 
 import com.ahmadabbas.filetracking.backend.user.User;
 import org.mapstruct.*;
+import org.mapstruct.factory.Mappers;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UserMapper {

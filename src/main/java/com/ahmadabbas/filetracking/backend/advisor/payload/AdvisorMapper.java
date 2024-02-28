@@ -2,13 +2,9 @@ package com.ahmadabbas.filetracking.backend.advisor.payload;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import org.mapstruct.*;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface AdvisorMapper {
-
-    AdvisorMapper INSTANCE = Mappers.getMapper(AdvisorMapper.class);
-
     @Mapping(source = "name", target = "user.name")
     Advisor toEntity(AdvisorDto advisorDto);
 

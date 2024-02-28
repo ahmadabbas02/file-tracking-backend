@@ -17,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 
 
@@ -28,6 +27,7 @@ public class AdvisorService {
     private final PasswordEncoder passwordEncoder;
     private final AdvisorRepository advisorRepository;
     private final UserRepository userRepository;
+    private final AdvisorMapper advisorMapper;
 
     public Advisor findAdvisorByAdvisorId(String advisorId) {
         return advisorRepository.findById(advisorId)
@@ -55,7 +55,7 @@ public class AdvisorService {
                         .name(advisorRegistrationRequest.name())
                         .email(advisorRegistrationRequest.email())
                         .password(passwordEncoder.encode(advisorRegistrationRequest.password()))
-                        .roles(Role.ADVISOR)
+                        .role(Role.ADVISOR)
                         .build()
         );
 
@@ -71,7 +71,7 @@ public class AdvisorService {
         Page<Advisor> studentPage = advisorRepository.findAll(pageable);
         List<AdvisorDto> content = studentPage.getContent()
                 .stream()
-                .map(AdvisorMapper.INSTANCE::toDto)
+                .map(advisorMapper::toDto)
                 .toList();
         return new PaginatedResponse<>(
                 content,

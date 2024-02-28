@@ -1,5 +1,6 @@
 package com.ahmadabbas.filetracking.backend.user;
 
+import com.ahmadabbas.filetracking.backend.token.Token;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
@@ -23,11 +24,11 @@ import java.util.stream.Stream;
                 @Index(name = "idx_user_name", columnList = "name")
         }
 )
-@Inheritance(strategy = InheritanceType.JOINED)
 @NamedEntityGraph(
         name = "User.eagerlyFetchRoles",
         attributeNodes = @NamedAttributeNode("roles")
 )
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User implements UserDetails {
 
     @Id
@@ -44,6 +45,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Singular
     @NotEmpty(message = "At least one role must be specified")
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
@@ -55,6 +57,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean isEnabled = true;
 
+    @OneToMany(mappedBy = "user")
+    private Set<Token> tokens;
+
     public void setRoles(Role... roles) {
         this.roles = Stream.of(roles).collect(Collectors.toSet());
     }
@@ -62,7 +67,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Stream<List<SimpleGrantedAuthority>> stream = roles.stream().map(Role::getAuthorities);
-        List<SimpleGrantedAuthority> authorities = stream.flatMap(List::stream).collect(Collectors.toList());
+        List<SimpleGrantedAuthority> authorities = stream.flatMap(List::stream).toList();
         return authorities;
 //        return role.getAuthorities();
     }
@@ -121,13 +126,6 @@ public class User implements UserDetails {
                 .add("roles=" + roles)
                 .add("isEnabled=" + isEnabled)
                 .toString();
-    }
-
-    public static class UserBuilder {
-        public UserBuilder roles(Role... roles) {
-            this.roles = Stream.of(roles).collect(Collectors.toSet());
-            return this;
-        }
     }
 
 }

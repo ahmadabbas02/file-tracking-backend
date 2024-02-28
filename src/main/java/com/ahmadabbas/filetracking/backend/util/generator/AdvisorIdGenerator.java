@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.util;
+package com.ahmadabbas.filetracking.backend.util.generator;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;

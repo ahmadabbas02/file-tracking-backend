@@ -3,15 +3,12 @@ package com.ahmadabbas.filetracking.backend.util;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.BlobItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -20,16 +17,29 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AzureBlobService {
 
-    final BlobServiceClient blobServiceClient;
-    final BlobContainerClient blobContainerClient;
+    private final BlobContainerClient blobContainerClient;
 
-    public String upload(MultipartFile multipartFile, String path) throws IOException {
-        if (multipartFile == null || multipartFile.getOriginalFilename() == null) {
-            return "failed to upload";
+    public String upload(File file, String path) throws IOException {
+        if (file == null || !file.isFile()) {
+            throw new RuntimeException("failed to upload");
         }
         String uuid = UUID.randomUUID().toString();
 
-        String fullPath = path + "/" + uuid + FileNameUtils.getFileExtension(multipartFile.getOriginalFilename());
+        String fullPath = path + "/" + uuid + FileNameUtil.getFileExtension(file.getName());
+        BlobClient blob = blobContainerClient.getBlobClient(fullPath);
+
+        FileInputStream inputStream = new FileInputStream(file);
+        blob.upload(inputStream, file.length(), true);
+        return fullPath;
+    }
+
+    public String upload(MultipartFile multipartFile, String path) throws IOException {
+        if (multipartFile == null || multipartFile.getOriginalFilename() == null) {
+            throw new RuntimeException("failed to upload");
+        }
+        String uuid = UUID.randomUUID().toString();
+
+        String fullPath = path + "/" + uuid + FileNameUtil.getFileExtension(multipartFile.getOriginalFilename());
         BlobClient blob = blobContainerClient.getBlobClient(fullPath);
         blob.upload(multipartFile.getInputStream(), multipartFile.getSize(), true);
         return fullPath;

@@ -10,6 +10,9 @@ public interface CategoryRepository extends JpaRepository<Category, SubCategoryP
     @Query("select (count(c) > 0) from Category c where upper(c.name) = upper(:name)")
     boolean existsByName(String name);
 
+    @Query("select c from Category c where upper(c.name) = upper(:name)")
+    Optional<Category> findByNameIgnoreCase(String name);
+
     @Query("select c from Category c where c.parentCategoryId = ?1")
     List<Category> findByParentCategoryId(Long parentCategoryId);
 

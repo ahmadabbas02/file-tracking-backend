@@ -3,6 +3,7 @@ package com.ahmadabbas.filetracking.backend.student;
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.user.User;
+import com.ahmadabbas.filetracking.backend.util.generator.StudentIdGenerator;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,6 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -25,7 +27,7 @@ import java.util.StringJoiner;
 )
 public class Student {
     @Id
-    @GenericGenerator(name = "student_id", type = com.ahmadabbas.filetracking.backend.util.StudentIdGenerator.class)
+    @GenericGenerator(name = "student_id", type = StudentIdGenerator.class)
     @GeneratedValue(generator = "student_id")
     private String id;
 
@@ -38,7 +40,7 @@ public class Student {
     @Column(nullable = false)
     private String picture;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -51,6 +53,13 @@ public class Student {
 
     @CreationTimestamp
     private Date createdAt;
+
+    public void addDocument(Document document) {
+        if (this.documents == null) {
+            this.documents = new HashSet<>();
+        }
+        this.documents.add(document);
+    }
 
     @JsonBackReference
     public Set<Document> getDocuments() {

@@ -15,12 +15,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/advisors")
 public class AdvisorController {
     private final AdvisorService advisorService;
+    private final AdvisorMapper advisorMapper;
 
     @Operation(summary = "Add advisor")
     @PostMapping
     public ResponseEntity<AdvisorDto> registerAdvisor(@RequestBody AdvisorRegistrationRequest advisorRegistrationRequest) {
         Advisor addedAdvisor = advisorService.addAdvisor(advisorRegistrationRequest);
-        return new ResponseEntity<>(AdvisorMapper.INSTANCE.toDto(addedAdvisor), HttpStatus.CREATED);
+        return new ResponseEntity<>(advisorMapper.toDto(addedAdvisor), HttpStatus.CREATED);
     }
 
     @Operation(

@@ -2,6 +2,8 @@ package com.ahmadabbas.filetracking.backend.auth;
 
 import com.ahmadabbas.filetracking.backend.auth.payload.AuthenticationRequest;
 import com.ahmadabbas.filetracking.backend.auth.payload.AuthenticationResponse;
+import com.ahmadabbas.filetracking.backend.token.Token;
+import com.ahmadabbas.filetracking.backend.token.TokenRepository;
 import com.ahmadabbas.filetracking.backend.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +19,7 @@ import java.util.Map;
 public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final TokenRepository tokenRepository;
 
     public AuthenticationResponse login(AuthenticationRequest request) {
         Authentication authentication = authenticationManager.authenticate(
@@ -31,8 +34,19 @@ public class AuthenticationService {
                 Map.of("role", user.getRoles()),
                 authentication
         );
+        saveToken(user, jwtToken);
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .build();
+    }
+
+    private void saveToken(User user, String jwtToken) {
+        var token = Token.builder()
+                .user(user)
+                .token(jwtToken)
+                .expired(false)
+                .blocked(false)
+                .build();
+        tokenRepository.save(token);
     }
 }

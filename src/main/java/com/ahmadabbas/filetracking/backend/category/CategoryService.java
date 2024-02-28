@@ -27,6 +27,13 @@ public class CategoryService {
         return getCategory(categoryId, -1L);
     }
 
+    public Category getCategoryByName(String name) {
+        return categoryRepository.findByNameIgnoreCase(name)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "category with name %s not found".formatted(name)
+                ));
+    }
+
     public Category getCategory(Long categoryId, Long parentCategoryId) {
         return categoryRepository.findByCategoryIdAndParentCategoryId(categoryId, parentCategoryId)
                 .orElseThrow(() -> new ResourceNotFoundException(

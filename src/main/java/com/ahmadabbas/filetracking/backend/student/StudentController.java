@@ -20,12 +20,13 @@ import java.io.IOException;
 @RequestMapping("/api/v1/students")
 public class StudentController {
     private final StudentService studentService;
+    private final StudentMapper studentMapper;
 
     @Operation(summary = "Student information", description = "Returns the student's personal information.")
     @GetMapping("{studentId}")
     public ResponseEntity<StudentDto> getStudent(@PathVariable String studentId) {
         Student student = studentService.getStudent(studentId);
-        return ResponseEntity.ok(StudentMapper.INSTANCE.toDto(student));
+        return ResponseEntity.ok(studentMapper.toDto(student));
     }
 
     @Operation(
@@ -48,7 +49,7 @@ public class StudentController {
     @PostMapping
     public ResponseEntity<StudentDto> registerStudent(@RequestBody StudentRegistrationRequest studentRegistrationRequest) {
         Student createdStudent = studentService.addStudent(studentRegistrationRequest);
-        StudentDto dto = StudentMapper.INSTANCE.toDto(createdStudent);
+        StudentDto dto = studentMapper.toDto(createdStudent);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 

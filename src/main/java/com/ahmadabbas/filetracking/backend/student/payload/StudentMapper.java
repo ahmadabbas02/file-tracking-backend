@@ -6,8 +6,6 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface StudentMapper {
-    StudentMapper INSTANCE = Mappers.getMapper(StudentMapper.class);
-
     Student toEntity(StudentDto studentDto);
 
     @Mapping(source = "user.name", target = "name")

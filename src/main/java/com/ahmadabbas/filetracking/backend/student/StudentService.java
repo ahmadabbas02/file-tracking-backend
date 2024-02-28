@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class StudentService {
+    private final StudentMapper studentMapper;
     private final StudentDao studentDao;
     private final UserRepository userRepository;
     private final AdvisorRepository advisorRepository;
@@ -97,9 +98,10 @@ public class StudentService {
             studentPage = Page.empty();
         }
 
+
         List<StudentDto> content = studentPage.getContent()
                 .stream()
-                .map(StudentMapper.INSTANCE::toDto)
+                .map(studentMapper::toDto)
                 .toList();
         return new PaginatedResponse<>(
                 content,
@@ -125,7 +127,7 @@ public class StudentService {
                 .name(studentRegistrationRequest.name())
                 .email(studentRegistrationRequest.email())
                 .password(passwordEncoder.encode(studentRegistrationRequest.password()))
-                .roles(Role.STUDENT)
+                .role(Role.STUDENT)
                 .build();
         User savedUser = userRepository.save(user);
 
@@ -182,7 +184,7 @@ public class StudentService {
                             .name(s.getName())
                             .email(s.getEmail())
                             .password(passwordEncoder.encode(s.getPassword()))
-                            .roles(Role.STUDENT)
+                            .role(Role.STUDENT)
                             .isEnabled(s.isEnabled())
                             .build();
                     if (!s.getAdvisorId().isBlank()) {

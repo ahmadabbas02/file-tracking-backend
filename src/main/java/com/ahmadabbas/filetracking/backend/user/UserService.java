@@ -22,7 +22,8 @@ public class UserService {
 
     public List<UserDto> getAllNonAdminUsers() {
         List<User> allNonAdminUsers = userRepository.findAllNonAdminUsers();
-        return allNonAdminUsers.stream().map(userMapper::toDto).collect(Collectors.toList());
+
+        return allNonAdminUsers.stream().map(userMapper::toDto).toList();
     }
 
     public Set<Role> getRoles(Authentication authentication) {
