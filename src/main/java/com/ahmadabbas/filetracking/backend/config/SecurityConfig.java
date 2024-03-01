@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -51,6 +52,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
                 .httpBasic(e -> e.authenticationEntryPoint(authEntryPoint))
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST_URL)
@@ -77,6 +79,12 @@ public class SecurityConfig {
                                         Role.VICE_CHAR.name(), Role.SECRETARY.name(),
                                         Role.ADVISOR.name()
                                 )
+                                //
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "api/v1/documents/contact"
+                                )
+                                .hasRole(Role.STUDENT.name())
                                 .anyRequest()
                                 .authenticated()
                 )
