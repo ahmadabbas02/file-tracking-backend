@@ -58,6 +58,10 @@ public class StudentService {
         return studentDao.getStudent(id);
     }
 
+    public Student getStudentByUserId(String userId) {
+        return studentDao.getStudentByUserId(userId);
+    }
+
     public PaginatedResponse<StudentDto> getAllStudents(Authentication authentication,
                                                         int pageNo, int pageSize, String sortBy, String order,
                                                         String searchQuery) {

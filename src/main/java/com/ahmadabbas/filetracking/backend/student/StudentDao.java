@@ -13,6 +13,8 @@ public interface StudentDao {
 
     Student getStudent(String id);
 
+    Student getStudentByUserId(String userId);
+
     Page<Student> getAllStudents(Pageable pageable);
 
     Page<Student> getAllStudentsById(boolean contains, String id, Pageable pageable);

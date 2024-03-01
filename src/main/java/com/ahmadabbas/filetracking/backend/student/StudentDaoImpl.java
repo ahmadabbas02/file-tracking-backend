@@ -32,6 +32,14 @@ public class StudentDaoImpl implements StudentDao {
     }
 
     @Override
+    public Student getStudentByUserId(String userId) {
+        return studentRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "student related with user id %s not found".formatted(userId)
+                ));
+    }
+
+    @Override
     public Page<Student> getAllStudents(Pageable pageable) {
         return studentRepository.findAll(pageable);
     }
