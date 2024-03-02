@@ -1,18 +1,14 @@
 package com.ahmadabbas.filetracking.backend.student;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
-import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.generator.StudentIdGenerator;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.StringJoiner;
 
 @Getter
@@ -45,23 +41,23 @@ public class Student {
     @JoinColumn(name = "advisor_id")
     private Advisor advisor;
 
-    @OneToMany(mappedBy = "student")
-    private Set<Document> documents;
+//    @OneToMany(mappedBy = "student")
+//    private Set<Document> documents;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    public void addDocument(Document document) {
-        if (this.documents == null) {
-            this.documents = new HashSet<>();
-        }
-        this.documents.add(document);
-    }
+//    public void addDocument(Document document) {
+//        if (this.documents == null) {
+//            this.documents = new HashSet<>();
+//        }
+//        this.documents.add(document);
+//    }
 
-    @JsonBackReference
-    public Set<Document> getDocuments() {
-        return documents;
-    }
+//    @JsonBackReference
+//    public Set<Document> getDocuments() {
+//        return documents;
+//    }
 
     @Override
     public String toString() {

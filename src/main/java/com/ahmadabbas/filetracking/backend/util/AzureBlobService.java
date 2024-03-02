@@ -30,6 +30,7 @@ public class AzureBlobService {
 
         FileInputStream inputStream = new FileInputStream(file);
         blob.upload(inputStream, file.length(), true);
+        inputStream.close();
         return fullPath;
     }
 

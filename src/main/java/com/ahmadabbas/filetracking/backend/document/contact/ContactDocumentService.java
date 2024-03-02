@@ -48,6 +48,7 @@ public class ContactDocumentService {
 
     @Transactional
     public ContactDocument addContactDocument(ContactDocumentAddRequest addRequest, Authentication authentication) {
+        System.out.println("ContactDocumentService.addContactDocument");
         User user = (User) authentication.getPrincipal();
         Student student = studentService.getStudentByUserId(user.getId());
         Category category = categoryService.getCategoryByName("Contact Forms");
@@ -57,8 +58,10 @@ public class ContactDocumentService {
                 throw new RuntimeException("couldn't generate contact form pdf.");
             }
             String cloudPath = azureBlobService.upload(filledPdf, "/" + student.getId());
-            filledPdf.delete();
-
+            log.info("cloudPath = " + cloudPath);
+            if (!filledPdf.delete()) {
+                log.warn("Failed to delete temp file @ {}", filledPdf.getAbsolutePath());
+            }
             ContactDocument document = ContactDocument.builder()
                     .email(addRequest.email())
                     .phoneNumber(addRequest.phoneNumber())

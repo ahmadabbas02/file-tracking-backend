@@ -62,7 +62,7 @@ public class DocumentService {
                 .path(cloudPath)
                 .student(student)
                 .build();
-        student.addDocument(document);
+//        student.addDocument(document);
 
         return documentRepository.save(document);
     }
@@ -106,8 +106,9 @@ public class DocumentService {
     ) {
         log.info("DocumentService.getAllDocuments");
         User loggedInUser = (User) authentication.getPrincipal();
+        Student student;
         if (loggedInUser.getRoles().contains(Role.STUDENT)) {
-            Student student = studentService.getStudentByUserId(loggedInUser.getId());
+            student = studentService.getStudentByUserId(loggedInUser.getId());
             studentId = student.getId();
             log.info("setting studentId to the logged in student: " + student.getId());
         }
@@ -116,7 +117,6 @@ public class DocumentService {
         Page<Document> documentPage = studentId.equals("-1")
                 ? documentRepository.findAll(pageable)
                 : documentRepository.findByStudentIdHavingCategoryIds(studentId, allowedCategoriesIds, pageable);
-
         List<DocumentDto> content = documentPage.getContent()
                 .stream()
                 .map(documentMapper::toDto)
