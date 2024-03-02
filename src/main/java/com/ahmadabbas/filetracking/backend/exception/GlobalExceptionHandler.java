@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 
 @ControllerAdvice
@@ -24,7 +25,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorDetails> handleResourceNotFoundException(ResourceNotFoundException exception,
                                                                         WebRequest webRequest) {
         ErrorDetails errorDetails = new ErrorDetails(
-                new Date(),
+                null,
                 exception.getMessage(),
                 webRequest.getDescription(false)
         );
@@ -36,7 +37,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorDetails> handleAPIException(APIException exception,
                                                            WebRequest webRequest) {
         ErrorDetails errorDetails = new ErrorDetails(
-                new Date(),
+                LocalDateTime.now(ZoneId.of("Europe/Athens")),
                 exception.getMessage(),
                 webRequest.getDescription(false)
         );
@@ -49,7 +50,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                     WebRequest webRequest) {
 
         ErrorDetails errorDetails = new ErrorDetails(
-                new Date(),
+                LocalDateTime.now(ZoneId.of("Europe/Athens")),
                 accessDeniedException.getMessage(),
                 webRequest.getDescription(false)
         );
@@ -62,7 +63,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                       WebRequest webRequest) {
 
         ErrorDetails errorDetails = new ErrorDetails(
-                new Date(),
+                LocalDateTime.now(ZoneId.of("Europe/Athens")),
                 authenticationException.getMessage(),
                 webRequest.getDescription(false)
         );
@@ -74,7 +75,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorDetails> handleGlobalException(Exception exception,
                                                               WebRequest webRequest) {
         ErrorDetails errorDetails = new ErrorDetails(
-                new Date(),
+                LocalDateTime.now(ZoneId.of("Europe/Athens")),
                 exception.getMessage(),
                 webRequest.getDescription(false)
         );

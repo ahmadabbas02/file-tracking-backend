@@ -8,6 +8,7 @@ CREATE TABLE _user
     name       VARCHAR(255) NOT NULL,
     email      VARCHAR(255) NOT NULL,
     password   VARCHAR(255) NOT NULL,
+    picture    VARCHAR(255) NOT NULL,
     is_enabled BOOLEAN      NOT NULL,
     CONSTRAINT pk__user PRIMARY KEY (id)
 );
@@ -63,7 +64,6 @@ CREATE TABLE student
     id         VARCHAR(255) NOT NULL,
     department VARCHAR(255) NOT NULL,
     year       SMALLINT     NOT NULL,
-    picture    VARCHAR(255) NOT NULL,
     user_id    BIGINT       NOT NULL,
     advisor_id VARCHAR(255),
     created_at TIMESTAMP WITHOUT TIME ZONE,

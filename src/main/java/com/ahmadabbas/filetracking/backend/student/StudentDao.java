@@ -13,7 +13,7 @@ public interface StudentDao {
 
     Student getStudent(String id);
 
-    Student getStudentByUserId(String userId);
+    Student getStudentByUserId(Long userId);
 
     Page<Student> getAllStudents(Pageable pageable);
 

@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -20,7 +20,7 @@ import java.util.StringJoiner;
 @Entity
 public class MedicalReportDocument extends Document {
 
-    private Date dateOfAbsence;
+    private LocalDateTime dateOfAbsence;
 
     private String note;
 

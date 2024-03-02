@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.document.payload;
+package com.ahmadabbas.filetracking.backend.document.base.payload;
 
 import com.ahmadabbas.filetracking.backend.document.base.Document;
 import org.mapstruct.*;
@@ -6,14 +6,11 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface DocumentMapper {
-
-    DocumentMapper INSTANCE = Mappers.getMapper(DocumentMapper.class);
-
     @InheritInverseConfiguration(name = "toDto")
-    Document toEntity(DocumentDto documentDto1);
+    Document toEntity(DocumentDto documentDto);
 
     @Mapping(source = "student.user.name", target = "studentName")
-    @Mapping(source = "student.picture", target = "studentPicture")
+    @Mapping(source = "student.user.picture", target = "studentPicture")
     @Mapping(source = "student.year", target = "studentYear")
     @Mapping(source = "student.department", target = "studentDepartment")
     @Mapping(source = "student.id", target = "studentId")

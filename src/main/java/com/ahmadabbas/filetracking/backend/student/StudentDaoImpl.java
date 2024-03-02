@@ -32,7 +32,7 @@ public class StudentDaoImpl implements StudentDao {
     }
 
     @Override
-    public Student getStudentByUserId(String userId) {
+    public Student getStudentByUserId(Long userId) {
         return studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "student related with user id %s not found".formatted(userId)

@@ -2,10 +2,8 @@ package com.ahmadabbas.filetracking.backend.document.contact;
 
 import com.ahmadabbas.filetracking.backend.document.base.Document;
 import jakarta.persistence.Entity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -14,6 +12,7 @@ import java.util.StringJoiner;
 @Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
+@SuperBuilder
 @Entity
 public class ContactDocument extends Document {
     private String email;

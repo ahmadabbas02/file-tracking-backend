@@ -58,7 +58,7 @@ public class StudentService {
         return studentDao.getStudent(id);
     }
 
-    public Student getStudentByUserId(String userId) {
+    public Student getStudentByUserId(Long userId) {
         return studentDao.getStudentByUserId(userId);
     }
 
@@ -131,6 +131,7 @@ public class StudentService {
                 .name(studentRegistrationRequest.name())
                 .email(studentRegistrationRequest.email())
                 .password(passwordEncoder.encode(studentRegistrationRequest.password()))
+                .picture(studentRegistrationRequest.picture())
                 .role(Role.STUDENT)
                 .build();
         User savedUser = userRepository.save(user);
@@ -139,7 +140,6 @@ public class StudentService {
                 .advisor(advisor)
                 .department(studentRegistrationRequest.department())
                 .year(studentRegistrationRequest.year())
-                .picture(studentRegistrationRequest.picture())
                 .user(savedUser)
                 .build();
         return studentDao.save(student);
@@ -189,6 +189,7 @@ public class StudentService {
                             .email(s.getEmail())
                             .password(passwordEncoder.encode(s.getPassword()))
                             .role(Role.STUDENT)
+                            .picture(s.getPicture())
                             .isEnabled(s.isEnabled())
                             .build();
                     if (!s.getAdvisorId().isBlank()) {
@@ -201,7 +202,6 @@ public class StudentService {
                             .advisor(advisor)
                             .department(s.getDepartment())
                             .year(s.getYear())
-                            .picture(s.getPicture())
                             .build();
                 }).toList();
         Instant endBuildList = Instant.now();

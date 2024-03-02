@@ -22,7 +22,7 @@ public interface StudentRepository extends JpaRepository<Student, String> {
             on u.id = s.user.id
             where u.id = :userId
             """)
-    Optional<Student> findByUserId(String userId);
+    Optional<Student> findByUserId(Long userId);
 
     @Query("select s from Student s where s.advisor.user.id = ?1")
     @EntityGraph(value = "Student.eagerlyFetchUser")

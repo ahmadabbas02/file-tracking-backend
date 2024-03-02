@@ -10,7 +10,8 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @RequiredArgsConstructor
 @Component
@@ -23,7 +24,7 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
         ErrorDetails errorDetails = new ErrorDetails(
-                new Date(),
+                LocalDateTime.now(ZoneId.of("Europe/Athens")),
                 authException.getMessage(),
                 "uri=" + request.getRequestURI()
         );

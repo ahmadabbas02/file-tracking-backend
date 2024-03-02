@@ -45,6 +45,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private String picture;
+
     @Singular
     @NotEmpty(message = "At least one role must be specified")
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
@@ -67,9 +70,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Stream<List<SimpleGrantedAuthority>> stream = roles.stream().map(Role::getAuthorities);
-        List<SimpleGrantedAuthority> authorities = stream.flatMap(List::stream).toList();
-        return authorities;
-//        return role.getAuthorities();
+        return stream.flatMap(List::stream).toList();
     }
 
     @Override

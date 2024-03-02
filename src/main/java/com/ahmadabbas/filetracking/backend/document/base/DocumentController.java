@@ -1,9 +1,14 @@
 package com.ahmadabbas.filetracking.backend.document.base;
 
-import com.ahmadabbas.filetracking.backend.document.payload.DocumentAddRequest;
-import com.ahmadabbas.filetracking.backend.document.payload.DocumentDto;
-import com.ahmadabbas.filetracking.backend.document.payload.DocumentMapper;
-import com.ahmadabbas.filetracking.backend.document.payload.DocumentModifyCategoryRequest;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentAddRequest;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentMapper;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentModifyCategoryRequest;
+import com.ahmadabbas.filetracking.backend.document.contact.ContactDocument;
+import com.ahmadabbas.filetracking.backend.document.contact.ContactDocumentService;
+import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentAddRequest;
+import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentDto;
+import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentMapper;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +30,9 @@ import java.util.UUID;
 public class DocumentController {
 
     private final DocumentService documentService;
+    private final DocumentMapper documentMapper;
+    private final ContactDocumentService contactDocumentService;
+    private final ContactDocumentMapper contactDocumentMapper;
 
     @Operation(
             summary = "Get all documents",
@@ -34,6 +43,7 @@ public class DocumentController {
     )
     @GetMapping
     public ResponseEntity<PaginatedResponse<DocumentDto>> getAllDocuments(
+            Authentication authentication,
             @RequestParam(defaultValue = "1", required = false) int pageNo,
             @RequestParam(defaultValue = "10", required = false) int pageSize,
             @RequestParam(defaultValue = "uploadedAt", required = false) String sortBy,
@@ -41,9 +51,36 @@ public class DocumentController {
             @RequestParam(defaultValue = "-1", required = false) String studentId
     ) {
         if (!studentId.equals("-1")) {
-            return ResponseEntity.ok(documentService.getAllDocuments(pageNo, pageSize, sortBy, order, studentId));
+            return ResponseEntity.ok(documentService.getAllDocuments(authentication, pageNo, pageSize, sortBy, order, studentId));
         }
-        return ResponseEntity.ok(documentService.getAllDocuments(pageNo, pageSize, sortBy, order));
+        return ResponseEntity.ok(documentService.getAllDocuments(authentication, pageNo, pageSize, sortBy, order));
+    }
+
+    @Operation(
+            summary = "Get contact document",
+            description = """
+                    Returns the student's contact document details.
+                    """
+    )
+    @GetMapping("/contact")
+    public ResponseEntity<ContactDocumentDto> getContactDocument(@RequestParam String studentId) {
+        ContactDocument contactDocument = contactDocumentService.getContactDocument(studentId);
+        return ResponseEntity.ok(contactDocumentMapper.toDto(contactDocument));
+    }
+
+    @Operation(
+            summary = "Upload contact document",
+            description = """
+                    Returns the student's contact document details.
+                    """
+    )
+    @PostMapping("/contact")
+    public ResponseEntity<ContactDocumentDto> postContactDocument(
+            @RequestBody ContactDocumentAddRequest addRequest,
+            Authentication authentication
+    ) {
+        ContactDocument contactDocument = contactDocumentService.addContactDocument(addRequest, authentication);
+        return ResponseEntity.ok(contactDocumentMapper.toDto(contactDocument));
     }
 
     @Operation(
@@ -67,8 +104,7 @@ public class DocumentController {
     ) throws IOException {
         DocumentAddRequest addRequest = new ObjectMapper().readValue(data, DocumentAddRequest.class);
         Document uploadedDocument = documentService.uploadDocument(file, addRequest);
-
-        return ResponseEntity.ok(DocumentMapper.INSTANCE.toDto(uploadedDocument));
+        return ResponseEntity.ok(documentMapper.toDto(uploadedDocument));
     }
 
     @Operation(
@@ -78,21 +114,8 @@ public class DocumentController {
     @PatchMapping(value = "/modify-category")
     public ResponseEntity<DocumentDto> modifyCategory(@RequestBody DocumentModifyCategoryRequest body) {
         Document modifiedDocument = documentService.modifyDocumentCategory(body);
-        return ResponseEntity.ok(DocumentMapper.INSTANCE.toDto(modifiedDocument));
+        return ResponseEntity.ok(documentMapper.toDto(modifiedDocument));
     }
-
-//    @GetMapping("/download")
-//    public ResponseEntity<byte[]> getFile(@RequestParam String fileName) throws IOException {
-//        byte[] data = azureBlobService.downloadBlob(fileName).readAllBytes();
-//        if (data != null) {
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.setContentLength(data.length);
-//            headers.set("Content-Disposition", "attachment; filename=" + fileName);
-//            return new ResponseEntity<>(data, headers, HttpStatus.OK);
-//        } else {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
 
     @Operation(
             summary = "Get file preview",
@@ -101,8 +124,8 @@ public class DocumentController {
                     """
     )
     @GetMapping("/preview")
-    public ResponseEntity<byte[]> getFilePreview(@RequestParam UUID uuid) throws IOException {
-        byte[] data = documentService.getDocumentPreview(uuid);
+    public ResponseEntity<byte[]> getFilePreview(Authentication authentication,@RequestParam UUID uuid) throws IOException {
+        byte[] data = documentService.getDocumentPreview(authentication,uuid);
         if (data != null) {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(data.length);

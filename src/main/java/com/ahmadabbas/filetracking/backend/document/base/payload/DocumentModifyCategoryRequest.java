@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.document.payload;
+package com.ahmadabbas.filetracking.backend.document.base.payload;
 
 import jakarta.validation.constraints.NotEmpty;
 

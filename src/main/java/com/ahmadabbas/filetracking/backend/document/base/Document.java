@@ -4,11 +4,15 @@ import com.ahmadabbas.filetracking.backend.category.Category;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -17,7 +21,7 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 @RequiredArgsConstructor
-@Builder
+@SuperBuilder
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class Document {
@@ -41,7 +45,7 @@ public class Document {
     private Student student;
 
     @CreationTimestamp
-    private Date uploadedAt;
+    private LocalDateTime uploadedAt;
 
     @Override
     public boolean equals(Object o) {

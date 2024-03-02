@@ -56,19 +56,37 @@ public class CategoryService {
             if (roles.contains(Role.ADMINISTRATOR)) {
                 return categoryRepository.findByParentCategoryId(-1L);
             } else {
-                for (var role : roles) {
-                    Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findByRole(role);
-                    categoryPermissions.forEach(permission -> {
-                        Category category = permission.getCategory();
-                        if (category != null && category.getParentCategoryId() == -1) categories.add(category);
-                    });
-                }
+                categories = getAllowedCategories(roles);
             }
 //            List<Category> allParentCategories = categoryRepository.findByParentCategoryId(-1L);
 //            return categories.stream().filter(allParentCategories::contains).collect(Collectors.toSet());
         }
-
         return categories;
+    }
+
+    public List<Category> getAllowedCategories(Set<Role> roles) {
+        List<Category> categories = new ArrayList<>(Collections.emptyList());
+        for (var role : roles) {
+            Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findByRole(role);
+            categoryPermissions.forEach(permission -> {
+                Category category = permission.getCategory();
+                if (category != null && category.getParentCategoryId() == -1) categories.add(category);
+            });
+        }
+        return categories;
+    }
+
+    public List<Long> getAllowedCategoriesIds(Set<Role> roles) {
+        List<Long> categoryIds = new ArrayList<>(Collections.emptyList());
+        for (var role : roles) {
+            Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findByRole(role);
+            categoryPermissions.forEach(permission -> {
+                Category category = permission.getCategory();
+                if (category != null && category.getParentCategoryId() == -1)
+                    categoryIds.add(category.getCategoryId());
+            });
+        }
+        return categoryIds;
     }
 
     public List<Category> getAllChildrenCategories(Long parentId) {

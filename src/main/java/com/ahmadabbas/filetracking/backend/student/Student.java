@@ -10,7 +10,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -37,9 +37,6 @@ public class Student {
     @Column(nullable = false)
     private Short year;
 
-    @Column(nullable = false)
-    private String picture;
-
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -52,7 +49,7 @@ public class Student {
     private Set<Document> documents;
 
     @CreationTimestamp
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     public void addDocument(Document document) {
         if (this.documents == null) {
@@ -72,10 +69,8 @@ public class Student {
                 .add("id='" + id + "'")
                 .add("department='" + department + "'")
                 .add("year=" + year)
-                .add("picture='" + picture + "'")
                 .add("user=" + user)
                 .add("advisor=" + advisor)
-                .add("documents=" + documents)
                 .add("createdAt=" + createdAt)
                 .toString();
     }
