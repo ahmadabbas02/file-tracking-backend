@@ -12,7 +12,10 @@ import java.util.Optional;
 public interface StudentRepository extends JpaRepository<Student, String> {
 
     @Override
-    @Query("select s from Student s")
+    @Query("""
+            select s from Student s
+            
+            """)
     @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAll(@NonNull Pageable pageable);
 

@@ -30,8 +30,12 @@ public class AuthenticationService {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         User user = (User) authentication.getPrincipal();
+        Map<String, Object> extraClaims = Map.of(
+                "role", user.getRoles(),
+                "name", user.getName()
+        );
         String jwtToken = jwtService.generateToken(
-                Map.of("role", user.getRoles()),
+                extraClaims,
                 authentication
         );
         saveToken(user, jwtToken);
@@ -41,7 +45,7 @@ public class AuthenticationService {
     }
 
     private void saveToken(User user, String jwtToken) {
-        var token = Token.builder()
+        Token token = Token.builder()
                 .user(user)
                 .token(jwtToken)
                 .expired(false)

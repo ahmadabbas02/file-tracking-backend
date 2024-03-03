@@ -1,10 +1,17 @@
 package com.ahmadabbas.filetracking.backend.auth;
 
+import com.ahmadabbas.filetracking.backend.advisor.Advisor;
+import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
+import com.ahmadabbas.filetracking.backend.student.Student;
+import com.ahmadabbas.filetracking.backend.student.StudentService;
+import com.ahmadabbas.filetracking.backend.user.Role;
+import com.ahmadabbas.filetracking.backend.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,9 +25,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@RequiredArgsConstructor
 @Service
 public class JwtService {
 
+    private final StudentService studentService;
+    private final AdvisorService advisorService;
     @Value("${application.security.jwt.secret-key}")
     private String secretKey;
     @Value("${application.security.jwt.expiration}")
@@ -60,10 +70,11 @@ public class JwtService {
             Authentication authentication,
             long expiration
     ) {
+        String subject = getSubjectFromAuthentication(authentication);
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
-                .setSubject(authentication.getName())
+                .setSubject(subject)
                 .setIssuer(issuer)
                 .setIssuedAt(Date.from(Instant.now()))
                 .setExpiration(
@@ -71,6 +82,19 @@ public class JwtService {
                 )
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    private String getSubjectFromAuthentication(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        if (user.getRoles().contains(Role.STUDENT)) {
+            Student student = studentService.getStudentByUserId(user.getId());
+            return student.getId();
+        } else if (user.getRoles().contains(Role.ADVISOR)) {
+            Advisor advisor = advisorService.getAdvisorByUserId(user.getId());
+            return advisor.getId();
+        } else {
+            return String.valueOf(user.getId());
+        }
     }
 
     private String buildToken(
@@ -93,7 +117,19 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String loginId = extractUserLoginId(token);
-        return loginId.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        User user = (User) userDetails;
+        if (isTokenExpired(token)) {
+            return false;
+        }
+        if (user.getRoles().contains(Role.STUDENT)) {
+            Student student = studentService.getStudentByUserId(user.getId());
+            return loginId.equals(student.getId());
+        } else if (user.getRoles().contains(Role.ADVISOR)) {
+            Advisor advisor = advisorService.getAdvisorByUserId(user.getId());
+            return loginId.equals(advisor.getId());
+        } else {
+            return loginId.equals(String.valueOf(user.getId()));
+        }
     }
 
     private boolean isTokenExpired(String token) {

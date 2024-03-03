@@ -1,5 +1,7 @@
 package com.ahmadabbas.filetracking.backend.user;
 
+import com.ahmadabbas.filetracking.backend.advisor.Advisor;
+import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.token.Token;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
@@ -47,6 +49,12 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private String picture;
+
+//    @OneToOne(mappedBy = "user")
+//    private Student student;
+//
+//    @OneToOne(mappedBy = "user")
+//    private Advisor advisor;
 
     @Singular
     @NotEmpty(message = "At least one role must be specified")

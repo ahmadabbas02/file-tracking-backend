@@ -66,24 +66,21 @@ public class StudentService {
                                                         int pageNo, int pageSize, String sortBy, String order,
                                                         String searchQuery) {
         Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
-        Page<Student> studentPage = null;
-        // TODO: check won't be needed later after forcing all users to be logged in
-        if (authentication != null && authentication.isAuthenticated()) {
-            User user = (User) authentication.getPrincipal();
-            log.info("Logged in user = %s".formatted(user));
-            Set<Role> roles = userService.getRoles(user);
-            log.info("Roles = %s".formatted(roles));
-            if (roles.contains(Role.ADVISOR)) {
-                if (searchQuery.isEmpty()) {
-                    log.info("No search query provided, getting all students..");
-                    studentPage = studentDao.getAllStudentsByAdvisorUserId(user.getId(), pageable);
-                } else {
-                    // TODO: Decide how we want searching to be done
-                    log.info("Provided search query: '%s', getting all students..".formatted(searchQuery));
-                    studentPage = StringUtils.isNumeric(searchQuery)
-                            ? studentDao.getAllStudentsByIdAndAdvisor(false, searchQuery, user.getId(), pageable)
-                            : studentDao.getAllStudentsByNameAndAdvisor(true, searchQuery, user.getId(), pageable);
-                }
+        Page<Student> studentPage;
+        User user = (User) authentication.getPrincipal();
+        log.info("Logged in user = %s".formatted(user));
+        Set<Role> roles = userService.getRoles(user);
+        log.info("Roles = %s".formatted(roles));
+        if (roles.contains(Role.ADVISOR)) {
+            if (searchQuery.isEmpty()) {
+                log.info("No search query provided, getting all students..");
+                studentPage = studentDao.getAllStudentsByAdvisorUserId(user.getId(), pageable);
+            } else {
+                // TODO: Decide how we want searching to be done
+                log.info("Provided search query: '%s', getting all students..".formatted(searchQuery));
+                studentPage = StringUtils.isNumeric(searchQuery)
+                        ? studentDao.getAllStudentsByIdAndAdvisor(false, searchQuery, user.getId(), pageable)
+                        : studentDao.getAllStudentsByNameAndAdvisor(true, searchQuery, user.getId(), pageable);
             }
         } else {
             if (searchQuery.isEmpty()) {
@@ -94,14 +91,13 @@ public class StudentService {
                 log.info("Provided search query: '%s', getting all students..".formatted(searchQuery));
                 studentPage = StringUtils.isNumeric(searchQuery)
                         ? studentDao.getAllStudentsById(false, searchQuery, pageable)
-                        : studentDao.getAllStudentsById(true, searchQuery, pageable);
+                        : studentDao.getAllStudentsByName(true, searchQuery, pageable);
             }
         }
 
         if (studentPage == null) {
             studentPage = Page.empty();
         }
-
 
         List<StudentDto> content = studentPage.getContent()
                 .stream()
@@ -125,7 +121,7 @@ public class StudentService {
             );
         }
 
-        Advisor advisor = advisorService.findAdvisorByAdvisorId(studentRegistrationRequest.advisorId());
+        Advisor advisor = advisorService.getAdvisorByAdvisorId(studentRegistrationRequest.advisorId());
 
         User user = User.builder()
                 .name(studentRegistrationRequest.name())
@@ -193,15 +189,15 @@ public class StudentService {
                             .isEnabled(s.isEnabled())
                             .build();
                     if (!s.getAdvisorId().isBlank()) {
-                        advisor = advisorService.findAdvisorByAdvisorId(s.getAdvisorId());
+                        advisor = advisorService.getAdvisorByAdvisorId(s.getAdvisorId());
                     }
 
                     return Student.builder()
                             .id(s.getStudentId())
-                            .user(user)
                             .advisor(advisor)
                             .department(s.getDepartment())
                             .year(s.getYear())
+                            .user(user)
                             .build();
                 }).toList();
         Instant endBuildList = Instant.now();

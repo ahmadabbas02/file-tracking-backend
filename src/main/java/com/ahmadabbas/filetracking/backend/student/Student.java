@@ -33,7 +33,7 @@ public class Student {
     @Column(nullable = false)
     private Short year;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -66,7 +66,6 @@ public class Student {
                 .add("department='" + department + "'")
                 .add("year=" + year)
                 .add("user=" + user)
-                .add("advisor=" + advisor)
                 .add("createdAt=" + createdAt)
                 .toString();
     }

@@ -29,7 +29,14 @@ public class AdvisorService {
     private final UserRepository userRepository;
     private final AdvisorMapper advisorMapper;
 
-    public Advisor findAdvisorByAdvisorId(String advisorId) {
+    public Advisor getAdvisorByUserId(Long userId) {
+        return advisorRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "advisor with user id `%s` not found".formatted(userId)
+                ));
+    }
+
+    public Advisor getAdvisorByAdvisorId(String advisorId) {
         return advisorRepository.findById(advisorId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "advisor with id `%s` not found".formatted(advisorId)

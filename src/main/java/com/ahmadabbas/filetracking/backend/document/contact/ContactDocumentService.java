@@ -48,7 +48,7 @@ public class ContactDocumentService {
 
     @Transactional
     public ContactDocument addContactDocument(ContactDocumentAddRequest addRequest, Authentication authentication) {
-        System.out.println("ContactDocumentService.addContactDocument");
+        log.info("ContactDocumentService.addContactDocument");
         User user = (User) authentication.getPrincipal();
         Student student = studentService.getStudentByUserId(user.getId());
         Category category = categoryService.getCategoryByName("Contact Forms");
