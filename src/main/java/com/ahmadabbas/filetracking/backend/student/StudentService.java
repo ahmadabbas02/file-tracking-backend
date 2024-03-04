@@ -3,6 +3,7 @@ package com.ahmadabbas.filetracking.backend.student;
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.ahmadabbas.filetracking.backend.advisor.AdvisorRepository;
 import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
+import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentCsvRepresentation;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentDto;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -200,7 +202,16 @@ public class StudentService {
                             .user(user)
                             .build();
                 }).toList();
+        List<User> users = students.stream().map(Student::getUser).toList();
         Instant endBuildList = Instant.now();
+
+        Instant startSaveUsers = Instant.now();
+        List<User> savedUsers = userRepository.saveAll(users);
+        Instant endSaveUsers = Instant.now();
+
+        if (savedUsers.isEmpty()) {
+            throw new APIException(HttpStatus.INTERNAL_SERVER_ERROR, "failed to save users");
+        }
 
         Instant startSaveStudents = Instant.now();
         List<Student> savedStudents = studentDao.saveAll(students);
@@ -211,6 +222,7 @@ public class StudentService {
         log.info("Time taken to filter: " + Duration.between(startFilter, endFilter).toMillis());
         log.info("Time taken to wrong information: " + Duration.between(startWrongInformation, endWrongInformation).toMillis());
         log.info("Time taken to build student list: " + Duration.between(startBuildList, endBuildList).toMillis());
+        log.info("Time taken to save users list: " + Duration.between(startSaveUsers, endSaveUsers).toMillis());
         log.info("Time taken to save student list: " + Duration.between(startSaveStudents, endSaveStudents).toMillis());
         return CsvUploadResponse.builder()
                 .successCount(savedStudents.size())

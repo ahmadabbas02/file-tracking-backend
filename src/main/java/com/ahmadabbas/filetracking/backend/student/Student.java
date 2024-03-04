@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.student;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
+import com.ahmadabbas.filetracking.backend.document.internship.InternshipStatus;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.generator.StudentIdGenerator;
 import jakarta.persistence.*;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 @Getter
@@ -33,7 +35,7 @@ public class Student {
     @Column(nullable = false)
     private Short year;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -41,23 +43,18 @@ public class Student {
     @JoinColumn(name = "advisor_id")
     private Advisor advisor;
 
-//    @OneToMany(mappedBy = "student")
-//    private Set<Document> documents;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private InternshipStatus.CompletionStatus internshipCompletionStatus = InternshipStatus.CompletionStatus.INCOMPLETE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private InternshipStatus.PaymentStatus paymentStatus = InternshipStatus.PaymentStatus.NOT_PAID;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
-
-//    public void addDocument(Document document) {
-//        if (this.documents == null) {
-//            this.documents = new HashSet<>();
-//        }
-//        this.documents.add(document);
-//    }
-
-//    @JsonBackReference
-//    public Set<Document> getDocuments() {
-//        return documents;
-//    }
 
     @Override
     public String toString() {
@@ -65,8 +62,21 @@ public class Student {
                 .add("id='" + id + "'")
                 .add("department='" + department + "'")
                 .add("year=" + year)
-                .add("user=" + user)
                 .add("createdAt=" + createdAt)
                 .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Student student)) return false;
+        return Objects.equals(id, student.id) && Objects.equals(department, student.department)
+                && Objects.equals(year, student.year) && Objects.equals(user, student.user)
+                && Objects.equals(advisor, student.advisor) && Objects.equals(createdAt, student.createdAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, department, year, user, advisor, createdAt);
     }
 }

@@ -9,6 +9,11 @@ import com.ahmadabbas.filetracking.backend.document.contact.ContactDocumentServi
 import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentAddRequest;
 import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentDto;
 import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentMapper;
+import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocument;
+import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumentService;
+import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipAddRequest;
+import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDto;
+import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipMapper;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +38,8 @@ public class DocumentController {
     private final DocumentMapper documentMapper;
     private final ContactDocumentService contactDocumentService;
     private final ContactDocumentMapper contactDocumentMapper;
+    private final InternshipDocumentService internshipDocumentService;
+    private final InternshipMapper internshipMapper;
 
     @Operation(
             summary = "Get all documents",
@@ -57,33 +64,6 @@ public class DocumentController {
     }
 
     @Operation(
-            summary = "Get contact document",
-            description = """
-                    Returns the student's contact document details.
-                    """
-    )
-    @GetMapping("/contact")
-    public ResponseEntity<ContactDocumentDto> getContactDocument(@RequestParam String studentId) {
-        ContactDocument contactDocument = contactDocumentService.getContactDocument(studentId);
-        return ResponseEntity.ok(contactDocumentMapper.toDto(contactDocument));
-    }
-
-    @Operation(
-            summary = "Upload contact document",
-            description = """
-                    Returns the student's contact document details.
-                    """
-    )
-    @PostMapping("/contact")
-    public ResponseEntity<ContactDocumentDto> postContactDocument(
-            @RequestBody ContactDocumentAddRequest addRequest,
-            Authentication authentication
-    ) {
-        ContactDocument contactDocument = contactDocumentService.addContactDocument(addRequest, authentication);
-        return ResponseEntity.ok(contactDocumentMapper.toDto(contactDocument));
-    }
-
-    @Operation(
             summary = "Upload a document",
             description = """
                     Uploads a document to the cloud which can be
@@ -104,7 +84,7 @@ public class DocumentController {
     ) throws IOException {
         DocumentAddRequest addRequest = new ObjectMapper().readValue(data, DocumentAddRequest.class);
         Document uploadedDocument = documentService.uploadDocument(file, addRequest);
-        return ResponseEntity.ok(documentMapper.toDto(uploadedDocument));
+        return new ResponseEntity<>(documentMapper.toDto(uploadedDocument), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -124,8 +104,8 @@ public class DocumentController {
                     """
     )
     @GetMapping("/preview")
-    public ResponseEntity<byte[]> getFilePreview(Authentication authentication,@RequestParam UUID uuid) throws IOException {
-        byte[] data = documentService.getDocumentPreview(authentication,uuid);
+    public ResponseEntity<byte[]> getFilePreview(Authentication authentication, @RequestParam UUID uuid) throws IOException {
+        byte[] data = documentService.getDocumentPreview(authentication, uuid);
         if (data != null) {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(data.length);
@@ -135,5 +115,55 @@ public class DocumentController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @Operation(
+            summary = "Get contact document",
+            description = """
+                    Returns the student's contact document details.
+                    """
+    )
+    @GetMapping("/contact")
+    public ResponseEntity<ContactDocumentDto> getContactDocument(@RequestParam String studentId) {
+        ContactDocument contactDocument = contactDocumentService.getContactDocument(studentId);
+        return ResponseEntity.ok(contactDocumentMapper.toDto(contactDocument));
+    }
+
+    @Operation(
+            summary = "Upload contact document",
+            description = """
+                    Generates and uploads contact form document.
+                    """
+    )
+    @PostMapping("/contact")
+    public ResponseEntity<ContactDocumentDto> postContactDocument(
+            @RequestBody ContactDocumentAddRequest addRequest,
+            Authentication authentication
+    ) {
+        ContactDocument contactDocument = contactDocumentService.addContactDocument(addRequest, authentication);
+        return new ResponseEntity<>(contactDocumentMapper.toDto(contactDocument), HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Upload internship document",
+            description = """
+                    Uploads an internship document to the cloud which can be
+                    later previewed/downloaded using the UUID returned. \n
+                    Example input for `data`: `{
+                                           "title":"Test File",
+                                           "description":"",
+                                           "studentId":"23000002",
+                                           "numberOfWorkingDays":20
+                                       }`
+                    """
+    )
+    @PostMapping(value = "/internship", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<InternshipDto> uploadInternshipDocument(
+            @RequestPart("file") MultipartFile file,
+            @RequestPart("data") String data
+    ) throws IOException {
+        InternshipAddRequest addRequest = new ObjectMapper().readValue(data, InternshipAddRequest.class);
+        InternshipDocument internshipDocument = internshipDocumentService.saveInternship(file, addRequest);
+        return new ResponseEntity<>(internshipMapper.toDto(internshipDocument), HttpStatus.CREATED);
     }
 }

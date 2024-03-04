@@ -46,10 +46,10 @@ public class AuthenticationService {
 
     private void saveToken(User user, String jwtToken) {
         Token token = Token.builder()
-                .user(user)
                 .token(jwtToken)
                 .expired(false)
                 .blocked(false)
+                .user(user)
                 .build();
         tokenRepository.save(token);
     }

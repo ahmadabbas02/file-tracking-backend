@@ -27,4 +27,12 @@ public class Token {
     @JoinColumn(name = "user_id")
     private User user;
 
+    public static class TokenBuilder {
+        public TokenBuilder user(final User user) {
+            this.user = user;
+            user.getTokens().add(this.build());
+            return this;
+        }
+    }
+
 }
