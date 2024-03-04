@@ -17,9 +17,9 @@ import com.github.javafaker.Faker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
@@ -34,18 +34,21 @@ public class DataLoader implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         Faker faker = new Faker();
+
         // Add category and sub categories
         Category savedMainCategory = categoryService.createCategory(
                 Category.builder()
                         .name("Main Cat. 1")
                         .build()
         );
+
         Category savedSubCategory1 = categoryService.createCategory(
                 Category.builder()
                         .parentCategoryId(savedMainCategory.getCategoryId())
                         .name("Sub Cat. 1")
                         .build()
         );
+
         Category savedSubCategory2 = categoryService.createCategory(
                 Category.builder()
                         .parentCategoryId(savedMainCategory.getCategoryId())
@@ -114,7 +117,7 @@ public class DataLoader implements ApplicationRunner {
         }
 
         Document medicalReportDocument = new MedicalReportDocument(
-                Date.from(Instant.now()),
+                LocalDateTime.from(Instant.now()),
                 "Test",
                 MedicalReportStatus.APPROVED
         );
@@ -124,7 +127,7 @@ public class DataLoader implements ApplicationRunner {
         documentRepository.save(medicalReportDocument);
 
         Document medicalReportDocument2 = new MedicalReportDocument(
-                Date.from(Instant.now()),
+                LocalDateTime.from(Instant.now()),
                 "Test2",
                 MedicalReportStatus.REJECTED
         );
@@ -134,7 +137,7 @@ public class DataLoader implements ApplicationRunner {
         documentRepository.save(medicalReportDocument2);
 
         Document medicalReportDocument3 = new MedicalReportDocument(
-                Date.from(Instant.now().minus(7, ChronoUnit.DAYS)),
+                LocalDateTime.from(Instant.now().minus(7, ChronoUnit.DAYS)),
                 "Test3",
                 MedicalReportStatus.REJECTED
         );
