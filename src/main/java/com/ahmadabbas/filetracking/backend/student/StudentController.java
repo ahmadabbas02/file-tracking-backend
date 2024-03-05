@@ -3,13 +3,14 @@ package com.ahmadabbas.filetracking.backend.student;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentDto;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
+import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,7 +24,7 @@ public class StudentController {
     private final StudentMapper studentMapper;
 
     @Operation(summary = "Student information", description = "Returns the student's personal information.")
-    @GetMapping("{studentId}")
+    @GetMapping("/{studentId}")
     public ResponseEntity<StudentDto> getStudent(@PathVariable String studentId) {
         Student student = studentService.getStudent(studentId);
         return ResponseEntity.ok(studentMapper.toDto(student));
@@ -40,9 +41,9 @@ public class StudentController {
             @RequestParam(defaultValue = "id", required = false) String sortBy,
             @RequestParam(defaultValue = "asc", required = false) String order,
             @RequestParam(defaultValue = "", required = false) String searchQuery,
-            Authentication authentication
-    ) {
-        return ResponseEntity.ok(studentService.getAllStudents(authentication, pageNo, pageSize, sortBy, order, searchQuery));
+            @AuthenticationPrincipal User user
+            ) {
+        return ResponseEntity.ok(studentService.getAllStudents(user, pageNo, pageSize, sortBy, order, searchQuery));
     }
 
     @Operation(summary = "Add new student", description = "Adds a new student to the database with the specified information.")

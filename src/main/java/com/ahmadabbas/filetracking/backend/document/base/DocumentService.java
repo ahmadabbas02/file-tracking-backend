@@ -4,7 +4,6 @@ import com.ahmadabbas.filetracking.backend.category.Category;
 import com.ahmadabbas.filetracking.backend.category.CategoryService;
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentAddRequest;
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentMapper;
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentModifyCategoryRequest;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.student.Student;
@@ -19,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,8 +33,6 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 public class DocumentService {
-    private final DocumentMapper documentMapper;
-
     private final DocumentRepository documentRepository;
     private final CategoryService categoryService;
     private final StudentService studentService;
@@ -74,8 +70,7 @@ public class DocumentService {
         return document;
     }
 
-    public byte[] getDocumentPreview(Authentication authentication, UUID uuid) throws IOException {
-        User loggedInUser = (User) authentication.getPrincipal();
+    public byte[] getDocumentPreview(User loggedInUser, UUID uuid) throws IOException {
         Document document = getDocument(uuid);
         if (loggedInUser.getRoles().contains(Role.STUDENT)
                 && !Objects.equals(document.getStudent().getUser().getId(), loggedInUser.getId())) {
@@ -87,17 +82,17 @@ public class DocumentService {
     }
 
     public PaginatedResponse<DocumentDto> getAllDocuments(
-            Authentication authentication,
+            User loggedInUser,
             int pageNo,
             int pageSize,
             String sortBy,
             String order
     ) {
-        return getAllDocuments(authentication, pageNo, pageSize, sortBy, order, "-1");
+        return getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, "-1");
     }
 
     public PaginatedResponse<DocumentDto> getAllDocuments(
-            Authentication authentication,
+            User loggedInUser,
             int pageNo,
             int pageSize,
             String sortBy,
@@ -105,22 +100,22 @@ public class DocumentService {
             Long categoryId,
             Long parentCategoryId
     ) {
-        return getAllDocuments(authentication, pageNo, pageSize, sortBy, order, "-1", categoryId, parentCategoryId);
+        return getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, "-1", categoryId, parentCategoryId);
     }
 
     public PaginatedResponse<DocumentDto> getAllDocuments(
-            Authentication authentication,
+            User loggedInUser,
             int pageNo,
             int pageSize,
             String sortBy,
             String order,
             String studentId
     ) {
-        return getAllDocuments(authentication, pageNo, pageSize, sortBy, order, studentId, -1L, -1L);
+        return getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, studentId, -1L, -1L);
     }
 
     public PaginatedResponse<DocumentDto> getAllDocuments(
-            Authentication authentication,
+            User loggedInUser,
             int pageNo,
             int pageSize,
             String sortBy,
@@ -130,7 +125,6 @@ public class DocumentService {
             Long parentCategoryId
     ) {
         log.info("DocumentService.getAllDocuments");
-        User loggedInUser = (User) authentication.getPrincipal();
         Student student;
         if (loggedInUser.getRoles().contains(Role.STUDENT)) {
             student = studentService.getStudentByUserId(loggedInUser.getId());

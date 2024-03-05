@@ -7,9 +7,10 @@ import com.ahmadabbas.filetracking.backend.category.permission.CategoryPermissio
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.user.Role;
+import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,25 +43,27 @@ public class CategoryService {
     }
 
     @Transactional
-    public Category createCategory(Category category) {
+    public Category createCategory(Category category, User user) {
+        Set<Role> roles = user.getRoles();
+        if (roles.contains(Role.SECRETARY) && category.getParentCategoryId() == -1L) {
+            throw new AccessDeniedException("only allowed to create sub categories");
+        }
         if (!categoryRepository.existsByName(category.getName())) {
             return categoryRepository.save(category);
         }
         throw new DuplicateResourceException("category with the name '%s' already exists!".formatted(category.getName()));
     }
 
-    public List<Category> getAllParentCategories(Authentication authentication) {
-        List<Category> categories = new ArrayList<>(Collections.emptyList());
-        if (authentication != null && authentication.isAuthenticated()) {
-            Set<Role> roles = userService.getRoles(authentication);
-            if (roles.contains(Role.ADMINISTRATOR)) {
-                return categoryRepository.findByParentCategoryId(-1L);
-            } else {
-                categories = getAllowedCategories(roles);
-            }
+    public List<Category> getAllParentCategories(User user) {
+        List<Category> categories;
+        Set<Role> roles = userService.getRoles(user);
+        if (roles.contains(Role.ADMINISTRATOR)) {
+            return categoryRepository.findByParentCategoryId(-1L);
+        } else {
+            categories = getAllowedCategories(roles);
+        }
 //            List<Category> allParentCategories = categoryRepository.findByParentCategoryId(-1L);
 //            return categories.stream().filter(allParentCategories::contains).collect(Collectors.toSet());
-        }
         return categories;
     }
 
@@ -100,6 +103,14 @@ public class CategoryService {
         return categoryRepository.findByParentCategoryId(parentId);
     }
 
+    public List<Category> getAllChildrenCategories(Long parentId, User user) {
+        List<Long> allowedCategories = getAllowedCategoriesIds(user.getRoles());
+        if (!allowedCategories.contains(parentId)) {
+            throw new AccessDeniedException("not allowed to children categories of `%s`".formatted(parentId));
+        }
+        return categoryRepository.findByParentCategoryId(parentId);
+    }
+
 //    public Map<String, List<Category>> getAllCategories1() {
 //        Map<String, List<Category>> result = new HashMap<>();
 //        List<Category> parentCategories = getAllParentCategories();
@@ -110,8 +121,8 @@ public class CategoryService {
 //        return result;
 //    }
 
-    public List<FullCategoryResponse> getAllCategories2(Authentication authentication) {
-        List<Category> parentCategories = getAllParentCategories(authentication);
+    public List<FullCategoryResponse> getAllCategories2(User user) {
+        List<Category> parentCategories = getAllParentCategories(user);
         List<FullCategoryResponse> result = new LinkedList<>();
         for (var parent : parentCategories) {
             List<Category> childrenCategories = getAllChildrenCategories(parent.getCategoryId());

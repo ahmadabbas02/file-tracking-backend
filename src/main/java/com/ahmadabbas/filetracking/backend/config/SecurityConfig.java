@@ -67,24 +67,40 @@ public class SecurityConfig {
                                 // Modifying/changing category of a document
                                 .requestMatchers("/api/v1/documents/modify-category")
                                 .hasAnyRole(Role.ADMINISTRATOR.name(), Role.SECRETARY.name())
-                                // Getting advisors and all students
+                                // Getting all advisors
                                 .requestMatchers(
                                         HttpMethod.GET,
-                                        "/api/v1/advisors",
-                                        "/api/v1/students",
-                                        "/api/v1/students/"
+                                        "/api/v1/advisors"
+                                )
+                                .hasAnyRole(
+                                        Role.ADMINISTRATOR.name(), Role.CHAIR.name(),
+                                        Role.VICE_CHAR.name(), Role.SECRETARY.name()
+                                )
+                                // Getting all students
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/api/v1/students"
                                 )
                                 .hasAnyRole(
                                         Role.ADMINISTRATOR.name(), Role.CHAIR.name(),
                                         Role.VICE_CHAR.name(), Role.SECRETARY.name(),
                                         Role.ADVISOR.name()
                                 )
-                                //
+                                // Only students can add contact document
                                 .requestMatchers(
                                         HttpMethod.POST,
                                         "api/v1/documents/contact"
                                 )
                                 .hasRole(Role.STUDENT.name())
+                                // category creation
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "api/v1/categories"
+                                )
+                                .hasAnyRole(
+                                        Role.ADMINISTRATOR.name(), Role.CHAIR.name(),
+                                        Role.VICE_CHAR.name(), Role.SECRETARY.name()
+                                )
                                 .anyRequest()
                                 .authenticated()
                 )

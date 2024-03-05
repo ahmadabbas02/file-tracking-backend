@@ -3,12 +3,13 @@ package com.ahmadabbas.filetracking.backend.auth;
 import com.ahmadabbas.filetracking.backend.auth.payload.AuthenticationRequest;
 import com.ahmadabbas.filetracking.backend.auth.payload.AuthenticationResponse;
 import com.ahmadabbas.filetracking.backend.user.Role;
+import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -41,8 +42,8 @@ public class AuthenticationController {
                     """
     )
     @GetMapping("/roles")
-    public ResponseEntity<Set<Role>> roles(Authentication authentication) {
-        Set<Role> roles = userService.getRoles(authentication);
+    public ResponseEntity<Set<Role>> roles(@AuthenticationPrincipal User user) {
+        Set<Role> roles = userService.getRoles(user);
         return ResponseEntity.ok(roles);
     }
 }

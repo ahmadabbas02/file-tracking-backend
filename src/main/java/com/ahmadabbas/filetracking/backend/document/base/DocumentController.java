@@ -14,6 +14,7 @@ import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumen
 import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipAddRequest;
 import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentDto;
 import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentMapper;
+import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,7 +51,7 @@ public class DocumentController {
     )
     @GetMapping
     public ResponseEntity<PaginatedResponse<DocumentDto>> getAllDocuments(
-            Authentication authentication,
+            @AuthenticationPrincipal User user,
             @RequestParam(defaultValue = "1", required = false) int pageNo,
             @RequestParam(defaultValue = "10", required = false) int pageSize,
             @RequestParam(defaultValue = "uploadedAt", required = false) String sortBy,
@@ -61,10 +62,10 @@ public class DocumentController {
     ) {
         if (!studentId.equals("-1")) {
             return ResponseEntity.ok(
-                    documentService.getAllDocuments(authentication, pageNo, pageSize, sortBy, order, studentId, categoryId, parentCategoryId)
+                    documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, studentId, categoryId, parentCategoryId)
             );
         }
-        return ResponseEntity.ok(documentService.getAllDocuments(authentication, pageNo, pageSize, sortBy, order, categoryId, parentCategoryId));
+        return ResponseEntity.ok(documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, categoryId, parentCategoryId));
     }
 
     @Operation(
@@ -108,8 +109,8 @@ public class DocumentController {
                     """
     )
     @GetMapping("/preview")
-    public ResponseEntity<byte[]> getFilePreview(Authentication authentication, @RequestParam UUID uuid) throws IOException {
-        byte[] data = documentService.getDocumentPreview(authentication, uuid);
+    public ResponseEntity<byte[]> getFilePreview(@AuthenticationPrincipal User user, @RequestParam UUID uuid) throws IOException {
+        byte[] data = documentService.getDocumentPreview(user, uuid);
         if (data != null) {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(data.length);
@@ -142,9 +143,9 @@ public class DocumentController {
     @PostMapping("/upload/contact")
     public ResponseEntity<ContactDocumentDto> postContactDocument(
             @RequestBody ContactDocumentAddRequest addRequest,
-            Authentication authentication
+            @AuthenticationPrincipal User user
     ) {
-        ContactDocument contactDocument = contactDocumentService.addContactDocument(addRequest, authentication);
+        ContactDocument contactDocument = contactDocumentService.addContactDocument(addRequest, user);
         return new ResponseEntity<>(contactDocumentMapper.toDto(contactDocument), HttpStatus.CREATED);
     }
 

@@ -2,13 +2,14 @@ package com.ahmadabbas.filetracking.backend.category;
 
 import com.ahmadabbas.filetracking.backend.category.payload.CategoryPermissionRequestDto;
 import com.ahmadabbas.filetracking.backend.category.payload.FullCategoryResponse;
+import com.ahmadabbas.filetracking.backend.user.User;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +25,8 @@ public class CategoryController {
             summary = "Add category"
     )
     @PostMapping
-    public ResponseEntity<Category> addCategory(@RequestBody Category category) {
-        return new ResponseEntity<>(categoryService.createCategory(category), HttpStatus.CREATED);
+    public ResponseEntity<Category> addCategory(@RequestBody Category category, @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(categoryService.createCategory(category, user), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -35,13 +36,13 @@ public class CategoryController {
     @GetMapping
     public ResponseEntity<List> getAllCategories(
             @RequestParam(value = "parents_only", required = false, defaultValue = "false") boolean parentsOnly,
-            Authentication authentication
+            @AuthenticationPrincipal User user
     ) {
         if (parentsOnly) {
-            List<Category> allParentCategories = categoryService.getAllParentCategories(authentication);
+            List<Category> allParentCategories = categoryService.getAllParentCategories(user);
             return ResponseEntity.ok(allParentCategories);
         }
-        List<FullCategoryResponse> allCategories = categoryService.getAllCategories2(authentication);
+        List<FullCategoryResponse> allCategories = categoryService.getAllCategories2(user);
         return ResponseEntity.ok(allCategories);
     }
 
@@ -50,8 +51,8 @@ public class CategoryController {
             description = "Returns a list of all categories with `parentId` as their parent category."
     )
     @GetMapping("{parentId}")
-    public ResponseEntity<List<Category>> getAllChildrenCategories(@PathVariable Long parentId) {
-        return ResponseEntity.ok(categoryService.getAllChildrenCategories(parentId));
+    public ResponseEntity<List<Category>> getAllChildrenCategories(@PathVariable Long parentId, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(categoryService.getAllChildrenCategories(parentId, user));
     }
 
     @Operation(

@@ -15,6 +15,15 @@ public interface AdvisorRepository extends JpaRepository<Advisor, String> {
     @Override
     Page<Advisor> findAll(@NonNull Pageable pageable);
 
+    @EntityGraph(value = "Advisor.eagerlyFetchUser")
+    @Query("select a from Advisor a where upper(a.id) like upper(concat(:id, '%'))")
+    Page<Advisor> findAllByIdStartsWith(String id, Pageable pageable);
+
+    @EntityGraph(value = "Advisor.eagerlyFetchUser")
+    @Query("select a from Advisor a where upper(a.user.name) like upper(concat('%', :name, '%'))")
+    Page<Advisor> findAllByNameContains(String name, Pageable pageable);
+
+
     @Query("""
             select a from Advisor a
             where a.user.id = :id

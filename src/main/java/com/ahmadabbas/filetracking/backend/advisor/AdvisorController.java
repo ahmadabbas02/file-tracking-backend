@@ -33,8 +33,9 @@ public class AdvisorController {
             @RequestParam(defaultValue = "1", required = false) int pageNo,
             @RequestParam(defaultValue = "10", required = false) int pageSize,
             @RequestParam(defaultValue = "id", required = false) String sortBy,
-            @RequestParam(defaultValue = "asc", required = false) String order
+            @RequestParam(defaultValue = "asc", required = false) String order,
+            @RequestParam(defaultValue = "", required = false) String searchQuery
     ) {
-        return ResponseEntity.ok(advisorService.getAllAdvisors(pageNo, pageSize, sortBy, order));
+        return ResponseEntity.ok(advisorService.getAllAdvisors(pageNo, pageSize, sortBy, order, searchQuery));
     }
 }

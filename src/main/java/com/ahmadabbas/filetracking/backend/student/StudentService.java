@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,25 +63,24 @@ public class StudentService {
         return studentDao.getStudentByUserId(userId);
     }
 
-    public PaginatedResponse<StudentDto> getAllStudents(Authentication authentication,
+    public PaginatedResponse<StudentDto> getAllStudents(User loggedInUser,
                                                         int pageNo, int pageSize, String sortBy, String order,
                                                         String searchQuery) {
         Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
         Page<Student> studentPage;
-        User user = (User) authentication.getPrincipal();
-        log.info("Logged in user = %s".formatted(user));
-        Set<Role> roles = userService.getRoles(user);
+        log.info("Logged in user = %s".formatted(loggedInUser));
+        Set<Role> roles = userService.getRoles(loggedInUser);
         log.info("Roles = %s".formatted(roles));
         if (roles.contains(Role.ADVISOR)) {
             if (searchQuery.isEmpty()) {
                 log.info("No search query provided, getting all students..");
-                studentPage = studentDao.getAllStudentsByAdvisorUserId(user.getId(), pageable);
+                studentPage = studentDao.getAllStudentsByAdvisorUserId(loggedInUser.getId(), pageable);
             } else {
                 // TODO: Decide how we want searching to be done
                 log.info("Provided search query: '%s', getting all students..".formatted(searchQuery));
                 studentPage = StringUtils.isNumeric(searchQuery)
-                        ? studentDao.getAllStudentsByIdAndAdvisor(false, searchQuery, user.getId(), pageable)
-                        : studentDao.getAllStudentsByNameAndAdvisor(true, searchQuery, user.getId(), pageable);
+                        ? studentDao.getAllStudentsByIdAndAdvisor(false, searchQuery, loggedInUser.getId(), pageable)
+                        : studentDao.getAllStudentsByNameAndAdvisor(true, searchQuery, loggedInUser.getId(), pageable);
             }
         } else {
             if (searchQuery.isEmpty()) {

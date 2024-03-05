@@ -11,6 +11,8 @@ import com.ahmadabbas.filetracking.backend.user.UserRepository;
 import com.ahmadabbas.filetracking.backend.util.PageableUtil;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +25,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class AdvisorService {
     private final PasswordEncoder passwordEncoder;
     private final AdvisorRepository advisorRepository;
@@ -73,10 +76,20 @@ public class AdvisorService {
         );
     }
 
-    public PaginatedResponse<AdvisorDto> getAllAdvisors(int pageNo, int pageSize, String sortBy, String order) {
+    public PaginatedResponse<AdvisorDto> getAllAdvisors(int pageNo, int pageSize, String sortBy, String order, String searchQuery) {
         Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
-        Page<Advisor> studentPage = advisorRepository.findAll(pageable);
-        List<AdvisorDto> content = studentPage.getContent()
+        Page<Advisor> advisorPage;
+        if (searchQuery.isEmpty()) {
+            log.info("No search query provided, getting all advisors..");
+            advisorPage = advisorRepository.findAll(pageable);
+        } else {
+            // TODO: Decide how we want searching to be done
+            log.info("Provided search query: '%s', getting all advisors..".formatted(searchQuery));
+            advisorPage = StringUtils.isNumeric(searchQuery.replace("AP", ""))
+                    ? advisorRepository.findAllByIdStartsWith(searchQuery, pageable)
+                    : advisorRepository.findAllByNameContains(searchQuery, pageable);
+        }
+        List<AdvisorDto> content = advisorPage.getContent()
                 .stream()
                 .map(advisorMapper::toDto)
                 .toList();
@@ -84,9 +97,9 @@ public class AdvisorService {
                 content,
                 pageNo,
                 pageSize,
-                studentPage.getTotalElements(),
-                studentPage.getTotalPages(),
-                studentPage.isLast()
+                advisorPage.getTotalElements(),
+                advisorPage.getTotalPages(),
+                advisorPage.isLast()
         );
     }
 }

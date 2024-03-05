@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,13 +46,12 @@ public class ContactDocumentService {
     }
 
     @Transactional
-    public ContactDocument addContactDocument(ContactDocumentAddRequest addRequest, Authentication authentication) {
+    public ContactDocument addContactDocument(ContactDocumentAddRequest addRequest, User loggedInUser) {
         log.info("ContactDocumentService.addContactDocument");
-        User user = (User) authentication.getPrincipal();
-        Student student = studentService.getStudentByUserId(user.getId());
+        Student student = studentService.getStudentByUserId(loggedInUser.getId());
         Category category = categoryService.getCategoryByName("Contact Forms");
         try {
-            File filledPdf = generateContactFilledPdf(addRequest, student.getId(), user.getName());
+            File filledPdf = generateContactFilledPdf(addRequest, student.getId(), loggedInUser.getName());
             if (filledPdf == null) {
                 throw new RuntimeException("couldn't generate contact form pdf.");
             }
