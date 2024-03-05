@@ -42,7 +42,7 @@ public class CategoryController {
             List<Category> allParentCategories = categoryService.getAllParentCategories(user);
             return ResponseEntity.ok(allParentCategories);
         }
-        List<FullCategoryResponse> allCategories = categoryService.getAllCategories2(user);
+        List<FullCategoryResponse> allCategories = categoryService.getAllCategories(user);
         return ResponseEntity.ok(allCategories);
     }
 

@@ -5,7 +5,9 @@ import com.ahmadabbas.filetracking.backend.category.Category;
 import java.util.List;
 
 public record FullCategoryResponse(
-        Category mainCategory,
+        Long categoryId,
+        Long parentCategoryId,
+        String name,
         List<Category> subCategories
 ) {
 }

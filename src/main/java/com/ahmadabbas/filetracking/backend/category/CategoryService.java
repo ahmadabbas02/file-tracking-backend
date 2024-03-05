@@ -111,26 +111,28 @@ public class CategoryService {
         return categoryRepository.findByParentCategoryId(parentId);
     }
 
-//    public Map<String, List<Category>> getAllCategories1() {
-//        Map<String, List<Category>> result = new HashMap<>();
-//        List<Category> parentCategories = getAllParentCategories();
-//        for (var parent : parentCategories) {
-//            List<Category> childrenCategories = getAllChildrenCategories(parent.getCategoryId());
-//            result.put(parent.getName(), childrenCategories);
-//        }
-//        return result;
-//    }
-
-    public List<FullCategoryResponse> getAllCategories2(User user) {
+    public List<FullCategoryResponse> getAllCategories(User user) {
         List<Category> parentCategories = getAllParentCategories(user);
         List<FullCategoryResponse> result = new LinkedList<>();
         for (var parent : parentCategories) {
             List<Category> childrenCategories = getAllChildrenCategories(parent.getCategoryId());
             if (!childrenCategories.isEmpty()) {
-                result.add(new FullCategoryResponse(parent, childrenCategories));
+                FullCategoryResponse response = new FullCategoryResponse(
+                        parent.getCategoryId(),
+                        parent.getParentCategoryId(),
+                        parent.getName(),
+                        childrenCategories
+                );
+                result.add(response);
                 continue;
             }
-            result.add(new FullCategoryResponse(parent, Collections.emptyList()));
+            FullCategoryResponse response = new FullCategoryResponse(
+                    parent.getCategoryId(),
+                    parent.getParentCategoryId(),
+                    parent.getName(),
+                    Collections.emptyList()
+            );
+            result.add(response);
         }
         return result;
     }
