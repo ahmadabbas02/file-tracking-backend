@@ -78,6 +78,13 @@ public class CategoryService {
 
     public List<Long> getAllowedCategoriesIds(Set<Role> roles) {
         List<Long> categoryIds = new ArrayList<>(Collections.emptyList());
+        if (roles.stream().anyMatch(role -> role.equals(Role.ADMINISTRATOR)
+                || role.equals(Role.CHAIR) || role.equals(Role.VICE_CHAR))) {
+            return categoryRepository.findAll()
+                    .stream()
+                    .filter(c -> c.getParentCategoryId() == -1L)
+                    .map(Category::getCategoryId).toList();
+        }
         for (var role : roles) {
             Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findByRole(role);
             categoryPermissions.forEach(permission -> {
@@ -127,7 +134,7 @@ public class CategoryService {
                     ));
             categoryPermissionRepository.delete(permission);
         } else {
-            var permission = categoryPermissionRepository.findByCategoryIdAndRole(request.categoryId(), request.role());
+            Optional<CategoryPermission> permission = categoryPermissionRepository.findByCategoryIdAndRole(request.categoryId(), request.role());
             if (permission.isPresent()) {
                 throw new DuplicateResourceException("category permission already exists!");
             }

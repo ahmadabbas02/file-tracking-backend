@@ -1,8 +1,13 @@
 package com.ahmadabbas.filetracking.backend.document.contact;
 
 import com.ahmadabbas.filetracking.backend.document.base.Document;
+import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentDto;
+import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentMapper;
 import jakarta.persistence.Entity;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Objects;
@@ -43,5 +48,10 @@ public class ContactDocument extends Document {
                 .add("emergencyName='" + emergencyName + "'")
                 .add("emergencyPhoneNumber='" + emergencyPhoneNumber + "'")
                 .toString();
+    }
+
+    @Override
+    public ContactDocumentDto toDto() {
+        return ContactDocumentMapper.INSTANCE.toDto(this);
     }
 }

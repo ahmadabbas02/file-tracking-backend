@@ -102,7 +102,32 @@ public class DocumentService {
             int pageSize,
             String sortBy,
             String order,
+            Long categoryId,
+            Long parentCategoryId
+    ) {
+        return getAllDocuments(authentication, pageNo, pageSize, sortBy, order, "-1", categoryId, parentCategoryId);
+    }
+
+    public PaginatedResponse<DocumentDto> getAllDocuments(
+            Authentication authentication,
+            int pageNo,
+            int pageSize,
+            String sortBy,
+            String order,
             String studentId
+    ) {
+        return getAllDocuments(authentication, pageNo, pageSize, sortBy, order, studentId, -1L, -1L);
+    }
+
+    public PaginatedResponse<DocumentDto> getAllDocuments(
+            Authentication authentication,
+            int pageNo,
+            int pageSize,
+            String sortBy,
+            String order,
+            String studentId,
+            Long categoryId,
+            Long parentCategoryId
     ) {
         log.info("DocumentService.getAllDocuments");
         User loggedInUser = (User) authentication.getPrincipal();
@@ -113,13 +138,28 @@ public class DocumentService {
             log.info("setting studentId to the logged in student: " + student.getId());
         }
         List<Long> allowedCategoriesIds = categoryService.getAllowedCategoriesIds(loggedInUser.getRoles());
+        if (categoryId != -1L && parentCategoryId != -1L
+                && !allowedCategoriesIds.contains(categoryId) && !allowedCategoriesIds.contains(parentCategoryId)) {
+            throw new AccessDeniedException("you are not allowed to get documents");
+        }
         Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
-        Page<Document> documentPage = studentId.equals("-1")
-                ? documentRepository.findAll(pageable)
-                : documentRepository.findByStudentIdHavingCategoryIds(studentId, allowedCategoriesIds, pageable);
+        Page<Document> documentPage;
+        if (studentId.equals("-1")) {
+            if (categoryId == -1L && parentCategoryId == -1L) {
+                documentPage = documentRepository.findAll(pageable);
+            } else {
+                documentPage = documentRepository.findByHavingCategoryIds(categoryId, parentCategoryId, pageable);
+            }
+        } else {
+            if (categoryId == -1L && parentCategoryId == -1L) {
+                documentPage = documentRepository.findByStudentIdHavingCategoryIds(studentId, allowedCategoriesIds, pageable);
+            } else {
+                documentPage = documentRepository.findByStudentIdHavingCategoryIds(studentId, categoryId, parentCategoryId, pageable);
+            }
+        }
         List<DocumentDto> content = documentPage.getContent()
                 .stream()
-                .map(documentMapper::toDto)
+                .map(Document::toDto)
                 .toList();
         return new PaginatedResponse<>(
                 content,

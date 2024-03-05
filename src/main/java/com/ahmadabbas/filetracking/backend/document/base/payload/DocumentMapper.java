@@ -6,6 +6,8 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface DocumentMapper {
+    DocumentMapper INSTANCE = Mappers.getMapper( DocumentMapper.class );
+
     @InheritInverseConfiguration(name = "toDto")
     Document toEntity(DocumentDto documentDto);
 

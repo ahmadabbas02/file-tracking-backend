@@ -1,13 +1,12 @@
 package com.ahmadabbas.filetracking.backend.document.base;
 
 import com.ahmadabbas.filetracking.backend.category.Category;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentMapper;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
@@ -32,7 +31,8 @@ public class Document {
     private UUID id;
 
     private String title;
-    private String description;
+    @Builder.Default
+    private String description = "";
 
     @Column(nullable = false)
     private String path;
@@ -66,4 +66,7 @@ public class Document {
         return student;
     }
 
+    public DocumentDto toDto() {
+        return DocumentMapper.INSTANCE.toDto(this);
+    }
 }

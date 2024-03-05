@@ -12,8 +12,8 @@ import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocum
 import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocument;
 import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumentService;
 import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipAddRequest;
-import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDto;
-import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipMapper;
+import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentDto;
+import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentMapper;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,7 +39,7 @@ public class DocumentController {
     private final ContactDocumentService contactDocumentService;
     private final ContactDocumentMapper contactDocumentMapper;
     private final InternshipDocumentService internshipDocumentService;
-    private final InternshipMapper internshipMapper;
+    private final InternshipDocumentMapper internshipDocumentMapper;
 
     @Operation(
             summary = "Get all documents",
@@ -55,12 +55,16 @@ public class DocumentController {
             @RequestParam(defaultValue = "10", required = false) int pageSize,
             @RequestParam(defaultValue = "uploadedAt", required = false) String sortBy,
             @RequestParam(defaultValue = "desc", required = false) String order,
-            @RequestParam(defaultValue = "-1", required = false) String studentId
+            @RequestParam(defaultValue = "-1", required = false) String studentId,
+            @RequestParam(defaultValue = "-1", required = false) Long categoryId,
+            @RequestParam(defaultValue = "-1", required = false) Long parentCategoryId
     ) {
         if (!studentId.equals("-1")) {
-            return ResponseEntity.ok(documentService.getAllDocuments(authentication, pageNo, pageSize, sortBy, order, studentId));
+            return ResponseEntity.ok(
+                    documentService.getAllDocuments(authentication, pageNo, pageSize, sortBy, order, studentId, categoryId, parentCategoryId)
+            );
         }
-        return ResponseEntity.ok(documentService.getAllDocuments(authentication, pageNo, pageSize, sortBy, order));
+        return ResponseEntity.ok(documentService.getAllDocuments(authentication, pageNo, pageSize, sortBy, order, categoryId, parentCategoryId));
     }
 
     @Operation(
@@ -135,7 +139,7 @@ public class DocumentController {
                     Generates and uploads contact form document.
                     """
     )
-    @PostMapping("/contact")
+    @PostMapping("/upload/contact")
     public ResponseEntity<ContactDocumentDto> postContactDocument(
             @RequestBody ContactDocumentAddRequest addRequest,
             Authentication authentication
@@ -157,13 +161,13 @@ public class DocumentController {
                                        }`
                     """
     )
-    @PostMapping(value = "/internship", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<InternshipDto> uploadInternshipDocument(
+    @PostMapping(value = "/upload/internship", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<InternshipDocumentDto> uploadInternshipDocument(
             @RequestPart("file") MultipartFile file,
             @RequestPart("data") String data
     ) throws IOException {
         InternshipAddRequest addRequest = new ObjectMapper().readValue(data, InternshipAddRequest.class);
         InternshipDocument internshipDocument = internshipDocumentService.saveInternship(file, addRequest);
-        return new ResponseEntity<>(internshipMapper.toDto(internshipDocument), HttpStatus.CREATED);
+        return new ResponseEntity<>(internshipDocumentMapper.toDto(internshipDocument), HttpStatus.CREATED);
     }
 }

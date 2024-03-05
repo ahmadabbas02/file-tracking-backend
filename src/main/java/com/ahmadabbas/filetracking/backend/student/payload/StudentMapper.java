@@ -9,6 +9,9 @@ public interface StudentMapper {
 
     @Mapping(source = "user.name", target = "name")
     @Mapping(source = "user.picture", target = "picture")
+    @Mapping(source = "user.email", target = "email")
+    @Mapping(source = "user.phoneNumber", target = "phoneNumber")
+    @Mapping(source = "advisor.user.name", target = "advisorName")
     StudentDto toDto(Student student);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
