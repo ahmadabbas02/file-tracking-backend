@@ -1,6 +1,5 @@
 package com.ahmadabbas.filetracking.backend.document.petition.comment;
 
-import com.ahmadabbas.filetracking.backend.category.CategoryService;
 import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.document.base.DocumentService;
 import com.ahmadabbas.filetracking.backend.document.petition.comment.payload.CommentAddRequest;

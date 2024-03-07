@@ -99,6 +99,7 @@ public class CategoryService {
                     .filter(c -> c.getParentCategoryId() == -1L)
                     .map(Category::getCategoryId).toList();
         }
+        categoryIds.add(-1L);
         for (var role : roles) {
             Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findByRole(role);
             categoryPermissions.forEach(permission -> {

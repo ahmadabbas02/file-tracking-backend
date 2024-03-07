@@ -33,7 +33,7 @@ public class CategoryController {
             description = "Returns a list of all categories"
     )
     @GetMapping
-    public ResponseEntity<List> getAllCategories(
+    public ResponseEntity<List<?>> getAllCategories(
             @RequestParam(value = "parents_only", required = false, defaultValue = "false") boolean parentsOnly,
             @AuthenticationPrincipal User user
     ) {

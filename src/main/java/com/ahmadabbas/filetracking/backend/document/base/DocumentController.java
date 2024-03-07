@@ -11,6 +11,7 @@ import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumen
 import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumentService;
 import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipAddRequest;
 import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentDto;
+import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocument;
 import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocumentService;
 import com.ahmadabbas.filetracking.backend.document.petition.comment.Comment;
 import com.ahmadabbas.filetracking.backend.document.petition.comment.CommentService;
@@ -55,11 +56,26 @@ public class DocumentController {
                     """
     )
     @GetMapping("/{documentId}")
-    public ResponseEntity<DocumentDto> getAllDocuments(
+    public ResponseEntity<DocumentDto> getDocument(
             @AuthenticationPrincipal User loggedInUser,
             @PathVariable UUID documentId
     ) {
         Document document = documentService.getDocument(documentId, loggedInUser);
+        return ResponseEntity.ok(document.toDto());
+    }
+
+    @Operation(
+            summary = "Approve student petition",
+            description = """
+                    Returns the fields related with the approved document.
+                    """
+    )
+    @PatchMapping("/{documentId}/approve")
+    public ResponseEntity<PetitionDocumentDto> approveDocument(
+            @AuthenticationPrincipal User loggedInUser,
+            @PathVariable UUID documentId
+    ) {
+        PetitionDocument document = petitionDocumentService.approvePetitionDocument(documentId, loggedInUser);
         return ResponseEntity.ok(document.toDto());
     }
 
@@ -109,15 +125,15 @@ public class DocumentController {
             @RequestParam(defaultValue = "uploadedAt", required = false) String sortBy,
             @RequestParam(defaultValue = "desc", required = false) String order,
             @RequestParam(defaultValue = "-1", required = false) String studentId,
-            @RequestParam(defaultValue = "-1", required = false) Long categoryId,
-            @RequestParam(defaultValue = "-1", required = false) Long parentCategoryId
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false) List<Long> parentCategoryIds
     ) {
         if (!studentId.equals("-1")) {
             return ResponseEntity.ok(
-                    documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, studentId, categoryId, parentCategoryId)
+                    documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, studentId, categoryIds, parentCategoryIds)
             );
         }
-        return ResponseEntity.ok(documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, categoryId, parentCategoryId));
+        return ResponseEntity.ok(documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, categoryIds, parentCategoryIds));
     }
 
     @Operation(

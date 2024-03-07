@@ -24,10 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -109,10 +106,10 @@ public class DocumentService {
             int pageSize,
             String sortBy,
             String order,
-            Long categoryId,
-            Long parentCategoryId
+            List<Long> categoryIds,
+            List<Long> parentCategoryIds
     ) {
-        return getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, "-1", categoryId, parentCategoryId);
+        return getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, "-1", categoryIds, parentCategoryIds);
     }
 
     public PaginatedResponse<DocumentDto> getAllDocuments(
@@ -123,7 +120,7 @@ public class DocumentService {
             String order,
             String studentId
     ) {
-        return getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, studentId, -1L, -1L);
+        return getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, studentId, Collections.emptyList(), Collections.emptyList());
     }
 
     public PaginatedResponse<DocumentDto> getAllDocuments(
@@ -133,34 +130,48 @@ public class DocumentService {
             String sortBy,
             String order,
             String studentId,
-            Long categoryId,
-            Long parentCategoryId
+            List<Long> categoryIds,
+            List<Long> parentCategoryIds
     ) {
         log.info("DocumentService.getAllDocuments");
-        Student student;
         if (loggedInUser.getRoles().contains(Role.STUDENT)) {
-            student = studentService.getStudentByUserId(loggedInUser.getId());
+            Student student = studentService.getStudentByUserId(loggedInUser.getId());
             studentId = student.getId();
             log.info("setting studentId to the logged in student: " + student.getId());
+        } else if (loggedInUser.getRoles().contains(Role.ADVISOR) && !studentId.equals("-1")) {
+            Student student = studentService.getStudent(studentId);
+            if (!student.getAdvisor().getUser().getId().equals(loggedInUser.getId())) {
+                throw new AccessDeniedException("you are only allowed to get your own student's documents");
+            }
         }
         List<Long> allowedCategoriesIds = categoryService.getAllowedCategoriesIds(loggedInUser.getRoles());
-        if (categoryId != -1L && parentCategoryId != -1L
-                && !allowedCategoriesIds.contains(categoryId) && !allowedCategoriesIds.contains(parentCategoryId)) {
-            throw new AccessDeniedException("you are not allowed to get documents");
+        boolean isMainCategoriesAllowed = categoryIds.isEmpty() || new HashSet<>(allowedCategoriesIds).containsAll(categoryIds);
+        boolean isChildrenCategoriesAllowed = parentCategoryIds.isEmpty() || new HashSet<>(allowedCategoriesIds).containsAll(parentCategoryIds);
+        if (!isMainCategoriesAllowed || !isChildrenCategoriesAllowed) {
+            log.info("categoryIds = " + categoryIds);
+            log.info("parentCategoryIds = " + parentCategoryIds);
+            log.info("allowedCategoriesIds = " + allowedCategoriesIds);
+            throw new AccessDeniedException("you are not allowed to get documents in given categories");
         }
         Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
         Page<Document> documentPage;
         if (studentId.equals("-1")) {
-            if (categoryId == -1L && parentCategoryId == -1L) {
+            if (categoryIds.isEmpty() && parentCategoryIds.isEmpty()) {
                 documentPage = documentRepository.findAll(pageable);
             } else {
-                documentPage = documentRepository.findByHavingCategoryIds(categoryId, parentCategoryId, pageable);
+                if (parentCategoryIds.isEmpty()) {
+                    parentCategoryIds.add(-1L);
+                }
+                documentPage = documentRepository.findByHavingCategoryIds(categoryIds, parentCategoryIds, pageable);
             }
         } else {
-            if (categoryId == -1L && parentCategoryId == -1L) {
+            if (categoryIds.isEmpty() && parentCategoryIds.isEmpty()) {
                 documentPage = documentRepository.findByStudentIdHavingCategoryIds(studentId, allowedCategoriesIds, pageable);
             } else {
-                documentPage = documentRepository.findByStudentIdHavingCategoryIds(studentId, categoryId, parentCategoryId, pageable);
+                if (parentCategoryIds.isEmpty()) {
+                    parentCategoryIds.add(-1L);
+                }
+                documentPage = documentRepository.findByStudentIdHavingCategoryIds(studentId, categoryIds, parentCategoryIds, pageable);
             }
         }
         List<DocumentDto> content = documentPage.getContent()

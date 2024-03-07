@@ -111,8 +111,12 @@ public class SecurityConfig {
                                 .hasAnyRole(
                                         Role.ADMINISTRATOR.name(), Role.SECRETARY.name()
                                 )
+                                // only admin can change category perms
                                 .requestMatchers("api/v1/categories/permissions/")
                                 .hasRole(Role.ADMINISTRATOR.name())
+                                // only advisors can approve petitions
+                                .requestMatchers("api/v1/documents/*/approve")
+                                .hasRole(Role.ADVISOR.name())
                                 .anyRequest()
                                 .authenticated()
                 )
