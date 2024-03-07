@@ -11,6 +11,7 @@ public interface ContactDocumentMapper {
     @InheritInverseConfiguration(name = "toDto")
     ContactDocument toEntity(ContactDocumentDto contactDocumentDto);
 
+    @Deprecated
     @Mapping(source = "student.user.name", target = "studentName")
     @Mapping(source = "student.user.picture", target = "studentPicture")
     @Mapping(source = "student.year", target = "studentYear")

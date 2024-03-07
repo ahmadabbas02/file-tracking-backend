@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,8 +59,8 @@ public class CategoryController {
             description = "Add/delete role view permissions for specific categories."
     )
     @PostMapping("/permissions/update")
-    @PreAuthorize("hasRole(T(com.ahmadabbas.filetracking.backend.user.Role).ADMINISTRATOR)")
-    public ResponseEntity<Category> updateCategoryPerms(@Valid @RequestBody CategoryPermissionRequestDto requestDto) {
-        return ResponseEntity.ok(categoryService.updateCategoryPermission(requestDto));
+    public ResponseEntity<Category> updateCategoryPerms(@Valid @RequestBody CategoryPermissionRequestDto requestDto,
+                                                        @AuthenticationPrincipal User loggedInUser) {
+        return ResponseEntity.ok(categoryService.updateCategoryPermission(requestDto, loggedInUser));
     }
 }

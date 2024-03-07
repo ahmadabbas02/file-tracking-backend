@@ -51,14 +51,12 @@ public class Document {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Document document)) return false;
-        return Objects.equals(id, document.id) && Objects.equals(title, document.title)
-                && Objects.equals(path, document.path) && Objects.equals(category, document.category)
-                && Objects.equals(student, document.student) && Objects.equals(uploadedAt, document.uploadedAt);
+        return Objects.equals(getId(), document.getId()) && Objects.equals(getTitle(), document.getTitle()) && Objects.equals(getDescription(), document.getDescription()) && Objects.equals(getPath(), document.getPath()) && Objects.equals(getCategory(), document.getCategory()) && Objects.equals(getStudent(), document.getStudent()) && Objects.equals(getUploadedAt(), document.getUploadedAt());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, path, category, student, uploadedAt);
+        return Objects.hash(getId(), getTitle(), getDescription(), getPath(), getCategory(), getStudent(), getUploadedAt());
     }
 
     @JsonManagedReference

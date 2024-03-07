@@ -32,14 +32,12 @@ public class MedicalReportDocument extends Document {
         if (this == o) return true;
         if (!(o instanceof MedicalReportDocument that)) return false;
         if (!super.equals(o)) return false;
-        return Objects.equals(dateOfAbsence, that.dateOfAbsence)
-                && Objects.equals(note, that.note)
-                && medicalReportStatus == that.medicalReportStatus;
+        return Objects.equals(getDateOfAbsence(), that.getDateOfAbsence()) && Objects.equals(getNote(), that.getNote()) && getMedicalReportStatus() == that.getMedicalReportStatus();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), dateOfAbsence, note, medicalReportStatus);
+        return Objects.hash(super.hashCode(), getDateOfAbsence(), getNote(), getMedicalReportStatus());
     }
 
     @Override

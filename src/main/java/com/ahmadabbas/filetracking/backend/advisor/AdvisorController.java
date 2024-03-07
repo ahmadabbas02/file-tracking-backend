@@ -17,6 +17,13 @@ public class AdvisorController {
     private final AdvisorService advisorService;
     private final AdvisorMapper advisorMapper;
 
+    @Operation(summary = "Get advisor")
+    @GetMapping("/{advisorId}")
+    public ResponseEntity<AdvisorDto> getAdvisor(@PathVariable String advisorId) {
+        Advisor advisor = advisorService.getAdvisorByAdvisorId(advisorId);
+        return ResponseEntity.ok(advisorMapper.toDto(advisor));
+    }
+
     @Operation(summary = "Add advisor")
     @PostMapping
     public ResponseEntity<AdvisorDto> registerAdvisor(@RequestBody AdvisorRegistrationRequest advisorRegistrationRequest) {

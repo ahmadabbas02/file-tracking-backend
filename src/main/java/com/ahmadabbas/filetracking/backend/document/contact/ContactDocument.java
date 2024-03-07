@@ -30,14 +30,12 @@ public class ContactDocument extends Document {
         if (this == o) return true;
         if (!(o instanceof ContactDocument that)) return false;
         if (!super.equals(o)) return false;
-        return Objects.equals(email, that.email) && Objects.equals(phoneNumber, that.phoneNumber)
-                && Objects.equals(emergencyName, that.emergencyName)
-                && Objects.equals(emergencyPhoneNumber, that.emergencyPhoneNumber);
+        return Objects.equals(getEmail(), that.getEmail()) && Objects.equals(getPhoneNumber(), that.getPhoneNumber()) && Objects.equals(getEmergencyName(), that.getEmergencyName()) && Objects.equals(getEmergencyPhoneNumber(), that.getEmergencyPhoneNumber());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), email, phoneNumber, emergencyName, emergencyPhoneNumber);
+        return Objects.hash(super.hashCode(), getEmail(), getPhoneNumber(), getEmergencyName(), getEmergencyPhoneNumber());
     }
 
     @Override

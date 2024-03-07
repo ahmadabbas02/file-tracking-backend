@@ -6,11 +6,12 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface DocumentMapper {
-    DocumentMapper INSTANCE = Mappers.getMapper( DocumentMapper.class );
+    DocumentMapper INSTANCE = Mappers.getMapper(DocumentMapper.class);
 
     @InheritInverseConfiguration(name = "toDto")
     Document toEntity(DocumentDto documentDto);
 
+    @Deprecated
     @Mapping(source = "student.user.name", target = "studentName")
     @Mapping(source = "student.user.picture", target = "studentPicture")
     @Mapping(source = "student.year", target = "studentYear")

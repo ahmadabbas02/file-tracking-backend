@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.exception;
 
 import com.ahmadabbas.filetracking.backend.exception.payload.ErrorDetails;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -19,6 +20,7 @@ import java.time.ZoneId;
 import java.util.HashMap;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -48,13 +50,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorDetails> handleAccessDeniedException(AccessDeniedException accessDeniedException,
                                                                     WebRequest webRequest) {
-
+        String logMessage = "[%s] %s".formatted(accessDeniedException.getClass().getSimpleName(),
+                accessDeniedException.getMessage());
+        log.info("Handing exception '{}'", logMessage);
         ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(ZoneId.of("Europe/Athens")),
                 accessDeniedException.getMessage(),
                 webRequest.getDescription(false)
         );
-
         return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
     }
 

@@ -26,17 +26,6 @@ public class UserService {
         return allNonAdminUsers.stream().map(userMapper::toDto).toList();
     }
 
-    public Set<Role> getRoles(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new AccessDeniedException("Should be logged in!");
-        }
-        return authentication.getAuthorities().stream()
-                .map(s -> {
-                    String replaced = s.toString().replace("ROLE_", "");
-                    return Role.valueOf(replaced);
-                }).collect(Collectors.toSet());
-    }
-
     public Set<Role> getRoles(User user) {
         if (user == null) {
             throw new AccessDeniedException("Should be logged in!");

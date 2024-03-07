@@ -8,8 +8,8 @@ import java.util.StringJoiner;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @RequiredArgsConstructor
+@AllArgsConstructor
 @Builder
 @Entity
 @IdClass(SubCategoryPK.class)
@@ -29,16 +29,13 @@ public class Category {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Category category = (Category) o;
-        return Objects.equals(parentCategoryId, category.parentCategoryId)
-                && Objects.equals(categoryId, category.categoryId)
-                && Objects.equals(name, category.name);
+        if (!(o instanceof Category category)) return false;
+        return Objects.equals(getParentCategoryId(), category.getParentCategoryId()) && Objects.equals(getCategoryId(), category.getCategoryId()) && Objects.equals(getName(), category.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(parentCategoryId, categoryId, name);
+        return Objects.hash(getParentCategoryId(), getCategoryId(), getName());
     }
 
     @Override

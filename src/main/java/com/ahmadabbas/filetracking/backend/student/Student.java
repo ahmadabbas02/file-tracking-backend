@@ -70,13 +70,11 @@ public class Student {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Student student)) return false;
-        return Objects.equals(id, student.id) && Objects.equals(department, student.department)
-                && Objects.equals(year, student.year) && Objects.equals(user, student.user)
-                && Objects.equals(advisor, student.advisor) && Objects.equals(createdAt, student.createdAt);
+        return Objects.equals(getId(), student.getId()) && Objects.equals(getDepartment(), student.getDepartment()) && Objects.equals(getYear(), student.getYear()) && Objects.equals(getUser(), student.getUser()) && Objects.equals(getAdvisor(), student.getAdvisor()) && getInternshipCompletionStatus() == student.getInternshipCompletionStatus() && getPaymentStatus() == student.getPaymentStatus() && Objects.equals(getCreatedAt(), student.getCreatedAt());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, department, year, user, advisor, createdAt);
+        return Objects.hash(getId(), getDepartment(), getYear(), getUser(), getAdvisor(), getInternshipCompletionStatus(), getPaymentStatus(), getCreatedAt());
     }
 }

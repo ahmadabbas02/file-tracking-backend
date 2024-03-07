@@ -38,13 +38,12 @@ public class Advisor {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Advisor advisor)) return false;
-        return Objects.equals(id, advisor.id) && Objects.equals(user, advisor.user)
-                && Objects.equals(createdAt, advisor.createdAt);
+        return Objects.equals(getId(), advisor.getId()) && Objects.equals(getUser(), advisor.getUser()) && Objects.equals(getCreatedAt(), advisor.getCreatedAt());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, user, createdAt);
+        return Objects.hash(getId(), getUser(), getCreatedAt());
     }
 
     @Override

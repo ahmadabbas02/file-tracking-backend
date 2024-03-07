@@ -89,7 +89,8 @@ public class SecurityConfig {
                                 // Only students can add contact document
                                 .requestMatchers(
                                         HttpMethod.POST,
-                                        "api/v1/documents/contact"
+                                        "api/v1/documents/upload/contact",
+                                        "api/v1/documents/upload/petition"
                                 )
                                 .hasRole(Role.STUDENT.name())
                                 // category creation
@@ -101,6 +102,17 @@ public class SecurityConfig {
                                         Role.ADMINISTRATOR.name(), Role.CHAIR.name(),
                                         Role.VICE_CHAR.name(), Role.SECRETARY.name()
                                 )
+                                // only secretary and admin can upload
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "api/v1/documents/upload",
+                                        "api/v1/documents/upload/internship"
+                                )
+                                .hasAnyRole(
+                                        Role.ADMINISTRATOR.name(), Role.SECRETARY.name()
+                                )
+                                .requestMatchers("api/v1/categories/permissions/")
+                                .hasRole(Role.ADMINISTRATOR.name())
                                 .anyRequest()
                                 .authenticated()
                 )

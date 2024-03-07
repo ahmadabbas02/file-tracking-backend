@@ -11,6 +11,7 @@ import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +25,8 @@ public class CategoryService {
     private final CategoryPermissionRepository categoryPermissionRepository;
     private final UserService userService;
 
-    public Category getParentCategory(Long categoryId) {
-        return getCategory(categoryId, -1L);
+    public Category getParentCategory(Long categoryId, User loggedInUser) {
+        return getCategory(categoryId, -1L, loggedInUser);
     }
 
     public Category getCategoryByName(String name) {
@@ -35,11 +36,15 @@ public class CategoryService {
                 ));
     }
 
-    public Category getCategory(Long categoryId, Long parentCategoryId) {
-        return categoryRepository.findByCategoryIdAndParentCategoryId(categoryId, parentCategoryId)
+    public Category getCategory(Long categoryId, Long parentCategoryId, @AuthenticationPrincipal User loggedInUser) {
+        Category category = categoryRepository.findByCategoryIdAndParentCategoryId(categoryId, parentCategoryId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "category with id %s and parent_id %s not found".formatted(categoryId, parentCategoryId)
                 ));
+        if (!getAllowedCategories(loggedInUser.getRoles()).contains(category)) {
+            throw new AccessDeniedException("not authorized");
+        }
+        return category;
     }
 
     @Transactional
@@ -69,6 +74,11 @@ public class CategoryService {
 
     public List<Category> getAllowedCategories(Set<Role> roles) {
         List<Category> categories = new ArrayList<>(Collections.emptyList());
+        if (roles.stream().anyMatch(role -> role.equals(Role.ADMINISTRATOR)
+                || role.equals(Role.CHAIR) || role.equals(Role.VICE_CHAR)
+                || role.equals(Role.SECRETARY))) {
+            return categoryRepository.findAll();
+        }
         for (var role : roles) {
             Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findByRole(role);
             categoryPermissions.forEach(permission -> {
@@ -82,7 +92,8 @@ public class CategoryService {
     public List<Long> getAllowedCategoriesIds(Set<Role> roles) {
         List<Long> categoryIds = new ArrayList<>(Collections.emptyList());
         if (roles.stream().anyMatch(role -> role.equals(Role.ADMINISTRATOR)
-                || role.equals(Role.CHAIR) || role.equals(Role.VICE_CHAR))) {
+                || role.equals(Role.CHAIR) || role.equals(Role.VICE_CHAR)
+                || role.equals(Role.SECRETARY))) {
             return categoryRepository.findAll()
                     .stream()
                     .filter(c -> c.getParentCategoryId() == -1L)
@@ -106,7 +117,7 @@ public class CategoryService {
     public List<Category> getAllChildrenCategories(Long parentId, User user) {
         List<Long> allowedCategories = getAllowedCategoriesIds(user.getRoles());
         if (!allowedCategories.contains(parentId)) {
-            throw new AccessDeniedException("not allowed to children categories of `%s`".formatted(parentId));
+            throw new AccessDeniedException("not allowed to get children categories of `%s`".formatted(parentId));
         }
         return categoryRepository.findByParentCategoryId(parentId);
     }
@@ -138,8 +149,8 @@ public class CategoryService {
     }
 
     @Transactional
-    public Category updateCategoryPermission(CategoryPermissionRequestDto request) {
-        Category category = getParentCategory(request.categoryId());
+    public Category updateCategoryPermission(CategoryPermissionRequestDto request, User loggedInUser) {
+        Category category = getParentCategory(request.categoryId(), loggedInUser);
         if (request.delete()) {
             CategoryPermission permission = categoryPermissionRepository.findByCategoryIdAndRole(request.categoryId(), request.role())
                     .orElseThrow(() -> new ResourceNotFoundException(

@@ -2,18 +2,23 @@ package com.ahmadabbas.filetracking.backend.document.base;
 
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentAddRequest;
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentMapper;
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentModifyCategoryRequest;
 import com.ahmadabbas.filetracking.backend.document.contact.ContactDocument;
 import com.ahmadabbas.filetracking.backend.document.contact.ContactDocumentService;
 import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentAddRequest;
 import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentDto;
-import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentMapper;
 import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocument;
 import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumentService;
 import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipAddRequest;
 import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentDto;
-import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentMapper;
+import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocumentService;
+import com.ahmadabbas.filetracking.backend.document.petition.comment.Comment;
+import com.ahmadabbas.filetracking.backend.document.petition.comment.CommentService;
+import com.ahmadabbas.filetracking.backend.document.petition.comment.payload.CommentAddRequest;
+import com.ahmadabbas.filetracking.backend.document.petition.comment.payload.CommentDto;
+import com.ahmadabbas.filetracking.backend.document.petition.comment.payload.CommentMapper;
+import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentAddRequest;
+import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentDto;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -36,11 +42,57 @@ import java.util.UUID;
 public class DocumentController {
 
     private final DocumentService documentService;
-    private final DocumentMapper documentMapper;
     private final ContactDocumentService contactDocumentService;
-    private final ContactDocumentMapper contactDocumentMapper;
     private final InternshipDocumentService internshipDocumentService;
-    private final InternshipDocumentMapper internshipDocumentMapper;
+    private final PetitionDocumentService petitionDocumentService;
+    private final CommentService commentService;
+    private final CommentMapper commentMapper;
+
+    @Operation(
+            summary = "Get document information",
+            description = """
+                    Returns the fields related with the document.
+                    """
+    )
+    @GetMapping("/{documentId}")
+    public ResponseEntity<DocumentDto> getAllDocuments(
+            @AuthenticationPrincipal User loggedInUser,
+            @PathVariable UUID documentId
+    ) {
+        Document document = documentService.getDocument(documentId, loggedInUser);
+        return ResponseEntity.ok(document.toDto());
+    }
+
+    @Operation(
+            summary = "Get document comments",
+            description = """
+                    Returns all the comments on a specific document.
+                    """
+    )
+    @GetMapping("/{documentId}/comments")
+    public ResponseEntity<List<CommentDto>> getAllComments(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID documentId
+    ) {
+        List<Comment> comments = commentService.getAllComments(documentId, user);
+        return ResponseEntity.ok(comments.stream().map(commentMapper::toDto).toList());
+    }
+
+    @Operation(
+            summary = "Add comment to document",
+            description = """
+                    Adds a comment to a specific document.
+                    """
+    )
+    @PostMapping("/{documentId}/comments")
+    public ResponseEntity<CommentDto> addComment(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID documentId,
+            @RequestBody CommentAddRequest addRequest
+    ) {
+        Comment comment = commentService.addComment(addRequest, documentId, user);
+        return ResponseEntity.ok(commentMapper.toDto(comment));
+    }
 
     @Operation(
             summary = "Get all documents",
@@ -85,11 +137,12 @@ public class DocumentController {
     @PostMapping(value = "/upload", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<DocumentDto> upload(
             @RequestPart("file") MultipartFile file,
-            @RequestPart("data") String data
+            @RequestPart("data") String data,
+            @AuthenticationPrincipal User user
     ) throws IOException {
         DocumentAddRequest addRequest = new ObjectMapper().readValue(data, DocumentAddRequest.class);
-        Document uploadedDocument = documentService.uploadDocument(file, addRequest);
-        return new ResponseEntity<>(documentMapper.toDto(uploadedDocument), HttpStatus.CREATED);
+        Document uploadedDocument = documentService.uploadDocument(file, addRequest, user);
+        return new ResponseEntity<>(uploadedDocument.toDto(), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -97,9 +150,10 @@ public class DocumentController {
             description = "Modifies a specific document category, mainly used to organize uploaded documents. "
     )
     @PatchMapping(value = "/modify-category")
-    public ResponseEntity<DocumentDto> modifyCategory(@RequestBody DocumentModifyCategoryRequest body) {
-        Document modifiedDocument = documentService.modifyDocumentCategory(body);
-        return ResponseEntity.ok(documentMapper.toDto(modifiedDocument));
+    public ResponseEntity<DocumentDto> modifyCategory(@RequestBody DocumentModifyCategoryRequest body,
+                                                      @AuthenticationPrincipal User loggedInUser) {
+        Document modifiedDocument = documentService.modifyDocumentCategory(body, loggedInUser);
+        return ResponseEntity.ok(modifiedDocument.toDto());
     }
 
     @Operation(
@@ -109,7 +163,8 @@ public class DocumentController {
                     """
     )
     @GetMapping("/preview")
-    public ResponseEntity<byte[]> getFilePreview(@AuthenticationPrincipal User user, @RequestParam UUID uuid) throws IOException {
+    public ResponseEntity<byte[]> getFilePreview(@AuthenticationPrincipal User user,
+                                                 @RequestParam UUID uuid) throws IOException {
         byte[] data = documentService.getDocumentPreview(user, uuid);
         if (data != null) {
             HttpHeaders headers = new HttpHeaders();
@@ -120,18 +175,6 @@ public class DocumentController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-    }
-
-    @Operation(
-            summary = "Get contact document",
-            description = """
-                    Returns the student's contact document details.
-                    """
-    )
-    @GetMapping("/contact")
-    public ResponseEntity<ContactDocumentDto> getContactDocument(@RequestParam String studentId) {
-        ContactDocument contactDocument = contactDocumentService.getContactDocument(studentId);
-        return ResponseEntity.ok(contactDocumentMapper.toDto(contactDocument));
     }
 
     @Operation(
@@ -146,7 +189,22 @@ public class DocumentController {
             @AuthenticationPrincipal User user
     ) {
         ContactDocument contactDocument = contactDocumentService.addContactDocument(addRequest, user);
-        return new ResponseEntity<>(contactDocumentMapper.toDto(contactDocument), HttpStatus.CREATED);
+        return new ResponseEntity<>(contactDocument.toDto(), HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Upload petition document",
+            description = """
+                    Generates and uploads petition document.
+                    """
+    )
+    @PostMapping("/upload/petition")
+    public ResponseEntity<PetitionDocumentDto> postPetitionDocument(
+            @RequestBody PetitionDocumentAddRequest addRequest,
+            @AuthenticationPrincipal User user
+    ) {
+        var petitionDocument = petitionDocumentService.addPetitionDocument(addRequest, user);
+        return new ResponseEntity<>(petitionDocument.toDto(), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -169,6 +227,6 @@ public class DocumentController {
     ) throws IOException {
         InternshipAddRequest addRequest = new ObjectMapper().readValue(data, InternshipAddRequest.class);
         InternshipDocument internshipDocument = internshipDocumentService.saveInternship(file, addRequest);
-        return new ResponseEntity<>(internshipDocumentMapper.toDto(internshipDocument), HttpStatus.CREATED);
+        return new ResponseEntity<>(internshipDocument.toDto(), HttpStatus.CREATED);
     }
 }

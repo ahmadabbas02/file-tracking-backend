@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -38,16 +39,32 @@ public class DocumentService {
     private final StudentService studentService;
     private final AzureBlobService azureBlobService;
 
-    public Document getDocument(UUID uuid) {
-        return documentRepository.findById(uuid)
+    public Document getDocument(UUID uuid, User loggedInUser) {
+        Document document = documentRepository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "document with id `%s` not found".formatted(uuid)
                 ));
+        Set<Role> roles = loggedInUser.getRoles();
+        if (roles.contains(Role.STUDENT)
+                && !Objects.equals(document.getStudent().getUser().getId(), loggedInUser.getId())) {
+            throw new AccessDeniedException("not authorized to get other student's documents");
+        } else if (roles.contains(Role.ADVISOR)) {
+            if (!document.getStudent().getAdvisor().getUser().getId().equals(loggedInUser.getId())) {
+                throw new AccessDeniedException("not authorized to get not own student's documents.");
+            }
+        }
+        List<Category> allowedCategories = categoryService.getAllowedCategories(roles);
+        if (!allowedCategories.contains(document.getCategory())) {
+            throw new AccessDeniedException("not authorized, not allowed to view %s category".formatted(document.getCategory().getName()));
+        }
+        return document;
     }
 
     @Transactional
-    public Document uploadDocument(MultipartFile file, DocumentAddRequest addRequest) throws IOException {
-        Category category = categoryService.getCategory(addRequest.categoryId(), addRequest.parentCategoryId());
+    public Document uploadDocument(MultipartFile file,
+                                   DocumentAddRequest addRequest,
+                                   User loggedInUser) throws IOException {
+        Category category = categoryService.getCategory(addRequest.categoryId(), addRequest.parentCategoryId(), loggedInUser);
         Student student = studentService.getStudent(addRequest.studentId());
         String cloudPath = azureBlobService.upload(file, "/" + addRequest.studentId());
         log.info("cloudPath received from uploading file: %s".formatted(cloudPath));
@@ -58,24 +75,19 @@ public class DocumentService {
                 .path(cloudPath)
                 .student(student)
                 .build();
-//        student.addDocument(document);
 
         return documentRepository.save(document);
     }
 
-    public Document modifyDocumentCategory(DocumentModifyCategoryRequest request) {
-        Document document = getDocument(request.uuid());
-        Category newCategory = categoryService.getCategory(request.categoryId(), request.parentCategoryId());
+    public Document modifyDocumentCategory(DocumentModifyCategoryRequest request, User loggedInUser) {
+        Document document = getDocument(request.uuid(), loggedInUser);
+        Category newCategory = categoryService.getCategory(request.categoryId(), request.parentCategoryId(), loggedInUser);
         document.setCategory(newCategory);
         return document;
     }
 
     public byte[] getDocumentPreview(User loggedInUser, UUID uuid) throws IOException {
-        Document document = getDocument(uuid);
-        if (loggedInUser.getRoles().contains(Role.STUDENT)
-                && !Objects.equals(document.getStudent().getUser().getId(), loggedInUser.getId())) {
-            throw new AccessDeniedException("not authorized");
-        }
+        Document document = getDocument(uuid, loggedInUser);
         try (InputStream inputStream = azureBlobService.getInputStream(document.getPath())) {
             return inputStream.readAllBytes();
         }
