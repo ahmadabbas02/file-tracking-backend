@@ -34,6 +34,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -188,6 +191,32 @@ public class DocumentController {
             headers.set("Content-Disposition", "inline; filename=" + uuid);
             headers.setContentType(MediaType.APPLICATION_PDF);
             return new ResponseEntity<>(data, headers, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(
+            summary = "Download multiple",
+            description = """
+                    Display's a preview of the file linked to database with the specific `UUID`.
+                    """
+    )
+    @GetMapping("/download")
+    public ResponseEntity<byte[]> getFilePreview(@AuthenticationPrincipal User user,
+                                                 @RequestParam List<UUID> uuids) throws IOException {
+        byte[] zipData = documentService.getDocumentsZip(user, uuids);
+        if (zipData != null) {
+            LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Athens"));
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+            String timestamp = formatter.format(now);
+            String downloadFilename = timestamp + ".zip";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentLength(zipData.length);
+            headers.set("Content-Disposition", "attachment; filename=" + downloadFilename);
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            return new ResponseEntity<>(zipData, headers, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

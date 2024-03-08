@@ -22,9 +22,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Transactional(readOnly = true)
@@ -88,6 +91,28 @@ public class DocumentService {
         try (InputStream inputStream = azureBlobService.getInputStream(document.getPath())) {
             return inputStream.readAllBytes();
         }
+    }
+
+    public byte[] getDocumentsZip(User loggedInUser, List<UUID> uuids) throws IOException {
+        ByteArrayOutputStream zipOutputStream = new ByteArrayOutputStream();
+        ZipOutputStream outputStream = new ZipOutputStream(zipOutputStream);
+
+        for (UUID uuid : uuids) {
+            Document document = getDocument(uuid, loggedInUser);
+
+            InputStream blobInputStream = azureBlobService.getInputStream(document.getPath());
+            outputStream.putNextEntry(new ZipEntry(uuid.toString() + ".pdf"));
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = blobInputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+            outputStream.closeEntry();
+            blobInputStream.close();
+        }
+        outputStream.close();
+
+        return zipOutputStream.toByteArray();
     }
 
     public PaginatedResponse<DocumentDto> getAllDocuments(
