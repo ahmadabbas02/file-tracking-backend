@@ -225,16 +225,15 @@ public class DocumentController {
     }
 
     @Operation(
-            summary = "Upload internship document",
+            summary = "Upload medical document",
             description = """
-                    Uploads an internship document to the cloud which can be
+                    Uploads an medical document to the cloud which can be
                     later previewed/downloaded using the UUID returned. \n
                     Example input for `data`: `{
-                                           "title":"Test File",
-                                           "description":"",
-                                           "studentId":"23000002",
-                                           "numberOfWorkingDays":20
-                                       }`
+                                        	"title": "Medical Report 1",
+                                        	"description": "some text",
+                                        	"dateOfAbsence": "2024-03-09"
+                                        }`
                     """
     )
     @PostMapping(value = "/upload/medical-report", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -287,8 +286,8 @@ public class DocumentController {
                     """
     )
     @PostMapping("/download")
-    public ResponseEntity<byte[]> getFilePreview(@AuthenticationPrincipal User user,
-                                                 @RequestBody DocumentDownloadRequest request) throws IOException {
+    public ResponseEntity<byte[]> downloadFiles(@AuthenticationPrincipal User user,
+                                                @RequestBody DocumentDownloadRequest request) throws IOException {
         byte[] zipData = documentService.getDocumentsZip(user, request.uuids());
         if (zipData != null) {
             LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Athens"));
