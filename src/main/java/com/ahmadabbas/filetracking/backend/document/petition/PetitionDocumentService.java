@@ -64,10 +64,10 @@ public class PetitionDocumentService {
                 log.warn("Failed to delete temp file @ {}", filledPdf.getAbsolutePath());
             }
             PetitionDocument document = PetitionDocument.builder()
+                    .title(addRequest.title())
                     .email(addRequest.email())
                     .subject(addRequest.subject())
-                    .title(addRequest.subject())
-                    .description(addRequest.reasoning())
+                    .description(addRequest.description())
                     .category(category)
                     .student(student)
                     .path(cloudPath)
