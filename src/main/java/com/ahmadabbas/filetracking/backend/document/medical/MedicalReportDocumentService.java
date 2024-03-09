@@ -6,11 +6,13 @@ import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalRepor
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
+import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.AzureBlobService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,9 +32,12 @@ public class MedicalReportDocumentService {
     private final AzureBlobService azureBlobService;
 
     @Transactional
-    public MedicalReportDocument saveMedicalReport(MultipartFile file,
-                                                   MedicalReportAddRequest addRequest,
-                                                   User loggedInUser) throws IOException {
+    public MedicalReportDocument addMedicalReport(MultipartFile file,
+                                                  MedicalReportAddRequest addRequest,
+                                                  User loggedInUser) throws IOException {
+        if (!loggedInUser.getRoles().contains(Role.STUDENT)) {
+            throw new AccessDeniedException("not authorized, only students can do this.");
+        }
         LocalDate localDate;
         try {
             localDate = LocalDate.parse(addRequest.dateOfAbsence());
@@ -43,7 +48,7 @@ public class MedicalReportDocumentService {
 
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
         Category medicalCategory = categoryService.getCategoryByName("Medical Reports");
-        String cloudPath = azureBlobService.upload(file, "/" + student.getId());
+        String cloudPath = azureBlobService.upload(file, student.getId());
         log.info("cloudPath received from uploading file: %s".formatted(cloudPath));
         MedicalReportDocument document = MedicalReportDocument.builder()
                 .title(addRequest.title())

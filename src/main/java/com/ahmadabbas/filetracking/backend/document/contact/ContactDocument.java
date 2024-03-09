@@ -4,10 +4,7 @@ import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentDto;
 import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentMapper;
 import jakarta.persistence.Entity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Objects;

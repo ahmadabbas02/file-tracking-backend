@@ -14,5 +14,4 @@ import java.io.Serializable;
 public class PetitionDocumentDto extends DocumentDto implements Serializable {
     String email;
     String subject;
-    String reasoning;
 }

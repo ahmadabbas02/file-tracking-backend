@@ -8,6 +8,7 @@ import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDoc
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
+import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.AzureBlobService;
 import com.lowagie.text.pdf.AcroFields;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,9 @@ public class PetitionDocumentService {
 
     @Transactional
     public PetitionDocument addPetitionDocument(PetitionDocumentAddRequest addRequest, User loggedInUser) {
+        if (!loggedInUser.getRoles().contains(Role.STUDENT)) {
+            throw new AccessDeniedException("not authorized, only students can do this.");
+        }
         log.info("PetitionDocumentService.addPetitionDocument");
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
         Category category = categoryService.getCategoryByName("Petition");
@@ -53,7 +58,7 @@ public class PetitionDocumentService {
             if (filledPdf == null) {
                 throw new RuntimeException("couldn't generate petition form pdf.");
             }
-            String cloudPath = azureBlobService.upload(filledPdf, "/" + student.getId());
+            String cloudPath = azureBlobService.upload(filledPdf, student.getId());
             log.info("cloudPath = " + cloudPath);
             if (!filledPdf.delete()) {
                 log.warn("Failed to delete temp file @ {}", filledPdf.getAbsolutePath());
@@ -62,6 +67,7 @@ public class PetitionDocumentService {
                     .email(addRequest.email())
                     .subject(addRequest.subject())
                     .title(addRequest.subject())
+                    .description(addRequest.reasoning())
                     .category(category)
                     .student(student)
                     .path(cloudPath)
@@ -82,7 +88,9 @@ public class PetitionDocumentService {
         return petitionDocumentRepository.save(petitionDocument);
     }
 
-    private File generatedFilledPetition(PetitionDocumentAddRequest addRequest, String studentId, String studentName) throws IOException {
+    private File generatedFilledPetition(PetitionDocumentAddRequest addRequest,
+                                         String studentId,
+                                         String studentName) throws IOException {
         Resource pdfResource = resourceLoader.getResource("classpath:static/Student Petition Fillable.pdf");
         PdfReader reader = new PdfReader(pdfResource.getInputStream());
         File outputFile = File.createTempFile(studentId, ".pdf");

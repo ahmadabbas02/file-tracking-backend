@@ -3,6 +3,7 @@ package com.ahmadabbas.filetracking.backend.document.medical;
 import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportDocumentMapper;
 import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportDto;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -21,6 +22,7 @@ public class MedicalReportDocument extends Document {
 
     private LocalDate dateOfAbsence;
 
+    @Column(columnDefinition = "boolean default false")
     @Builder.Default
     private boolean isApproved = false;
 

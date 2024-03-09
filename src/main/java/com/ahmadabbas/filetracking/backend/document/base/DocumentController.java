@@ -134,8 +134,8 @@ public class DocumentController {
             @RequestParam(defaultValue = "uploadedAt", required = false) String sortBy,
             @RequestParam(defaultValue = "desc", required = false) String order,
             @RequestParam(defaultValue = "-1", required = false) String studentId,
-            @RequestParam(required = false) List<Long> categoryIds,
-            @RequestParam(required = false) List<Long> parentCategoryIds
+            @RequestParam(defaultValue = "", required = false) List<Long> categoryIds,
+            @RequestParam(defaultValue = "", required = false) List<Long> parentCategoryIds
     ) {
         if (!studentId.equals("-1")) {
             return ResponseEntity.ok(
@@ -166,8 +166,54 @@ public class DocumentController {
             @AuthenticationPrincipal User user
     ) throws IOException {
         DocumentAddRequest addRequest = new ObjectMapper().readValue(data, DocumentAddRequest.class);
-        Document uploadedDocument = documentService.uploadDocument(file, addRequest, user);
+        Document uploadedDocument = documentService.addDocument(file, addRequest, user);
         return new ResponseEntity<>(uploadedDocument.toDto(), HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Upload a document",
+            description = """
+                    Uploads a document to the cloud which can be
+                    later previewed/downloaded using the UUID returned. \n
+                    `type` can accept 'contact', 'petition', 'internship', 'medical' and 'normal' \n
+                    Example input for `data`: `{
+                                           "title":"Test File",
+                                           "description":"",
+                                           "studentId":"23000002",
+                                           "parentCategoryId":1,
+                                           "categoryId":2
+                                       }`
+                    """
+    )
+    @PostMapping(value = "/uploadd", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<DocumentDto> uploadTest(
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @RequestPart("data") String data,
+            @RequestParam(defaultValue = "normal") String documentType,
+            @AuthenticationPrincipal User loggedInUser
+    ) throws IOException {
+        switch (documentType) {
+            case "contact":
+                ContactDocumentAddRequest contactAddRequest = new ObjectMapper().readValue(data, ContactDocumentAddRequest.class);
+                ContactDocument contactDocument = contactDocumentService.addContactDocument(contactAddRequest, loggedInUser);
+                return new ResponseEntity<>(contactDocument.toDto(), HttpStatus.CREATED);
+            case "petition":
+                PetitionDocumentAddRequest petitionDocumentAddRequest = new ObjectMapper().readValue(data, PetitionDocumentAddRequest.class);
+                PetitionDocument petitionDocument = petitionDocumentService.addPetitionDocument(petitionDocumentAddRequest, loggedInUser);
+                return new ResponseEntity<>(petitionDocument.toDto(), HttpStatus.CREATED);
+            case "internship":
+                InternshipAddRequest internshipAddRequest = new ObjectMapper().readValue(data, InternshipAddRequest.class);
+                InternshipDocument internshipDocument = internshipDocumentService.addInternship(file, internshipAddRequest, loggedInUser);
+                return new ResponseEntity<>(internshipDocument.toDto(), HttpStatus.CREATED);
+            case "medical":
+                MedicalReportAddRequest medicalReportAddRequest = new ObjectMapper().readValue(data, MedicalReportAddRequest.class);
+                MedicalReportDocument medicalReportDocument = medicalReportDocumentService.addMedicalReport(file, medicalReportAddRequest, loggedInUser);
+                return new ResponseEntity<>(medicalReportDocument.toDto(), HttpStatus.CREATED);
+            default:
+                DocumentAddRequest normalAddRequest = new ObjectMapper().readValue(data, DocumentAddRequest.class);
+                Document uploadedDocument = documentService.addDocument(file, normalAddRequest, loggedInUser);
+                return new ResponseEntity<>(uploadedDocument.toDto(), HttpStatus.CREATED);
+        }
     }
 
     @Operation(
@@ -220,7 +266,7 @@ public class DocumentController {
             @AuthenticationPrincipal User loggedInUser
     ) throws IOException {
         InternshipAddRequest addRequest = new ObjectMapper().readValue(data, InternshipAddRequest.class);
-        InternshipDocument internshipDocument = internshipDocumentService.saveInternship(file, addRequest, loggedInUser);
+        InternshipDocument internshipDocument = internshipDocumentService.addInternship(file, addRequest, loggedInUser);
         return new ResponseEntity<>(internshipDocument.toDto(), HttpStatus.CREATED);
     }
 
@@ -243,7 +289,7 @@ public class DocumentController {
             @AuthenticationPrincipal User loggedInUser
     ) throws IOException {
         MedicalReportAddRequest addRequest = new ObjectMapper().readValue(data, MedicalReportAddRequest.class);
-        MedicalReportDocument medicalReportDocument = medicalReportDocumentService.saveMedicalReport(file, addRequest, loggedInUser);
+        MedicalReportDocument medicalReportDocument = medicalReportDocumentService.addMedicalReport(file, addRequest, loggedInUser);
         return new ResponseEntity<>(medicalReportDocument.toDto(), HttpStatus.CREATED);
     }
 

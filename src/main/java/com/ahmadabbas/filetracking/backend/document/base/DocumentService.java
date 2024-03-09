@@ -61,12 +61,15 @@ public class DocumentService {
     }
 
     @Transactional
-    public Document uploadDocument(MultipartFile file,
-                                   DocumentAddRequest addRequest,
-                                   User loggedInUser) throws IOException {
+    public Document addDocument(MultipartFile file,
+                                DocumentAddRequest addRequest,
+                                User loggedInUser) throws IOException {
+        if (loggedInUser.getRoles().contains(Role.STUDENT)) {
+            throw new AccessDeniedException("not authorized..");
+        }
         Category category = categoryService.getCategory(addRequest.categoryId(), addRequest.parentCategoryId(), loggedInUser);
         Student student = studentService.getStudent(addRequest.studentId(), loggedInUser);
-        String cloudPath = azureBlobService.upload(file, "/" + addRequest.studentId());
+        String cloudPath = azureBlobService.upload(file, addRequest.studentId());
         log.info("cloudPath received from uploading file: %s".formatted(cloudPath));
         Document document = Document.builder()
                 .category(category)

@@ -21,6 +21,7 @@ public class InternshipDocument extends Document {
     @Column(columnDefinition = "integer default 0")
     private int numberOfWorkingDays = 0;
 
+
     @Override
     public InternshipDocumentDto toDto() {
         return InternshipDocumentMapper.INSTANCE.toDto(this);

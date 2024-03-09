@@ -6,6 +6,7 @@ import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocum
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
+import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.AzureBlobService;
 import com.lowagie.text.pdf.AcroFields;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,9 @@ public class ContactDocumentService {
 
     @Transactional
     public ContactDocument addContactDocument(ContactDocumentAddRequest addRequest, User loggedInUser) {
+        if (!loggedInUser.getRoles().contains(Role.STUDENT)) {
+            throw new AccessDeniedException("not authorized, only students can do this.");
+        }
         log.info("ContactDocumentService.addContactDocument");
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
         Category category = categoryService.getCategoryByName("Contact Forms");
@@ -55,7 +60,7 @@ public class ContactDocumentService {
             if (filledPdf == null) {
                 throw new RuntimeException("couldn't generate contact form pdf.");
             }
-            String cloudPath = azureBlobService.upload(filledPdf, "/" + student.getId());
+            String cloudPath = azureBlobService.upload(filledPdf, student.getId());
             log.info("cloudPath = " + cloudPath);
             if (!filledPdf.delete()) {
                 log.warn("Failed to delete temp file @ {}", filledPdf.getAbsolutePath());
