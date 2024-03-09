@@ -36,6 +36,17 @@ public class CategoryService {
                 ));
     }
 
+    public Category getCategory(Long categoryId, @AuthenticationPrincipal User loggedInUser) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "category with id %s not found".formatted(categoryId)
+                ));
+        if (!getAllowedCategories(loggedInUser.getRoles()).contains(category)) {
+            throw new AccessDeniedException("not authorized");
+        }
+        return category;
+    }
+
     public Category getCategory(Long categoryId, Long parentCategoryId, @AuthenticationPrincipal User loggedInUser) {
         Category category = categoryRepository.findByCategoryIdAndParentCategoryId(categoryId, parentCategoryId)
                 .orElseThrow(() -> new ResourceNotFoundException(

@@ -1,15 +1,13 @@
 package com.ahmadabbas.filetracking.backend.document.medical;
 
 import com.ahmadabbas.filetracking.backend.document.base.Document;
+import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportDocumentMapper;
+import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportDto;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -17,35 +15,38 @@ import java.util.StringJoiner;
 @Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
+@SuperBuilder
 @Entity
 public class MedicalReportDocument extends Document {
 
-    private LocalDateTime dateOfAbsence;
+    private LocalDate dateOfAbsence;
 
-    private String note;
-
-    @Enumerated(value = EnumType.STRING)
-    private MedicalReportStatus medicalReportStatus;
+    @Builder.Default
+    private boolean isApproved = false;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MedicalReportDocument that)) return false;
         if (!super.equals(o)) return false;
-        return Objects.equals(getDateOfAbsence(), that.getDateOfAbsence()) && Objects.equals(getNote(), that.getNote()) && getMedicalReportStatus() == that.getMedicalReportStatus();
+        return isApproved() == that.isApproved() && Objects.equals(getDateOfAbsence(), that.getDateOfAbsence());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getDateOfAbsence(), getNote(), getMedicalReportStatus());
+        return Objects.hash(super.hashCode(), getDateOfAbsence(), isApproved());
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", MedicalReportDocument.class.getSimpleName() + "[", "]")
                 .add("dateOfAbsence=" + dateOfAbsence)
-                .add("note='" + note + "'")
-                .add("medicalReportStatus=" + medicalReportStatus)
+                .add("isApproved=" + isApproved)
                 .toString();
+    }
+
+    @Override
+    public MedicalReportDto toDto() {
+        return MedicalReportDocumentMapper.INSTANCE.toDto(this);
     }
 }

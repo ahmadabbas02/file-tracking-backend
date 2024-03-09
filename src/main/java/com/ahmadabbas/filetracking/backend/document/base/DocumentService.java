@@ -65,7 +65,7 @@ public class DocumentService {
                                    DocumentAddRequest addRequest,
                                    User loggedInUser) throws IOException {
         Category category = categoryService.getCategory(addRequest.categoryId(), addRequest.parentCategoryId(), loggedInUser);
-        Student student = studentService.getStudent(addRequest.studentId());
+        Student student = studentService.getStudent(addRequest.studentId(), loggedInUser);
         String cloudPath = azureBlobService.upload(file, "/" + addRequest.studentId());
         log.info("cloudPath received from uploading file: %s".formatted(cloudPath));
         Document document = Document.builder()
@@ -159,14 +159,19 @@ public class DocumentService {
             List<Long> parentCategoryIds
     ) {
         log.info("DocumentService.getAllDocuments");
+        List<String> studentIds = Collections.emptyList();
         if (loggedInUser.getRoles().contains(Role.STUDENT)) {
             Student student = studentService.getStudentByUserId(loggedInUser.getId());
             studentId = student.getId();
             log.info("setting studentId to the logged in student: " + student.getId());
-        } else if (loggedInUser.getRoles().contains(Role.ADVISOR) && !studentId.equals("-1")) {
-            Student student = studentService.getStudent(studentId);
-            if (!student.getAdvisor().getUser().getId().equals(loggedInUser.getId())) {
-                throw new AccessDeniedException("you are only allowed to get your own student's documents");
+        } else if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
+            if (!studentId.equals("-1")) {
+                Student student = studentService.getStudent(studentId, loggedInUser);
+                if (!student.getAdvisor().getUser().getId().equals(loggedInUser.getId())) {
+                    throw new AccessDeniedException("you are only allowed to get your own student's documents");
+                }
+            } else {
+                studentIds = studentService.getAllStudentIds(loggedInUser);
             }
         }
         List<Long> allowedCategoriesIds = categoryService.getAllowedCategoriesIds(loggedInUser.getRoles());
@@ -182,12 +187,20 @@ public class DocumentService {
         Page<Document> documentPage;
         if (studentId.equals("-1")) {
             if (categoryIds.isEmpty() && parentCategoryIds.isEmpty()) {
-                documentPage = documentRepository.findAll(pageable);
+                if (studentIds.isEmpty()) {
+                    documentPage = documentRepository.findAll(pageable);
+                } else {
+                    documentPage = documentRepository.findAll(pageable, studentIds);
+                }
             } else {
                 if (parentCategoryIds.isEmpty()) {
                     parentCategoryIds.add(-1L);
                 }
-                documentPage = documentRepository.findByHavingCategoryIds(categoryIds, parentCategoryIds, pageable);
+                if (studentIds.isEmpty()) {
+                    documentPage = documentRepository.findByHavingCategoryIds(categoryIds, parentCategoryIds, pageable);
+                } else {
+                    documentPage = documentRepository.findByHavingCategoryIds(categoryIds, parentCategoryIds, pageable, studentIds);
+                }
             }
         } else {
             if (categoryIds.isEmpty() && parentCategoryIds.isEmpty()) {

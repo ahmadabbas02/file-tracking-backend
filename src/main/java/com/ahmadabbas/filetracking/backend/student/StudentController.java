@@ -25,8 +25,9 @@ public class StudentController {
 
     @Operation(summary = "Student information", description = "Returns the student's personal information.")
     @GetMapping("/{studentId}")
-    public ResponseEntity<StudentDto> getStudent(@PathVariable String studentId) {
-        Student student = studentService.getStudent(studentId);
+    public ResponseEntity<StudentDto> getStudent(@PathVariable String studentId,
+                                                 @AuthenticationPrincipal User loggedInUser) {
+        Student student = studentService.getStudent(studentId, loggedInUser);
         return ResponseEntity.ok(studentMapper.toDto(student));
     }
 
@@ -42,14 +43,15 @@ public class StudentController {
             @RequestParam(defaultValue = "asc", required = false) String order,
             @RequestParam(defaultValue = "", required = false) String searchQuery,
             @AuthenticationPrincipal User user
-            ) {
+    ) {
         return ResponseEntity.ok(studentService.getAllStudents(user, pageNo, pageSize, sortBy, order, searchQuery));
     }
 
     @Operation(summary = "Add new student", description = "Adds a new student to the database with the specified information.")
     @PostMapping
-    public ResponseEntity<StudentDto> registerStudent(@RequestBody StudentRegistrationRequest studentRegistrationRequest) {
-        Student createdStudent = studentService.addStudent(studentRegistrationRequest);
+    public ResponseEntity<StudentDto> registerStudent(@RequestBody StudentRegistrationRequest studentRegistrationRequest,
+                                                      @AuthenticationPrincipal User loggedInUser) {
+        Student createdStudent = studentService.addStudent(studentRegistrationRequest, loggedInUser);
         StudentDto dto = studentMapper.toDto(createdStudent);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
@@ -59,7 +61,8 @@ public class StudentController {
             description = "Adds the students in the csv to the database with their specified IDs.\nThe csv should have the following format: `studentId,advisorId,name,email,password,department,year,picture,isEnabled` as headers."
     )
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
-    public ResponseEntity<CsvUploadResponse> uploadStudents(@RequestPart("file") MultipartFile file) throws IOException {
-        return new ResponseEntity<>(studentService.uploadStudents(file), HttpStatus.CREATED);
+    public ResponseEntity<CsvUploadResponse> uploadStudents(@RequestPart("file") MultipartFile file,
+                                                            @AuthenticationPrincipal User loggedInUser) throws IOException {
+        return new ResponseEntity<>(studentService.uploadStudents(file, loggedInUser), HttpStatus.CREATED);
     }
 }

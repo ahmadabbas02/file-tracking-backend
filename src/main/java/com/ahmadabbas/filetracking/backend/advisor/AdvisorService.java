@@ -5,6 +5,8 @@ import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorMapper;
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
+import com.ahmadabbas.filetracking.backend.student.Student;
+import com.ahmadabbas.filetracking.backend.student.StudentRepository;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserRepository;
@@ -15,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,9 +30,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class AdvisorService {
-    private final PasswordEncoder passwordEncoder;
+    private final StudentRepository studentRepository;
     private final AdvisorRepository advisorRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
     private final AdvisorMapper advisorMapper;
 
     public Advisor getAdvisorByUserId(Long userId) {
@@ -39,7 +44,21 @@ public class AdvisorService {
                 ));
     }
 
-    public Advisor getAdvisorByAdvisorId(String advisorId) {
+    public Advisor getAdvisorByAdvisorId(String advisorId, User loggedInUser) {
+        if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
+            Advisor advisor = getAdvisorByUserId(loggedInUser.getId());
+            if (!advisorId.equals(advisor.getId())) {
+                throw new AccessDeniedException("not authorized, you can only get details about your own profile");
+            }
+        } else if (loggedInUser.getRoles().contains(Role.STUDENT)) {
+            Student student = studentRepository.findByUserId(loggedInUser.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "student related with user id %s not found".formatted(loggedInUser.getId())
+                    ));
+            if (!student.getAdvisor().getId().equals(advisorId)) {
+                throw new AccessDeniedException("not authorized, you can only get details for your own advisor profile");
+            }
+        }
         return advisorRepository.findById(advisorId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "advisor with id `%s` not found".formatted(advisorId)

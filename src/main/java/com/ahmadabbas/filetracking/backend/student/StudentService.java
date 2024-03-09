@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,7 +56,20 @@ public class StudentService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
-    public Student getStudent(String id) {
+    public Student getStudent(String id, User loggedInUser) {
+        if (loggedInUser.getRoles().contains(Role.STUDENT)) {
+            Student student = getStudentByUserId(loggedInUser.getId());
+            if (!id.equals(student.getId())) {
+                throw new AccessDeniedException("not authorized, you can only get details about your own profile");
+            }
+        } else if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
+            Student student = studentDao.getStudent(id);
+            if (student.getAdvisor().getUser().getId().equals(loggedInUser.getId())) {
+                return student;
+            } else {
+                throw new AccessDeniedException("not authorized, you can only get details about your own students");
+            }
+        }
         return studentDao.getStudent(id);
     }
 
@@ -113,15 +127,25 @@ public class StudentService {
         );
     }
 
+    public List<String> getAllStudentIds(User loggedInUser) {
+        log.info("Logged in user = %s".formatted(loggedInUser));
+        Set<Role> roles = userService.getRoles(loggedInUser);
+        log.info("Roles = %s".formatted(roles));
+        if (!roles.contains(Role.ADVISOR)) {
+            throw new RuntimeException("Unexpected error! report");
+        }
+        return studentDao.getAllStudentIdsByAdvisorUserId(loggedInUser.getId());
+    }
+
     @Transactional
-    public Student addStudent(StudentRegistrationRequest studentRegistrationRequest) {
+    public Student addStudent(StudentRegistrationRequest studentRegistrationRequest, User loggedInUser) {
         if (userRepository.existsByEmail(studentRegistrationRequest.email())) {
             throw new DuplicateResourceException(
                     "email already taken"
             );
         }
 
-        Advisor advisor = advisorService.getAdvisorByAdvisorId(studentRegistrationRequest.advisorId());
+        Advisor advisor = advisorService.getAdvisorByAdvisorId(studentRegistrationRequest.advisorId(), loggedInUser);
 
         User user = User.builder()
                 .name(studentRegistrationRequest.name())
@@ -142,7 +166,7 @@ public class StudentService {
     }
 
     @Transactional
-    public CsvUploadResponse uploadStudents(MultipartFile file) throws IOException {
+    public CsvUploadResponse uploadStudents(MultipartFile file, User loggedInUser) throws IOException {
         Instant startParseCsv = Instant.now();
         Set<StudentCsvRepresentation> studentCsvRepresentationSet = parseCsv(file);
         Instant endParseCsv = Instant.now();
@@ -189,7 +213,7 @@ public class StudentService {
                             .isEnabled(s.isEnabled())
                             .build();
                     if (!s.getAdvisorId().isBlank()) {
-                        advisor = advisorService.getAdvisorByAdvisorId(s.getAdvisorId());
+                        advisor = advisorService.getAdvisorByAdvisorId(s.getAdvisorId(), loggedInUser);
                     }
 
                     return Student.builder()

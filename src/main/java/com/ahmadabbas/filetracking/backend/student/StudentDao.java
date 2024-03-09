@@ -27,4 +27,6 @@ public interface StudentDao {
 
     Page<Student> getAllStudentsByAdvisorUserId(Long userId, Pageable pageable);
 
+    List<String> getAllStudentIdsByAdvisorUserId(Long userId);
+
 }

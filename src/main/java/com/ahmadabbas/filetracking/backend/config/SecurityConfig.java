@@ -90,7 +90,8 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         HttpMethod.POST,
                                         "api/v1/documents/upload/contact",
-                                        "api/v1/documents/upload/petition"
+                                        "api/v1/documents/upload/petition",
+                                        "api/v1/documents/upload/medical-report"
                                 )
                                 .hasRole(Role.STUDENT.name())
                                 // category creation

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface StudentRepository extends JpaRepository<Student, String> {
@@ -31,6 +32,10 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAllByAdvisorUserId(Long userId,
                                          Pageable pageable);
+
+    @Query("select s.id from Student s where s.advisor.user.id = ?1")
+    @EntityGraph(value = "Student.eagerlyFetchUser")
+    List<String> findAllByAdvisorUserId(Long userId);
 
     @Query("select s from Student s where upper(s.id) like upper(concat(?1, '%'))")
     @EntityGraph(value = "Student.eagerlyFetchUser")

@@ -80,4 +80,9 @@ public class StudentDaoImpl implements StudentDao {
     public Page<Student> getAllStudentsByAdvisorUserId(Long userId, Pageable pageable) {
         return studentRepository.findAllByAdvisorUserId(userId, pageable);
     }
+
+    @Override
+    public List<String> getAllStudentIdsByAdvisorUserId(Long userId) {
+        return studentRepository.findAllByAdvisorUserId(userId);
+    }
 }

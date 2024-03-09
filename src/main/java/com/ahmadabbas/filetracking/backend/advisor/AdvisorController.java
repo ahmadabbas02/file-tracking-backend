@@ -3,11 +3,13 @@ package com.ahmadabbas.filetracking.backend.advisor;
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorDto;
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorMapper;
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorRegistrationRequest;
+import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -19,8 +21,8 @@ public class AdvisorController {
 
     @Operation(summary = "Get advisor")
     @GetMapping("/{advisorId}")
-    public ResponseEntity<AdvisorDto> getAdvisor(@PathVariable String advisorId) {
-        Advisor advisor = advisorService.getAdvisorByAdvisorId(advisorId);
+    public ResponseEntity<AdvisorDto> getAdvisor(@PathVariable String advisorId, @AuthenticationPrincipal User loggedInUser) {
+        Advisor advisor = advisorService.getAdvisorByAdvisorId(advisorId, loggedInUser);
         return ResponseEntity.ok(advisorMapper.toDto(advisor));
     }
 

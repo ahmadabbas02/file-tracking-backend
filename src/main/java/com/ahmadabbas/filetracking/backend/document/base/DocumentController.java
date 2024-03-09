@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.document.base;
 
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentAddRequest;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDownloadRequest;
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentModifyCategoryRequest;
 import com.ahmadabbas.filetracking.backend.document.contact.ContactDocument;
@@ -11,6 +12,10 @@ import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumen
 import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumentService;
 import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipAddRequest;
 import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentDto;
+import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocument;
+import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocumentService;
+import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportAddRequest;
+import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportDto;
 import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocument;
 import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocumentService;
 import com.ahmadabbas.filetracking.backend.document.petition.comment.Comment;
@@ -51,6 +56,7 @@ public class DocumentController {
     private final PetitionDocumentService petitionDocumentService;
     private final CommentService commentService;
     private final CommentMapper commentMapper;
+    private final MedicalReportDocumentService medicalReportDocumentService;
 
     @Operation(
             summary = "Get document information",
@@ -165,64 +171,6 @@ public class DocumentController {
     }
 
     @Operation(
-            summary = "Modify document category",
-            description = "Modifies a specific document category, mainly used to organize uploaded documents. "
-    )
-    @PatchMapping(value = "/modify-category")
-    public ResponseEntity<DocumentDto> modifyCategory(@RequestBody DocumentModifyCategoryRequest body,
-                                                      @AuthenticationPrincipal User loggedInUser) {
-        Document modifiedDocument = documentService.modifyDocumentCategory(body, loggedInUser);
-        return ResponseEntity.ok(modifiedDocument.toDto());
-    }
-
-    @Operation(
-            summary = "Get file preview",
-            description = """
-                    Display's a preview of the file linked to database with the specific `UUID`.
-                    """
-    )
-    @GetMapping("/preview")
-    public ResponseEntity<byte[]> getFilePreview(@AuthenticationPrincipal User user,
-                                                 @RequestParam UUID uuid) throws IOException {
-        byte[] data = documentService.getDocumentPreview(user, uuid);
-        if (data != null) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentLength(data.length);
-            headers.set("Content-Disposition", "inline; filename=" + uuid);
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            return new ResponseEntity<>(data, headers, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @Operation(
-            summary = "Download multiple",
-            description = """
-                    Display's a preview of the file linked to database with the specific `UUID`.
-                    """
-    )
-    @GetMapping("/download")
-    public ResponseEntity<byte[]> getFilePreview(@AuthenticationPrincipal User user,
-                                                 @RequestParam List<UUID> uuids) throws IOException {
-        byte[] zipData = documentService.getDocumentsZip(user, uuids);
-        if (zipData != null) {
-            LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Athens"));
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-            String timestamp = formatter.format(now);
-            String downloadFilename = timestamp + ".zip";
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentLength(zipData.length);
-            headers.set("Content-Disposition", "attachment; filename=" + downloadFilename);
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            return new ResponseEntity<>(zipData, headers, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @Operation(
             summary = "Upload contact document",
             description = """
                     Generates and uploads contact form document.
@@ -268,10 +216,94 @@ public class DocumentController {
     @PostMapping(value = "/upload/internship", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<InternshipDocumentDto> uploadInternshipDocument(
             @RequestPart("file") MultipartFile file,
-            @RequestPart("data") String data
+            @RequestPart("data") String data,
+            @AuthenticationPrincipal User loggedInUser
     ) throws IOException {
         InternshipAddRequest addRequest = new ObjectMapper().readValue(data, InternshipAddRequest.class);
-        InternshipDocument internshipDocument = internshipDocumentService.saveInternship(file, addRequest);
+        InternshipDocument internshipDocument = internshipDocumentService.saveInternship(file, addRequest, loggedInUser);
         return new ResponseEntity<>(internshipDocument.toDto(), HttpStatus.CREATED);
     }
+
+    @Operation(
+            summary = "Upload internship document",
+            description = """
+                    Uploads an internship document to the cloud which can be
+                    later previewed/downloaded using the UUID returned. \n
+                    Example input for `data`: `{
+                                           "title":"Test File",
+                                           "description":"",
+                                           "studentId":"23000002",
+                                           "numberOfWorkingDays":20
+                                       }`
+                    """
+    )
+    @PostMapping(value = "/upload/medical-report", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<MedicalReportDto> uploadMedicalReportDocument(
+            @RequestPart("file") MultipartFile file,
+            @RequestPart("data") String data,
+            @AuthenticationPrincipal User loggedInUser
+    ) throws IOException {
+        MedicalReportAddRequest addRequest = new ObjectMapper().readValue(data, MedicalReportAddRequest.class);
+        MedicalReportDocument medicalReportDocument = medicalReportDocumentService.saveMedicalReport(file, addRequest, loggedInUser);
+        return new ResponseEntity<>(medicalReportDocument.toDto(), HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Modify document category",
+            description = "Modifies a specific document category, mainly used to organize uploaded documents. "
+    )
+    @PatchMapping(value = "/modify-category")
+    public ResponseEntity<DocumentDto> modifyCategory(@RequestBody DocumentModifyCategoryRequest body,
+                                                      @AuthenticationPrincipal User loggedInUser) {
+        Document modifiedDocument = documentService.modifyDocumentCategory(body, loggedInUser);
+        return ResponseEntity.ok(modifiedDocument.toDto());
+    }
+
+    @Operation(
+            summary = "Get file preview",
+            description = """
+                    Display's a preview of the file linked to database with the specific `UUID`.
+                    """
+    )
+    @GetMapping("/preview")
+    public ResponseEntity<byte[]> getFilePreview(@AuthenticationPrincipal User user,
+                                                 @RequestParam UUID uuid) throws IOException {
+        byte[] data = documentService.getDocumentPreview(user, uuid);
+        if (data != null) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentLength(data.length);
+            headers.set("Content-Disposition", "inline; filename=" + uuid);
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            return new ResponseEntity<>(data, headers, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(
+            summary = "Download multiple",
+            description = """
+                    Display's a preview of the file linked to database with the specific `UUID`.
+                    """
+    )
+    @PostMapping("/download")
+    public ResponseEntity<byte[]> getFilePreview(@AuthenticationPrincipal User user,
+                                                 @RequestBody DocumentDownloadRequest request) throws IOException {
+        byte[] zipData = documentService.getDocumentsZip(user, request.uuids());
+        if (zipData != null) {
+            LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Athens"));
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+            String timestamp = formatter.format(now);
+            String downloadFilename = timestamp + ".zip";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentLength(zipData.length);
+            headers.set("Content-Disposition", "attachment; filename=" + downloadFilename);
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            return new ResponseEntity<>(zipData, headers, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

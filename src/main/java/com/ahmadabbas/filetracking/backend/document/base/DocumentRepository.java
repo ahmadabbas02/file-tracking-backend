@@ -9,26 +9,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface DocumentRepository extends JpaRepository<Document, UUID> {
-    @Query("""
-            select d from Document d
-            inner join Student s
-            on s.id = d.student.id
-            where d.student.id = ?1
-            """)
-    Page<Document> findByStudentId(String id, Pageable pageable);
-
-    @Query("""
-            select d from Document d
-            inner join Student s
-            on s.id = d.student.id
-            where d.category.categoryId = :categoryId
-            and d.category.parentCategoryId = :parentCategoryId
-            """)
-    Page<Document> findByHavingCategoryIds(
-            Long categoryId,
-            Long parentCategoryId,
-            Pageable pageable
-    );
 
     @Query("""
             select d from Document d
@@ -40,6 +20,20 @@ public interface DocumentRepository extends JpaRepository<Document, UUID> {
             List<Long> categoryIds,
             List<Long> parentCategoryIds,
             Pageable pageable
+    );
+
+    @Query("""
+            select d from Document d
+            inner join Student s
+            on s.id = d.student.id
+            where (d.category.categoryId in :categoryIds and d.category.parentCategoryId in :parentCategoryIds)
+            and d.student.id in :studentIds
+            """)
+    Page<Document> findByHavingCategoryIds(
+            List<Long> categoryIds,
+            List<Long> parentCategoryIds,
+            Pageable pageable,
+            List<String> studentIds
     );
 
     @Query("""
@@ -60,21 +54,6 @@ public interface DocumentRepository extends JpaRepository<Document, UUID> {
             inner join Student s
             on s.id = d.student.id
             where d.student.id = :id
-            and d.category.categoryId = :categoryId
-            and d.category.parentCategoryId = :parentCategoryId
-            """)
-    Page<Document> findByStudentIdHavingCategoryIds(
-            String id,
-            Long categoryId,
-            Long parentCategoryId,
-            Pageable pageable
-    );
-
-    @Query("""
-            select d from Document d
-            inner join Student s
-            on s.id = d.student.id
-            where d.student.id = :id
             and (d.category.categoryId in :categoryIds and d.category.parentCategoryId in :parentCategoryIds)
             """)
     Page<Document> findByStudentIdHavingCategoryIds(
@@ -84,5 +63,11 @@ public interface DocumentRepository extends JpaRepository<Document, UUID> {
             Pageable pageable
     );
 
-
+    @Query("""
+            select d from Document d
+            inner join Student s
+            on s.id = d.student.id
+            where d.student.id in :studentIds
+            """)
+    Page<Document> findAll(Pageable pageable, List<String> studentIds);
 }
