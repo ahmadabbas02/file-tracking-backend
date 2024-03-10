@@ -1,8 +1,13 @@
 package com.ahmadabbas.filetracking.backend.document.petition.payload;
 
 import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocument;
+import com.ahmadabbas.filetracking.backend.document.petition.comment.Comment;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
+
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface PetitionDocumentMapper {
@@ -19,8 +24,23 @@ public interface PetitionDocumentMapper {
     @Mapping(source = "student.program", target = "studentProgram")
     @Mapping(source = "student.year", target = "studentYear")
     @Mapping(source = "student.user.picture", target = "studentPicture")
+//    @Mapping(expression = "java(getNumberOfComments(petitionDocument))", target = "numberOfComments")
+//    @Mapping(expression = "java(getLatestComment(petitionDocument))", target = "latestComment")
     PetitionDocumentDto toDto(PetitionDocument petitionDocument);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     PetitionDocument partialUpdate(PetitionDocumentDto petitionDocumentDto, @MappingTarget PetitionDocument petitionDocument);
+
+    default LocalDateTime getLatestComment(PetitionDocument petitionDocument) {
+        List<Comment> comments = petitionDocument.getComments();
+        if (comments.isEmpty()) {
+            return null;
+        }
+        comments.sort(Comparator.comparing(Comment::getPostedAt).reversed());
+        return comments.get(0).getPostedAt();
+    }
+
+    default int getNumberOfComments(PetitionDocument petitionDocument) {
+        return petitionDocument.getComments().size();
+    }
 }

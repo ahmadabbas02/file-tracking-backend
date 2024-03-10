@@ -22,7 +22,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @SuperBuilder
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Document {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
