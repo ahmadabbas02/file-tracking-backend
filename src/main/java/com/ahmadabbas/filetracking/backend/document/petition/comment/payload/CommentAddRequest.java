@@ -1,4 +1,8 @@
 package com.ahmadabbas.filetracking.backend.document.petition.comment.payload;
 
-public record CommentAddRequest(String message) {
+import jakarta.validation.constraints.NotEmpty;
+
+public record CommentAddRequest(
+        @NotEmpty(message = "Comment message should not be empty") String message
+) {
 }

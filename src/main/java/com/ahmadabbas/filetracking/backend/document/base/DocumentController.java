@@ -29,6 +29,7 @@ import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -113,7 +114,7 @@ public class DocumentController {
     public ResponseEntity<CommentDto> addComment(
             @AuthenticationPrincipal User user,
             @PathVariable UUID documentId,
-            @RequestBody CommentAddRequest addRequest
+            @Valid @RequestBody CommentAddRequest addRequest
     ) {
         Comment comment = commentService.addComment(addRequest, documentId, user);
         return ResponseEntity.ok(commentMapper.toDto(comment));
@@ -224,7 +225,7 @@ public class DocumentController {
     )
     @PostMapping("/upload/contact")
     public ResponseEntity<ContactDocumentDto> postContactDocument(
-            @RequestBody ContactDocumentAddRequest addRequest,
+            @Valid @RequestBody ContactDocumentAddRequest addRequest,
             @AuthenticationPrincipal User user
     ) {
         ContactDocument contactDocument = contactDocumentService.addContactDocument(addRequest, user);
@@ -239,10 +240,10 @@ public class DocumentController {
     )
     @PostMapping("/upload/petition")
     public ResponseEntity<PetitionDocumentDto> postPetitionDocument(
-            @RequestBody PetitionDocumentAddRequest addRequest,
+            @Valid @RequestBody PetitionDocumentAddRequest addRequest,
             @AuthenticationPrincipal User user
     ) {
-        var petitionDocument = petitionDocumentService.addPetitionDocument(addRequest, user);
+        PetitionDocument petitionDocument = petitionDocumentService.addPetitionDocument(addRequest, user);
         return new ResponseEntity<>(petitionDocument.toDto(), HttpStatus.CREATED);
     }
 
@@ -298,7 +299,7 @@ public class DocumentController {
             description = "Modifies a specific document category, mainly used to organize uploaded documents. "
     )
     @PatchMapping(value = "/modify-category")
-    public ResponseEntity<DocumentDto> modifyCategory(@RequestBody DocumentModifyCategoryRequest body,
+    public ResponseEntity<DocumentDto> modifyCategory(@Valid @RequestBody DocumentModifyCategoryRequest body,
                                                       @AuthenticationPrincipal User loggedInUser) {
         Document modifiedDocument = documentService.modifyDocumentCategory(body, loggedInUser);
         return ResponseEntity.ok(modifiedDocument.toDto());
@@ -333,7 +334,7 @@ public class DocumentController {
     )
     @PostMapping("/download")
     public ResponseEntity<byte[]> downloadFiles(@AuthenticationPrincipal User user,
-                                                @RequestBody DocumentDownloadRequest request) throws IOException {
+                                                @Valid @RequestBody DocumentDownloadRequest request) throws IOException {
         byte[] zipData = documentService.getDocumentsZip(user, request.uuids());
         if (zipData != null) {
             LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Athens"));
