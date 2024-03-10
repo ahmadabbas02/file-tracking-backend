@@ -40,10 +40,11 @@ public class MedicalReportDocumentService {
         }
         LocalDate localDate;
         try {
-            localDate = LocalDate.parse(addRequest.dateOfAbsence());
+            String datePart = addRequest.dateOfAbsence().substring(0, 10);
+            localDate = LocalDate.parse(datePart);
         } catch (DateTimeParseException exception) {
             throw new APIException(HttpStatus.BAD_REQUEST,
-                    "Failed to parse date. It should be in the format `yyyy-MM-dd` like `2024-03-09`");
+                    "Failed to parse date. It should be in the format like `2024-03-25T22:00:00.000Z`");
         }
 
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
