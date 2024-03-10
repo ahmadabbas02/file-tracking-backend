@@ -66,6 +66,7 @@ public class ContactDocumentService {
                 log.warn("Failed to delete temp file @ {}", filledPdf.getAbsolutePath());
             }
             ContactDocument document = ContactDocument.builder()
+                    .description(addRequest.description())
                     .email(addRequest.email())
                     .phoneNumber(addRequest.phoneNumber())
                     .emergencyName(addRequest.emergencyName())
