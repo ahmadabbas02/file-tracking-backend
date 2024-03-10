@@ -15,7 +15,7 @@ public interface DocumentMapper {
     @Mapping(source = "student.user.name", target = "studentName")
     @Mapping(source = "student.user.picture", target = "studentPicture")
     @Mapping(source = "student.year", target = "studentYear")
-    @Mapping(source = "student.department", target = "studentDepartment")
+    @Mapping(source = "student.program", target = "studentProgram")
     @Mapping(source = "student.id", target = "studentId")
     @Mapping(source = "category.name", target = "categoryName")
     @Mapping(source = "category.categoryId", target = "categoryId")

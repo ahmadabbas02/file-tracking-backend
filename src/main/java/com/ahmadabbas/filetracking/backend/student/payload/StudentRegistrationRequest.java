@@ -9,7 +9,7 @@ public record StudentRegistrationRequest(
         @NotBlank String name,
         @Email String email,
         @NotBlank String password,
-        @NotBlank String department,
+        @NotBlank String program,
         @Positive @Min(1) Short year,
         @NotBlank String picture,
         @NotBlank String advisorId

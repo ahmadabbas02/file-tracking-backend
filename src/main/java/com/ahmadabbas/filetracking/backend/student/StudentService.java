@@ -158,7 +158,7 @@ public class StudentService {
 
         Student student = Student.builder()
                 .advisor(advisor)
-                .department(studentRegistrationRequest.department())
+                .program(studentRegistrationRequest.program())
                 .year(studentRegistrationRequest.year())
                 .user(savedUser)
                 .build();
@@ -219,7 +219,7 @@ public class StudentService {
                     return Student.builder()
                             .id(s.getStudentId())
                             .advisor(advisor)
-                            .department(s.getDepartment())
+                            .program(s.getDepartment())
                             .year(s.getYear())
                             .user(user)
                             .build();

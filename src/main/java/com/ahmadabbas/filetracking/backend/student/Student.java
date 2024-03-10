@@ -30,7 +30,7 @@ public class Student {
     private String id;
 
     @Column(nullable = false)
-    private String department;
+    private String program;
 
     @Column(nullable = false)
     private Short year;
@@ -60,7 +60,7 @@ public class Student {
     public String toString() {
         return new StringJoiner(", ", Student.class.getSimpleName() + "[", "]")
                 .add("id='" + id + "'")
-                .add("department='" + department + "'")
+                .add("department='" + program + "'")
                 .add("year=" + year)
                 .add("createdAt=" + createdAt)
                 .toString();
@@ -70,11 +70,11 @@ public class Student {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Student student)) return false;
-        return Objects.equals(getId(), student.getId()) && Objects.equals(getDepartment(), student.getDepartment()) && Objects.equals(getYear(), student.getYear()) && Objects.equals(getUser(), student.getUser()) && Objects.equals(getAdvisor(), student.getAdvisor()) && getInternshipCompletionStatus() == student.getInternshipCompletionStatus() && getPaymentStatus() == student.getPaymentStatus() && Objects.equals(getCreatedAt(), student.getCreatedAt());
+        return Objects.equals(getId(), student.getId()) && Objects.equals(getProgram(), student.getProgram()) && Objects.equals(getYear(), student.getYear()) && Objects.equals(getUser(), student.getUser()) && Objects.equals(getAdvisor(), student.getAdvisor()) && getInternshipCompletionStatus() == student.getInternshipCompletionStatus() && getPaymentStatus() == student.getPaymentStatus() && Objects.equals(getCreatedAt(), student.getCreatedAt());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getDepartment(), getYear(), getUser(), getAdvisor(), getInternshipCompletionStatus(), getPaymentStatus(), getCreatedAt());
+        return Objects.hash(getId(), getProgram(), getYear(), getUser(), getAdvisor(), getInternshipCompletionStatus(), getPaymentStatus(), getCreatedAt());
     }
 }

@@ -9,8 +9,7 @@ import java.time.format.DateTimeFormatter;
 
 
 public record ContactDocumentAddRequest(String title, String description, @Email String email, String phoneNumber,
-                                        String emergencyName, String emergencyPhoneNumber,
-                                        String program) implements Serializable {
+                                        String emergencyName, String emergencyPhoneNumber) implements Serializable {
     public ContactDocumentAddRequest {
         if (title == null || title.isBlank()) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");

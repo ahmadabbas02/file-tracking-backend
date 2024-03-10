@@ -56,7 +56,7 @@ public class ContactDocumentService {
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
         Category category = categoryService.getCategoryByName("Contact Forms");
         try {
-            File filledPdf = generateContactFilledPdf(addRequest, student.getId(), loggedInUser.getName());
+            File filledPdf = generateContactFilledPdf(addRequest, student, loggedInUser.getName());
             if (filledPdf == null) {
                 throw new RuntimeException("couldn't generate contact form pdf.");
             }
@@ -81,17 +81,17 @@ public class ContactDocumentService {
         }
     }
 
-    private File generateContactFilledPdf(ContactDocumentAddRequest addRequest, String studentId, String studentName) throws IOException {
+    private File generateContactFilledPdf(ContactDocumentAddRequest addRequest, Student student, String studentName) throws IOException {
         Resource resource = resourceLoader.getResource("classpath:static/Student Information Fillable Form.pdf");
         PdfReader reader = new PdfReader(resource.getInputStream());
-        File outputFile = File.createTempFile(studentId, ".pdf");
+        File outputFile = File.createTempFile(student.getId(), ".pdf");
         try (PdfStamper stamp = new PdfStamper(reader, new FileOutputStream(outputFile))) {
             AcroFields form = stamp.getAcroFields();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             LocalDate localDate = LocalDate.now(ZoneId.of("Europe/Athens"));
-            form.setField("program", addRequest.program());
+            form.setField("program", student.getProgram().toLowerCase());
             form.setField("date", localDate.format(formatter));
-            form.setField("studentNumber", studentId);
+            form.setField("studentNumber", student.getId());
             form.setField("studentName", studentName);
             form.setField("studentEmail", addRequest.email());
             form.setField("homeTeleNumber", addRequest.phoneNumber());

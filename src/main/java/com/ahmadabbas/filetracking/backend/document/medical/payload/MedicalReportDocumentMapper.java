@@ -16,7 +16,7 @@ public interface MedicalReportDocumentMapper {
     @Mapping(source = "category.parentCategoryId", target = "categoryParentId")
     @Mapping(source = "student.id", target = "studentId")
     @Mapping(source = "student.user.name", target = "studentName")
-    @Mapping(source = "student.department", target = "studentDepartment")
+    @Mapping(source = "student.program", target = "studentProgram")
     @Mapping(source = "student.year", target = "studentYear")
     @Mapping(source = "student.user.picture", target = "studentPicture")
     MedicalReportDto toDto(MedicalReportDocument medicalReportDocument);
