@@ -31,16 +31,16 @@ public interface PetitionDocumentMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     PetitionDocument partialUpdate(PetitionDocumentDto petitionDocumentDto, @MappingTarget PetitionDocument petitionDocument);
 
-    default LocalDateTime getLatestComment(PetitionDocument petitionDocument) {
-        List<Comment> comments = petitionDocument.getComments();
-        if (comments.isEmpty()) {
-            return null;
-        }
-        comments.sort(Comparator.comparing(Comment::getPostedAt).reversed());
-        return comments.get(0).getPostedAt();
-    }
-
-    default int getNumberOfComments(PetitionDocument petitionDocument) {
-        return petitionDocument.getComments().size();
-    }
+//    default LocalDateTime getLatestComment(PetitionDocument petitionDocument) {
+//        List<Comment> comments = petitionDocument.getComments();
+//        if (comments.isEmpty()) {
+//            return null;
+//        }
+//        comments.sort(Comparator.comparing(Comment::getPostedAt).reversed());
+//        return comments.get(0).getPostedAt();
+//    }
+//
+//    default int getNumberOfComments(PetitionDocument petitionDocument) {
+//        return petitionDocument.getComments().size();
+//    }
 }
