@@ -192,6 +192,8 @@ public class DocumentService {
         }
         Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
         Page<Document> documentPage;
+        log.debug("loggedInUser = " + loggedInUser + ", pageNo = " + pageNo + ", pageSize = " + pageSize + ", sortBy = " + sortBy + ", order = " + order + ", studentId = " + studentId + ", categoryIds = " + categoryIds + ", parentCategoryIds = " + parentCategoryIds);
+        log.debug("allowedCategoriesIds = " + allowedCategoriesIds);
         if (studentId.equals("-1")) {
             if (categoryIds.isEmpty() && parentCategoryIds.isEmpty()) {
                 if (studentIds.isEmpty()) {

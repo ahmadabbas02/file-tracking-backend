@@ -41,7 +41,7 @@ public interface DocumentRepository extends JpaRepository<Document, UUID> {
             inner join Student s
             on s.id = d.student.id
             where d.student.id = :id
-            and (d.category.categoryId in :categoryIds or d.category.parentCategoryId in :categoryIds)
+            and d.category.categoryId in :categoryIds
             """)
     Page<Document> findByStudentIdHavingCategoryIds(
             String id,
