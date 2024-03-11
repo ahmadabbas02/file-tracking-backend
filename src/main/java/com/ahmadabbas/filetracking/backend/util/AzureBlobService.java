@@ -96,6 +96,11 @@ public class AzureBlobService {
                                            String title,
                                            String originalFileName,
                                            String parentFolder) {
+        log.debug("categoryName = " + categoryName + ", title = " + title + ", originalFileName = " + originalFileName + ", parentFolder = " + parentFolder);
+        title = FileNameUtil.sanitizeFileName(title);
+        originalFileName = FileNameUtil.sanitizeFileName(originalFileName);
+        log.debug("title = " + title);
+        log.debug("originalFileName = " + originalFileName);
         String fileNameWithoutExtension = "%s-%s"
                 .formatted(categoryName, title);
         String fileName = "%s%s"
