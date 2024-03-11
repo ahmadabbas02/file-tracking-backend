@@ -26,6 +26,7 @@ import com.ahmadabbas.filetracking.backend.document.petition.comment.payload.Com
 import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentAddRequest;
 import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentDto;
 import com.ahmadabbas.filetracking.backend.user.User;
+import com.ahmadabbas.filetracking.backend.util.payload.PaginatedMapResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -144,6 +145,32 @@ public class DocumentController {
             );
         }
         return ResponseEntity.ok(documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, categoryIds, parentCategoryIds));
+    }
+
+    @Operation(
+            summary = "Get all document blobs",
+            description = """
+                    Returns a pagination result of all document blobs
+                    sorted by default on `uploadedAt` and `descending` order.
+                    """
+    )
+    @GetMapping("/blobs")
+    public ResponseEntity<PaginatedMapResponse<String, byte[]>> getAllDocumentBlobs(
+            @AuthenticationPrincipal User user,
+            @RequestParam(defaultValue = "1", required = false) int pageNo,
+            @RequestParam(defaultValue = "10", required = false) int pageSize,
+            @RequestParam(defaultValue = "uploadedAt", required = false) String sortBy,
+            @RequestParam(defaultValue = "desc", required = false) String order,
+            @RequestParam(defaultValue = "-1", required = false) String studentId,
+            @RequestParam(defaultValue = "", required = false) List<Long> categoryIds,
+            @RequestParam(defaultValue = "", required = false) List<Long> parentCategoryIds
+    ) throws IOException {
+        if (!studentId.equals("-1")) {
+            return ResponseEntity.ok(
+                    documentService.getAllDocumentBlobs(user, pageNo, pageSize, sortBy, order, studentId, categoryIds, parentCategoryIds)
+            );
+        }
+        return ResponseEntity.ok(documentService.getAllDocumentBlobs(user, pageNo, pageSize, sortBy, order, categoryIds, parentCategoryIds));
     }
 
     @Operation(

@@ -12,6 +12,7 @@ import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.AzureBlobService;
 import com.ahmadabbas.filetracking.backend.util.PageableUtil;
+import com.ahmadabbas.filetracking.backend.util.payload.PaginatedMapResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -232,6 +233,50 @@ public class DocumentService {
                 documentPage.getTotalElements(),
                 documentPage.getTotalPages(),
                 documentPage.isLast()
+        );
+    }
+
+    public PaginatedMapResponse<String, byte[]> getAllDocumentBlobs(
+            User loggedInUser,
+            int pageNo,
+            int pageSize,
+            String sortBy,
+            String order,
+            List<Long> categoryIds,
+            List<Long> parentCategoryIds
+    ) throws IOException {
+        return getAllDocumentBlobs(loggedInUser, pageNo, pageSize, sortBy, order, "-1", categoryIds, parentCategoryIds);
+    }
+
+    public PaginatedMapResponse<String, byte[]> getAllDocumentBlobs(
+            User loggedInUser,
+            int pageNo,
+            int pageSize,
+            String sortBy,
+            String order,
+            String studentId,
+            List<Long> categoryIds,
+            List<Long> parentCategoryIds
+    ) throws IOException {
+        log.info("DocumentService.getAllDocumentBlobs");
+        PaginatedResponse<DocumentDto> documents = getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, studentId, categoryIds, parentCategoryIds);
+
+
+        Map<String, byte[]> blobs = new HashMap<>();
+
+        for (var document : documents.results()) {
+            var id = document.getId();
+            var blob = getDocumentPreview(loggedInUser, UUID.fromString(id));
+            blobs.put(id, blob);
+        }
+
+        return new PaginatedMapResponse<>(
+                blobs,
+                pageNo,
+                pageSize,
+                documents.totalElements(),
+                documents.totalPages(),
+                documents.isLastPage()
         );
     }
 }
