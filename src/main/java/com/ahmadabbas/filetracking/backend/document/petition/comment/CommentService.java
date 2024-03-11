@@ -35,8 +35,10 @@ public class CommentService {
             throw new AccessDeniedException("not authorized to add comments");
         }
         Document doc = documentService.getDocument(documentId, loggedInUser);
-        if (!doc.getCategory().getName().equalsIgnoreCase("petition")) {
-            throw new AccessDeniedException("comments can only be added to petition!");
+        String categoryName = doc.getCategory().getName().toLowerCase();
+        if (!categoryName.contains("petition")
+                && !categoryName.contains("medical report")) {
+            throw new AccessDeniedException("comments can only be added to petition and medical report!");
         }
         Comment comment = Comment.builder()
                 .document(doc)

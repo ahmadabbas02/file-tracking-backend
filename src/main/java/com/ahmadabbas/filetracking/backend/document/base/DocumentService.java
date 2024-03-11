@@ -69,7 +69,7 @@ public class DocumentService {
         }
         Category category = categoryService.getCategory(addRequest.categoryId(), addRequest.parentCategoryId(), loggedInUser);
         Student student = studentService.getStudent(addRequest.studentId(), loggedInUser);
-        String cloudPath = azureBlobService.upload(file, addRequest.studentId());
+        String cloudPath = azureBlobService.upload(file, addRequest.studentId(), category.getName(), addRequest.title());
         log.info("cloudPath received from uploading file: %s".formatted(cloudPath));
         Document document = Document.builder()
                 .category(category)

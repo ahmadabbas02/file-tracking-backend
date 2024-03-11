@@ -37,7 +37,7 @@ public class InternshipDocumentService {
         log.info("InternshipDocumentService.saveInternship");
         Student student = studentService.getStudent(addRequest.studentId(), loggedInUser);
         Category category = categoryService.getCategoryByName("Internship");
-        String cloudPath = azureBlobService.upload(file, addRequest.studentId());
+        String cloudPath = azureBlobService.upload(file, addRequest.studentId(), category.getName(), addRequest.title());
         log.info("cloudPath received from uploading file: %s".formatted(cloudPath));
         InternshipDocument internshipDocument = InternshipDocument.builder()
                 .category(category)

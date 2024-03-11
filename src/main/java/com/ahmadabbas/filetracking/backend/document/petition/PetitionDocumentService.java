@@ -58,7 +58,7 @@ public class PetitionDocumentService {
             if (filledPdf == null) {
                 throw new RuntimeException("couldn't generate petition form pdf.");
             }
-            String cloudPath = azureBlobService.upload(filledPdf, student.getId());
+            String cloudPath = azureBlobService.upload(filledPdf, student.getId(), category.getName(), addRequest.title());
             log.info("cloudPath = " + cloudPath);
             if (!filledPdf.delete()) {
                 log.warn("Failed to delete temp file @ {}", filledPdf.getAbsolutePath());

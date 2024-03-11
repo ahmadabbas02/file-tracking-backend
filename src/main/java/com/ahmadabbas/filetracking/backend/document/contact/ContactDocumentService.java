@@ -60,7 +60,7 @@ public class ContactDocumentService {
             if (filledPdf == null) {
                 throw new RuntimeException("couldn't generate contact form pdf.");
             }
-            String cloudPath = azureBlobService.upload(filledPdf, student.getId());
+            String cloudPath = azureBlobService.upload(filledPdf, student.getId(), category.getName(), addRequest.title());
             log.info("cloudPath = " + cloudPath);
             if (!filledPdf.delete()) {
                 log.warn("Failed to delete temp file @ {}", filledPdf.getAbsolutePath());
