@@ -17,7 +17,7 @@ public class Token {
     @SequenceGenerator(name = "token_id_generator", sequenceName = "token_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 500)
     private String token;
 
     private boolean expired;
