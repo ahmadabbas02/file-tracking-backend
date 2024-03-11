@@ -102,9 +102,13 @@ public class DocumentService {
 
         for (UUID uuid : uuids) {
             Document document = getDocument(uuid, loggedInUser);
+            String path = document.getPath();
 
-            InputStream blobInputStream = azureBlobService.getInputStream(document.getPath());
-            outputStream.putNextEntry(new ZipEntry(uuid.toString() + ".pdf"));
+            InputStream blobInputStream = azureBlobService.getInputStream(path);
+            int slashIndex = path.lastIndexOf("/");
+            String originalFileName = path.substring(slashIndex + 1);
+
+            outputStream.putNextEntry(new ZipEntry(originalFileName));
             byte[] buffer = new byte[1024];
             int length;
             while ((length = blobInputStream.read(buffer)) > 0) {
