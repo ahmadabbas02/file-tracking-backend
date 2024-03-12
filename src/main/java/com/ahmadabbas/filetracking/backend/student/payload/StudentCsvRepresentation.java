@@ -18,6 +18,8 @@ public class StudentCsvRepresentation {
     @CsvBindByName
     private String name;
     @CsvBindByName
+    private String surname;
+    @CsvBindByName
     private String password;
     @CsvBindByName
     private String email;

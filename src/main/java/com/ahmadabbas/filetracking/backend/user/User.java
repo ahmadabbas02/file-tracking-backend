@@ -22,10 +22,10 @@ import java.util.stream.Stream;
 @Builder
 @Entity
 @Table(
-        name = "_user",
-        indexes = {
-                @Index(name = "idx_user_name", columnList = "name")
-        }
+        name = "_user"
+//        indexes = {
+//                @Index(name = "idx_user_name", columnList = "name")
+//        }
 )
 @NamedEntityGraph(
         name = "User.eagerlyFetchRoles",
@@ -39,8 +39,7 @@ public class User implements UserDetails {
     @SequenceGenerator(name = "user_generator", sequenceName = "_user_seq", allocationSize = 1)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String name;
+    private Name name;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -121,4 +120,27 @@ public class User implements UserDetails {
                 .toString();
     }
 
+    @Getter
+    @Embeddable
+    public static class Name {
+        @Column(nullable = false)
+        private String firstName;
+        @Column(nullable = false)
+        private String lastName;
+
+        public Name(String firstName, String lastName) {
+            this.firstName = firstName;
+            this.lastName = lastName;
+        }
+
+        public Name() {
+
+        }
+
+        public String getFullName() {
+            return "%s %s".formatted(getFirstName(), getLastName());
+        }
+    }
 }
+
+

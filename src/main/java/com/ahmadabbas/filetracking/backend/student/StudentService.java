@@ -147,8 +147,9 @@ public class StudentService {
 
         Advisor advisor = advisorService.getAdvisorByAdvisorId(studentRegistrationRequest.advisorId(), loggedInUser);
 
+        User.Name name = new User.Name(studentRegistrationRequest.name(), studentRegistrationRequest.surname());
         User user = User.builder()
-                .name(studentRegistrationRequest.name())
+                .name(name)
                 .email(studentRegistrationRequest.email())
                 .password(passwordEncoder.encode(studentRegistrationRequest.password()))
                 .picture(studentRegistrationRequest.picture())
@@ -205,7 +206,7 @@ public class StudentService {
                 .map(s -> {
                     Advisor advisor = null;
                     User user = User.builder()
-                            .name(s.getName())
+                            .name(new User.Name(s.getName(), s.getSurname()))
                             .email(s.getEmail())
                             .password(passwordEncoder.encode(s.getPassword()))
                             .role(Role.STUDENT)

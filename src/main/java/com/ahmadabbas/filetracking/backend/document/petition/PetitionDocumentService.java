@@ -90,7 +90,7 @@ public class PetitionDocumentService {
 
     private File generatedFilledPetition(PetitionDocumentAddRequest addRequest,
                                          String studentId,
-                                         String studentName) throws IOException {
+                                         User.Name name) throws IOException {
         Resource pdfResource = resourceLoader.getResource("classpath:static/Student Petition Fillable.pdf");
         PdfReader reader = new PdfReader(pdfResource.getInputStream());
         File outputFile = File.createTempFile(studentId, ".pdf");
@@ -100,21 +100,13 @@ public class PetitionDocumentService {
             LocalDate localDate = LocalDate.now(ZoneId.of("Europe/Athens"));
             form.setField("studentNumber", studentId);
             form.setField("department", "Computer Engineering");
-            form.setField("studentNumber", studentId);
-            String firstname = studentName.split(" ")[0];
-            String surname;
-            if (studentName.split(" ").length > 1) {
-                surname = studentName.split(" ")[1];
-            } else {
-                surname = "-";
-            }
-            form.setField("name", firstname);
-            form.setField("surname", surname);
+            form.setField("name", name.getFirstName());
+            form.setField("surname", name.getLastName());
             form.setField("email", addRequest.email());
             form.setField("phoneNumber", addRequest.phoneNumber());
             form.setField("subject", addRequest.subject());
             form.setField("date", localDate.format(formatter));
-            form.setField("signature", studentName);
+            form.setField("signature", name.getFullName());
             form.setField("reason", addRequest.reasoning());
             stamp.setFormFlattening(true);
             return outputFile;

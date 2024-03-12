@@ -1,13 +1,9 @@
 package com.ahmadabbas.filetracking.backend.document.petition.payload;
 
 import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocument;
-import com.ahmadabbas.filetracking.backend.document.petition.comment.Comment;
+import com.ahmadabbas.filetracking.backend.user.User;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
-
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface PetitionDocumentMapper {
@@ -20,7 +16,7 @@ public interface PetitionDocumentMapper {
     @Mapping(source = "category.categoryId", target = "categoryId")
     @Mapping(source = "category.parentCategoryId", target = "categoryParentId")
     @Mapping(source = "student.id", target = "studentId")
-    @Mapping(source = "student.user.name", target = "studentName")
+    @Mapping(expression = "java(getUserFullName(petitionDocument.getStudent().getUser()))", target = "studentName")
     @Mapping(source = "student.program", target = "studentProgram")
     @Mapping(source = "student.year", target = "studentYear")
     @Mapping(source = "student.user.picture", target = "studentPicture")
@@ -30,6 +26,10 @@ public interface PetitionDocumentMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     PetitionDocument partialUpdate(PetitionDocumentDto petitionDocumentDto, @MappingTarget PetitionDocument petitionDocument);
+
+    default String getUserFullName(User user) {
+        return user.getName().getFullName();
+    }
 
 //    default LocalDateTime getLatestComment(PetitionDocument petitionDocument) {
 //        List<Comment> comments = petitionDocument.getComments();

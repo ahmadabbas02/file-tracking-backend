@@ -81,7 +81,7 @@ public class AdvisorService {
 
         User savedUser = userRepository.save(
                 User.builder()
-                        .name(advisorRegistrationRequest.name())
+                        .name(new User.Name(advisorRegistrationRequest.name(), advisorRegistrationRequest.surname()))
                         .email(advisorRegistrationRequest.email())
                         .password(passwordEncoder.encode(advisorRegistrationRequest.password()))
                         .role(Role.ADVISOR)

@@ -54,14 +54,14 @@ public class ContactDocumentService {
         }
         log.info("ContactDocumentService.addContactDocument");
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
-        Category category = categoryService.getCategoryByName("Contact Forms");
+        Category category = categoryService.getCategoryByName("Contact Form");
         try {
             File filledPdf = generateContactFilledPdf(addRequest, student, loggedInUser.getName());
             if (filledPdf == null) {
                 throw new RuntimeException("couldn't generate contact form pdf.");
             }
             String cloudPath = azureBlobService.upload(filledPdf, student.getId(), category.getName(), addRequest.title());
-            log.info("cloudPath = " + cloudPath);
+            log.info("cloudPath = {}", cloudPath);
             if (!filledPdf.delete()) {
                 log.warn("Failed to delete temp file @ {}", filledPdf.getAbsolutePath());
             }
@@ -82,7 +82,7 @@ public class ContactDocumentService {
         }
     }
 
-    private File generateContactFilledPdf(ContactDocumentAddRequest addRequest, Student student, String studentName) throws IOException {
+    private File generateContactFilledPdf(ContactDocumentAddRequest addRequest, Student student, User.Name name) throws IOException {
         Resource resource = resourceLoader.getResource("classpath:static/Student Information Fillable Form.pdf");
         PdfReader reader = new PdfReader(resource.getInputStream());
         File outputFile = File.createTempFile(student.getId(), ".pdf");
@@ -93,7 +93,7 @@ public class ContactDocumentService {
             form.setField("program", student.getProgram().toLowerCase());
             form.setField("date", localDate.format(formatter));
             form.setField("studentNumber", student.getId());
-            form.setField("studentName", studentName);
+            form.setField("studentName", name.getFullName());
             form.setField("studentEmail", addRequest.email());
             form.setField("homeTeleNumber", addRequest.phoneNumber());
             form.setField("mobileTeleNumber", addRequest.phoneNumber());

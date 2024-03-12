@@ -12,6 +12,7 @@ import java.util.List;
 
 public record StudentRegistrationRequest(
         @NotEmpty(message = "Student name should not be empty") String name,
+        @NotEmpty(message = "Student surname should not be empty") String surname,
         @Email(message = "Student email should be valid") String email,
         @NotEmpty(message = "Student name should not be empty") String password,
         @NotEmpty(message = "Student program should not be empty") String program,

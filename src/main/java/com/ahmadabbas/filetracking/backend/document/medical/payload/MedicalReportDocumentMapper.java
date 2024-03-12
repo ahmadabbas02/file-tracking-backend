@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.document.medical.payload;
 
 import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocument;
+import com.ahmadabbas.filetracking.backend.user.User;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -15,7 +16,7 @@ public interface MedicalReportDocumentMapper {
     @Mapping(source = "category.categoryId", target = "categoryId")
     @Mapping(source = "category.parentCategoryId", target = "categoryParentId")
     @Mapping(source = "student.id", target = "studentId")
-    @Mapping(source = "student.user.name", target = "studentName")
+    @Mapping(expression = "java(getStudentFullName(medicalReportDocument))", target = "studentName")
     @Mapping(source = "student.program", target = "studentProgram")
     @Mapping(source = "student.year", target = "studentYear")
     @Mapping(source = "student.user.picture", target = "studentPicture")
@@ -23,4 +24,9 @@ public interface MedicalReportDocumentMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     MedicalReportDocument partialUpdate(MedicalReportDto medicalReportDto, @MappingTarget MedicalReportDocument medicalReportDocument);
+
+    default String getStudentFullName(MedicalReportDocument medicalReportDocument) {
+        User user = medicalReportDocument.getStudent().getUser();
+        return user.getName().getFullName();
+    }
 }

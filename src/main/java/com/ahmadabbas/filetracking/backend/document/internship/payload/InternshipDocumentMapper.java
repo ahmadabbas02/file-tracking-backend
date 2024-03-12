@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.document.internship.payload;
 
 import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocument;
+import com.ahmadabbas.filetracking.backend.user.User;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -15,7 +16,7 @@ public interface InternshipDocumentMapper {
     @Mapping(source = "category.categoryId", target = "categoryId")
     @Mapping(source = "category.parentCategoryId", target = "categoryParentId")
     @Mapping(source = "student.id", target = "studentId")
-    @Mapping(source = "student.user.name", target = "studentName")
+    @Mapping(expression = "java(getStudentFullName(internshipDocument))", target = "studentName")
     @Mapping(source = "student.program", target = "studentProgram")
     @Mapping(source = "student.year", target = "studentYear")
     @Mapping(source = "student.user.picture", target = "studentPicture")
@@ -24,4 +25,9 @@ public interface InternshipDocumentMapper {
     @InheritConfiguration(name = "toEntity")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     InternshipDocument partialUpdate(InternshipDocumentDto internshipDto, @MappingTarget InternshipDocument internshipDocument);
+
+    default String getStudentFullName(InternshipDocument internshipDocument) {
+        User user = internshipDocument.getStudent().getUser();
+        return user.getName().getFullName();
+    }
 }
