@@ -14,6 +14,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             join fetch User u
             on u.id = c.user.id
             where c.document.id = :id
+            order by c.postedAt desc
             """)
     List<Comment> findAllByDocumentId(UUID id);
 
