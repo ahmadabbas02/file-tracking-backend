@@ -84,7 +84,7 @@ public class DocumentService {
 
     public byte[] getDocumentPreview(User loggedInUser, UUID uuid) throws IOException {
         Document document = getDocument(uuid, loggedInUser);
-        try (InputStream inputStream = azureBlobService.getInputStream(document.getPath())) {
+        try (InputStream inputStream = azureBlobService.getInputStream(document.getPath(), uuid)) {
             return inputStream.readAllBytes();
         }
     }
@@ -97,7 +97,7 @@ public class DocumentService {
             Document document = getDocument(uuid, loggedInUser);
             String path = document.getPath();
 
-            InputStream blobInputStream = azureBlobService.getInputStream(path);
+            InputStream blobInputStream = azureBlobService.getInputStream(path, uuid);
             int slashIndex = path.lastIndexOf("/");
             String originalFileName = path.substring(slashIndex + 1);
 

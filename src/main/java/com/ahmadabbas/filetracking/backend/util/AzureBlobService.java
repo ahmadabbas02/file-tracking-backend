@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.util;
 
 import com.ahmadabbas.filetracking.backend.exception.APIException;
+import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -86,8 +88,13 @@ public class AzureBlobService {
         return true;
     }
 
-    public InputStream getInputStream(String blobName) {
+    public InputStream getInputStream(String blobName, UUID uuid) {
         BlobClient blobClient = blobContainerClient.getBlobClient(blobName);
+        if (!blobClient.exists()) {
+            throw new ResourceNotFoundException(
+                    "requested file with id `%s` does not exist".formatted(uuid.toString())
+            );
+        }
         return blobClient.downloadContent().toStream();
     }
 
