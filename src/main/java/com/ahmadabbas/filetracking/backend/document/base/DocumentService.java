@@ -45,15 +45,7 @@ public class DocumentService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "document with id `%s` not found".formatted(uuid)
                 ));
-        Set<Role> roles = loggedInUser.getRoles();
-        if (roles.contains(Role.STUDENT)
-                && !Objects.equals(document.getStudent().getUser().getId(), loggedInUser.getId())) {
-            throw new AccessDeniedException("not authorized to get other student's documents");
-        } else if (roles.contains(Role.ADVISOR)) {
-            if (!document.getStudent().getAdvisor().getUser().getId().equals(loggedInUser.getId())) {
-                throw new AccessDeniedException("not authorized to get not own student's documents.");
-            }
-        }
+        Set<Role> roles = getRoles(loggedInUser, document);
         List<Category> allowedCategories = categoryService.getAllowedCategories(roles);
         if (!allowedCategories.contains(document.getCategory())) {
             throw new AccessDeniedException("not authorized, not allowed to view %s category".formatted(document.getCategory().getName()));
@@ -171,7 +163,7 @@ public class DocumentService {
         if (loggedInUser.getRoles().contains(Role.STUDENT)) {
             Student student = studentService.getStudentByUserId(loggedInUser.getId());
             studentId = student.getId();
-            log.info("setting studentId to the logged in student: " + student.getId());
+            log.info("setting studentId to the logged in student: {}", student.getId());
         } else if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
             if (!studentId.equals("-1")) {
                 Student student = studentService.getStudent(studentId, loggedInUser);
@@ -186,15 +178,15 @@ public class DocumentService {
         boolean isMainCategoriesAllowed = categoryIds.isEmpty() || new HashSet<>(allowedCategoriesIds).containsAll(categoryIds);
         boolean isChildrenCategoriesAllowed = parentCategoryIds.isEmpty() || new HashSet<>(allowedCategoriesIds).containsAll(parentCategoryIds);
         if (!isMainCategoriesAllowed || !isChildrenCategoriesAllowed) {
-            log.info("categoryIds = " + categoryIds);
-            log.info("parentCategoryIds = " + parentCategoryIds);
-            log.info("allowedCategoriesIds = " + allowedCategoriesIds);
+            log.info("categoryIds = {}", categoryIds);
+            log.info("parentCategoryIds = {}", parentCategoryIds);
+            log.info("allowedCategoriesIds = {}", allowedCategoriesIds);
             throw new AccessDeniedException("you are not allowed to get documents in given categories");
         }
         Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
         Page<Document> documentPage;
-        log.debug("loggedInUser = " + loggedInUser + ", pageNo = " + pageNo + ", pageSize = " + pageSize + ", sortBy = " + sortBy + ", order = " + order + ", studentId = " + studentId + ", categoryIds = " + categoryIds + ", parentCategoryIds = " + parentCategoryIds);
-        log.debug("allowedCategoriesIds = " + allowedCategoriesIds);
+        log.debug("loggedInUser = {}, pageNo = {}, pageSize = {}, sortBy = {}, order = {}, studentId = {}, categoryIds = {}, parentCategoryIds = {}", loggedInUser, pageNo, pageSize, sortBy, order, studentId, categoryIds, parentCategoryIds);
+        log.debug("allowedCategoriesIds = {}", allowedCategoriesIds);
         if (studentId.equals("-1")) {
             if (categoryIds.isEmpty() && parentCategoryIds.isEmpty()) {
                 if (studentIds.isEmpty()) {
@@ -278,5 +270,18 @@ public class DocumentService {
                 documents.totalPages(),
                 documents.isLastPage()
         );
+    }
+
+    private Set<Role> getRoles(User loggedInUser, Document document) {
+        Set<Role> roles = loggedInUser.getRoles();
+        if (roles.contains(Role.STUDENT)
+            && !Objects.equals(document.getStudent().getUser().getId(), loggedInUser.getId())) {
+            throw new AccessDeniedException("not authorized to get other student's documents");
+        } else if (roles.contains(Role.ADVISOR)) {
+            if (!document.getStudent().getAdvisor().getUser().getId().equals(loggedInUser.getId())) {
+                throw new AccessDeniedException("not authorized to get not own student's documents.");
+            }
+        }
+        return roles;
     }
 }

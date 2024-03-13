@@ -24,17 +24,18 @@ public class AzureBlobService {
 
     private final BlobContainerClient blobContainerClient;
 
-    public String upload(File file, String parentFolder, String categoryName, String title) throws IOException {
+    public String upload(File file,
+                         String parentFolder,
+                         String categoryName,
+                         String title) throws IOException {
         if (file == null || !file.isFile()) {
             throw new RuntimeException("failed to upload");
         }
-        log.debug("AzureBlobService.upload");
-        log.debug("file = " + file + ", parentFolder = " + parentFolder + ", categoryName = " + categoryName + ", title = " + title);
+        log.debug("file = {}, parentFolder = {}, categoryName = {}, title = {}", file, parentFolder, categoryName, title);
         String fullPath = getNonDuplicateFullPath(categoryName,
                 title,
                 file.getName(),
                 parentFolder);
-        log.debug("fullPath = " + fullPath);
         BlobClient blob = blobContainerClient.getBlobClient(fullPath);
 
         FileInputStream inputStream = new FileInputStream(file);
@@ -50,13 +51,11 @@ public class AzureBlobService {
         if (multipartFile == null || multipartFile.getOriginalFilename() == null) {
             throw new RuntimeException("failed to upload");
         }
-        log.debug("AzureBlobService.upload");
-        log.debug("multipartFile = " + multipartFile + ", parentFolder = " + parentFolder + ", categoryName = " + categoryName + ", title = " + title);
+        log.debug("multipartFile = {}, parentFolder = {}, categoryName = {}, title = {}", multipartFile, parentFolder, categoryName, title);
         String fullPath = getNonDuplicateFullPath(categoryName,
                 title,
                 multipartFile.getOriginalFilename(),
                 parentFolder);
-        log.debug("fullPath = " + fullPath);
         BlobClient blob = blobContainerClient.getBlobClient(fullPath);
         blob.upload(multipartFile.getInputStream(), multipartFile.getSize(), true);
         return fullPath;
@@ -96,11 +95,11 @@ public class AzureBlobService {
                                            String title,
                                            String originalFileName,
                                            String parentFolder) {
-        log.debug("categoryName = " + categoryName + ", title = " + title + ", originalFileName = " + originalFileName + ", parentFolder = " + parentFolder);
+        log.debug("categoryName = {}, title = {}, originalFileName = {}, parentFolder = {}", categoryName, title, originalFileName, parentFolder);
         title = FileNameUtil.sanitizeFileName(title);
         originalFileName = FileNameUtil.sanitizeFileName(originalFileName);
-        log.debug("title = " + title);
-        log.debug("originalFileName = " + originalFileName);
+        log.debug("title = {}", title);
+        log.debug("originalFileName = {}", originalFileName);
         String fileNameWithoutExtension = "%s-%s"
                 .formatted(categoryName, title);
         String fileName = "%s%s"
@@ -114,7 +113,7 @@ public class AzureBlobService {
                                 .replace(FileNameUtil.getFileExtension(name), "")
                 )
                 .toList();
-        log.debug("blobsInParentFolder = " + blobsInParentFolder);
+        log.debug("blobsInParentFolder = {}", blobsInParentFolder);
 
         int count = 1;
         while (blobsInParentFolder.contains(fileNameWithoutExtension)) {

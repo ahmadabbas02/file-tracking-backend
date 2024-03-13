@@ -1,6 +1,5 @@
 package com.ahmadabbas.filetracking.backend.config;
 
-import com.ahmadabbas.filetracking.backend.util.PageableUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,8 +36,4 @@ public class ApplicationConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public PageableUtil pageableUtil() {
-        return new PageableUtil();
-    }
 }

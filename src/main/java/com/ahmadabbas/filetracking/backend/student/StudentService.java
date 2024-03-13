@@ -87,7 +87,7 @@ public class StudentService {
         log.info("Roles = %s".formatted(roles));
         if (roles.contains(Role.ADVISOR)) {
             if (searchQuery.isEmpty()) {
-                log.info("No search query provided, getting all students..");
+                log.info("No search query provided, getting all advisor students..");
                 studentPage = studentDao.getAllStudentsByAdvisorUserId(loggedInUser.getId(), pageable);
             } else {
                 // TODO: Decide how we want searching to be done
@@ -240,13 +240,13 @@ public class StudentService {
         List<Student> savedStudents = studentDao.saveAll(students);
         Instant endSaveStudents = Instant.now();
 
-        log.info("Time taken to parse csv: " + Duration.between(startParseCsv, endParseCsv).toMillis());
-        log.info("Time taken to partition: " + Duration.between(startPartition, endPartition).toMillis());
-        log.info("Time taken to filter: " + Duration.between(startFilter, endFilter).toMillis());
-        log.info("Time taken to wrong information: " + Duration.between(startWrongInformation, endWrongInformation).toMillis());
-        log.info("Time taken to build student list: " + Duration.between(startBuildList, endBuildList).toMillis());
-        log.info("Time taken to save users list: " + Duration.between(startSaveUsers, endSaveUsers).toMillis());
-        log.info("Time taken to save student list: " + Duration.between(startSaveStudents, endSaveStudents).toMillis());
+        log.info("Time taken to parse csv: {}", Duration.between(startParseCsv, endParseCsv).toMillis());
+        log.info("Time taken to partition: {}", Duration.between(startPartition, endPartition).toMillis());
+        log.info("Time taken to filter: {}", Duration.between(startFilter, endFilter).toMillis());
+        log.info("Time taken to wrong information: {}", Duration.between(startWrongInformation, endWrongInformation).toMillis());
+        log.info("Time taken to build student list: {}", Duration.between(startBuildList, endBuildList).toMillis());
+        log.info("Time taken to save users list: {}", Duration.between(startSaveUsers, endSaveUsers).toMillis());
+        log.info("Time taken to save student list: {}", Duration.between(startSaveStudents, endSaveStudents).toMillis());
         return CsvUploadResponse.builder()
                 .successCount(savedStudents.size())
                 .failedCount(studentsWithWrongInformation.size())
