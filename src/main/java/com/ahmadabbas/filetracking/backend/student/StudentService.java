@@ -78,7 +78,11 @@ public class StudentService {
     }
 
     public PaginatedResponse<StudentDto> getAllStudents(User loggedInUser,
-                                                        int pageNo, int pageSize, String sortBy, String order,
+                                                        int pageNo,
+                                                        int pageSize,
+                                                        String sortBy,
+                                                        String order,
+                                                        String advisorId,
                                                         String searchQuery) {
         Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
         Page<Student> studentPage;
@@ -93,19 +97,32 @@ public class StudentService {
                 // TODO: Decide how we want searching to be done
                 log.info("Provided search query: '%s', getting all students..".formatted(searchQuery));
                 studentPage = StringUtils.isNumeric(searchQuery)
-                        ? studentDao.getAllStudentsByIdAndAdvisor(false, searchQuery, loggedInUser.getId(), pageable)
-                        : studentDao.getAllStudentsByNameAndAdvisor(true, searchQuery, loggedInUser.getId(), pageable);
+                        ? studentDao.getAllStudentsByIdAndAdvisorUserId(false, searchQuery, loggedInUser.getId(), pageable)
+                        : studentDao.getAllStudentsByNameAndAdvisorUserId(true, searchQuery, loggedInUser.getId(), pageable);
             }
         } else {
-            if (searchQuery.isEmpty()) {
-                log.info("No search query provided, getting all students..");
-                studentPage = studentDao.getAllStudents(pageable);
+            if (advisorId.isBlank()) {
+                if (searchQuery.isEmpty()) {
+                    log.info("No search query provided, getting all students..");
+                    studentPage = studentDao.getAllStudents(pageable);
+                } else {
+                    // TODO: Decide how we want searching to be done
+                    log.info("Provided search query: '%s', getting all students..".formatted(searchQuery));
+                    studentPage = StringUtils.isNumeric(searchQuery)
+                            ? studentDao.getAllStudentsById(false, searchQuery, pageable)
+                            : studentDao.getAllStudentsByName(true, searchQuery, pageable);
+                }
             } else {
-                // TODO: Decide how we want searching to be done
-                log.info("Provided search query: '%s', getting all students..".formatted(searchQuery));
-                studentPage = StringUtils.isNumeric(searchQuery)
-                        ? studentDao.getAllStudentsById(false, searchQuery, pageable)
-                        : studentDao.getAllStudentsByName(true, searchQuery, pageable);
+                if (searchQuery.isEmpty()) {
+                    log.info("No search query provided, getting all students..");
+                    studentPage = studentDao.getAllStudentsByAdvisorId(advisorId, pageable);
+                } else {
+                    // TODO: Decide how we want searching to be done
+                    log.info("Provided search query: '%s', getting all students..".formatted(searchQuery));
+                    studentPage = StringUtils.isNumeric(searchQuery)
+                            ? studentDao.getAllStudentsByIdAndAdvisorId(searchQuery, advisorId, pageable)
+                            : studentDao.getAllStudentsByNameAndAdvisorId(searchQuery, advisorId, pageable);
+                }
             }
         }
 
@@ -182,7 +199,7 @@ public class StudentService {
                                         return false;
                                     }
                                     return s.getAdvisorId() == null || s.getAdvisorId().isBlank()
-                                            || advisorRepository.existsById(s.getAdvisorId());
+                                           || advisorRepository.existsById(s.getAdvisorId());
                                 }
                         )
                 );

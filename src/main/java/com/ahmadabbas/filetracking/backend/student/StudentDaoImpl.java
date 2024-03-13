@@ -61,19 +61,19 @@ public class StudentDaoImpl implements StudentDao {
     }
 
     @Override
-    public Page<Student> getAllStudentsByIdAndAdvisor(boolean contains, String id, Long userId, Pageable pageable) {
+    public Page<Student> getAllStudentsByIdAndAdvisorUserId(boolean contains, String id, Long userId, Pageable pageable) {
         if (contains) {
-            return studentRepository.findAllByIdContainsAndAdvisor(id, userId, pageable);
+            return studentRepository.findAllByIdContainsAndAdvisorUserId(id, userId, pageable);
         }
-        return studentRepository.findAllByIdStartsWithAndAdvisor(id, userId, pageable);
+        return studentRepository.findAllByIdStartsWithAndAdvisorUserId(id, userId, pageable);
     }
 
     @Override
-    public Page<Student> getAllStudentsByNameAndAdvisor(boolean contains, String name, Long userId, Pageable pageable) {
+    public Page<Student> getAllStudentsByNameAndAdvisorUserId(boolean contains, String name, Long userId, Pageable pageable) {
         if (contains) {
-            return studentRepository.findAllByNameContainsAndAdvisor(name, userId, pageable);
+            return studentRepository.findAllByNameContainsAndAdvisorUserId(name, userId, pageable);
         }
-        return studentRepository.findAllByNameStartsWithAndAdvisor(name, userId, pageable);
+        return studentRepository.findAllByNameStartsWithAndAdvisorUserId(name, userId, pageable);
     }
 
     @Override
@@ -84,5 +84,20 @@ public class StudentDaoImpl implements StudentDao {
     @Override
     public List<String> getAllStudentIdsByAdvisorUserId(Long userId) {
         return studentRepository.findAllByAdvisorUserId(userId);
+    }
+
+    @Override
+    public Page<Student> getAllStudentsByAdvisorId(String advisorId, Pageable pageable) {
+        return studentRepository.findAllByAdvisorId(advisorId, pageable);
+    }
+
+    @Override
+    public Page<Student> getAllStudentsByNameAndAdvisorId(String name, String advisorId, Pageable pageable) {
+        return studentRepository.findAllByNameContainsAndAdvisorId(name, advisorId, pageable);
+    }
+
+    @Override
+    public Page<Student> getAllStudentsByIdAndAdvisorId(String studentId, String advisorId, Pageable pageable) {
+        return studentRepository.findAllByIdStartsWithAndAdvisorId(studentId, advisorId, pageable);
     }
 }

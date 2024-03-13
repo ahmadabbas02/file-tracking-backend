@@ -21,12 +21,17 @@ public interface StudentDao {
 
     Page<Student> getAllStudentsByName(boolean contains, String name, Pageable pageable);
 
-    Page<Student> getAllStudentsByIdAndAdvisor(boolean contains, String id, Long userId, Pageable pageable);
+    Page<Student> getAllStudentsByIdAndAdvisorUserId(boolean contains, String id, Long userId, Pageable pageable);
 
-    Page<Student> getAllStudentsByNameAndAdvisor(boolean contains, String name, Long userId, Pageable pageable);
+    Page<Student> getAllStudentsByNameAndAdvisorUserId(boolean contains, String name, Long userId, Pageable pageable);
 
     Page<Student> getAllStudentsByAdvisorUserId(Long userId, Pageable pageable);
 
     List<String> getAllStudentIdsByAdvisorUserId(Long userId);
 
+    Page<Student> getAllStudentsByAdvisorId(String advisorId, Pageable pageable);
+
+    Page<Student> getAllStudentsByNameAndAdvisorId(String name, String advisorId, Pageable pageable);
+
+    Page<Student> getAllStudentsByIdAndAdvisorId(String studentId, String advisorId, Pageable pageable);
 }
