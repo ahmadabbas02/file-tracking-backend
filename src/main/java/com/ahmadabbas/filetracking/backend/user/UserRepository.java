@@ -11,9 +11,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph("User.eagerlyFetchRoles")
     Optional<User> findByEmail(String email);
 
-//    @Query("select u from User u where u.role != 'CHAIR' and u.role != 'VICE_CHAIR'")
-//    List<User> findAllNonAdminUsers();
-
     default List<User> findAllNonAdminUsers() {
         return findByRolesNotIn(Role.CHAIR, Role.VICE_CHAR);
     }
@@ -27,5 +24,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
 
-    boolean existsByName(String name);
+    @Query("""
+            select (count(u) > 0) from User u
+            where upper(u.name.firstName) = upper(?1) and upper(u.name.lastName) = upper(?2)""")
+    boolean existsByName(String firstName, String lastName);
+
+
 }

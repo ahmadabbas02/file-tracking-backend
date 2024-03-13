@@ -73,7 +73,7 @@ public class AdvisorService {
             );
         }
 
-        if (userRepository.existsByName(advisorRegistrationRequest.name())) {
+        if (userRepository.existsByName(advisorRegistrationRequest.name(), advisorRegistrationRequest.surname())) {
             throw new DuplicateResourceException(
                     "name already taken"
             );

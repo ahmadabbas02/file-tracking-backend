@@ -20,7 +20,11 @@ public interface AdvisorRepository extends JpaRepository<Advisor, String> {
     Page<Advisor> findAllByIdStartsWith(String id, Pageable pageable);
 
     @EntityGraph(value = "Advisor.eagerlyFetchUser")
-    @Query("select a from Advisor a where upper(a.user.name) like upper(concat('%', :name, '%'))")
+    @Query("""
+            select a from Advisor a
+            where upper(a.user.name.firstName) like upper(concat('%', :name, '%'))
+            or upper(a.user.name.lastName) like upper(concat('%', :name, '%'))
+            """)
     Page<Advisor> findAllByNameContains(String name, Pageable pageable);
 
 

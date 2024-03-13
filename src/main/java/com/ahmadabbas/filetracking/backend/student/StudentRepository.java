@@ -15,7 +15,6 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     @Override
     @Query("""
             select s from Student s
-            
             """)
     @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAll(@NonNull Pageable pageable);
@@ -37,44 +36,75 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     @EntityGraph(value = "Student.eagerlyFetchUser")
     List<String> findAllByAdvisorUserId(Long userId);
 
-    @Query("select s from Student s where upper(s.id) like upper(concat(?1, '%'))")
+    @Query("""
+            select s from Student s
+            where upper(s.id) like concat(?1, '%')
+            """)
     @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAllByIdStartsWith(@NonNull String id,
                                         Pageable pageable);
 
-    @Query("select s from Student s where upper(s.id) like upper(concat('%', ?1, '%'))")
+    @Query("""
+            select s from Student s
+            where upper(s.id) like upper(concat('%', ?1, '%'))
+            """)
     @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAllByIdContains(@NonNull String id,
                                       Pageable pageable);
 
-    @Query("select s from Student s where upper(s.id) like upper(concat(?1, '%')) and s.advisor.user.id = ?2")
+    @Query("""
+            select s from Student s
+            where upper(s.id) like upper(concat(?1, '%'))
+            and s.advisor.user.id = ?2
+            """)
     @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAllByIdStartsWithAndAdvisor(@NonNull String id,
                                                   Long userId,
                                                   Pageable pageable);
 
-    @Query("select s from Student s where upper(s.id) like upper(concat('%', ?1, '%')) and s.advisor.user.id = ?2")
+    @Query("""
+            select s from Student s
+            where upper(s.id) like upper(concat('%', ?1, '%'))
+            and s.advisor.user.id = ?2
+            """)
     @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAllByIdContainsAndAdvisor(@NonNull String id,
                                                 Long userId,
                                                 Pageable pageable);
 
-    @Query("select s from Student s where upper(s.user.name) like upper(concat(?1, '%'))")
+    @Query("""
+            select s from Student s
+            where upper(s.user.name.firstName) like upper(concat(?1, '%'))
+            or upper(s.user.name.lastName) like upper(concat(?1, '%'))
+            """)
     @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAllByNameStartsWith(@NonNull String name,
                                           Pageable pageable);
 
-    @Query("select s from Student s where upper(s.user.name) like upper(concat('%', ?1, '%'))")
+    @Query("""
+            select s from Student s
+            where upper(s.user.name.firstName) like upper(concat('%', ?1, '%'))
+            or upper(s.user.name.lastName) like upper(concat('%', ?1, '%'))""")
     @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAllByNameContains(@NonNull String name, Pageable pageable);
 
-    @Query("select s from Student s where upper(s.user.name) like upper(concat(?1, '%')) and s.advisor.user.id = ?2")
+    @Query("""
+            select s from Student s
+            where (upper(s.user.name.firstName) like upper(concat(?1, '%'))
+            or upper(s.user.name.lastName) like upper(concat(?1, '%')))
+            and s.advisor.user.id = ?2
+            """)
     @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAllByNameStartsWithAndAdvisor(@NonNull String name,
                                                     Long userId,
                                                     Pageable pageable);
 
-    @Query("select s from Student s where upper(s.user.name) like upper(concat('%', ?1, '%')) and s.advisor.user.id = ?2")
+    @Query("""
+            select s from Student s
+            where (upper(s.user.name.firstName) like upper(concat('%', ?1, '%'))
+            or upper(s.user.name.lastName) like upper(concat('%', ?1, '%')))
+            and s.advisor.user.id = ?2
+            """)
     @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAllByNameContainsAndAdvisor(@NonNull String name,
                                                   Long userId,
