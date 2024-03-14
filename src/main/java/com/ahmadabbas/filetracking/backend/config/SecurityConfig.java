@@ -4,9 +4,7 @@ import com.ahmadabbas.filetracking.backend.auth.JwtAuthenticationFilter;
 import com.ahmadabbas.filetracking.backend.exception.AuthEntryPoint;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -18,6 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
 
 
 @Configuration
@@ -55,67 +56,32 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .httpBasic(e -> e.authenticationEntryPoint(authEntryPoint))
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers(WHITE_LIST_URL)
-                                .permitAll()
+                        req.requestMatchers(WHITE_LIST_URL).permitAll()
                                 // Adding new students or advisor
-                                .requestMatchers(
-                                        HttpMethod.POST,
-                                        "/api/v1/students",
-                                        "/api/v1/students/upload",
-                                        "/api/v1/advisors"
-                                ).hasRole(Role.ADMINISTRATOR.name())
+                                .requestMatchers(POST, "/api/v1/students", "/api/v1/students/upload", "/api/v1/advisors")
+                                .hasRole(Role.ADMINISTRATOR.name())
                                 // Modifying/changing category of a document
                                 .requestMatchers("/api/v1/documents/modify-category")
                                 .hasAnyRole(Role.ADMINISTRATOR.name(), Role.SECRETARY.name())
                                 // Getting all advisors
-                                .requestMatchers(
-                                        HttpMethod.GET,
-                                        "/api/v1/advisors"
-                                )
-                                .hasAnyRole(
-                                        Role.ADMINISTRATOR.name(), Role.CHAIR.name(),
-                                        Role.VICE_CHAR.name(), Role.SECRETARY.name()
-                                )
+                                .requestMatchers(GET, "/api/v1/advisors")
+                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.VICE_CHAR.name(), Role.SECRETARY.name())
                                 // Getting all students
-                                .requestMatchers(
-                                        HttpMethod.GET,
-                                        "/api/v1/students"
-                                )
-                                .hasAnyRole(
-                                        Role.ADMINISTRATOR.name(), Role.CHAIR.name(),
-                                        Role.VICE_CHAR.name(), Role.SECRETARY.name(),
-                                        Role.ADVISOR.name()
-                                )
+                                .requestMatchers(GET, "/api/v1/students")
+                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.VICE_CHAR.name(), Role.SECRETARY.name(), Role.ADVISOR.name())
                                 // Only students can add contact document
-                                .requestMatchers(
-                                        HttpMethod.POST,
-                                        "api/v1/documents/upload/contact",
-                                        "api/v1/documents/upload/petition",
-                                        "api/v1/documents/upload/medical-report"
-                                )
+                                .requestMatchers(POST, "api/v1/documents/upload/contact", "api/v1/documents/upload/petition", "api/v1/documents/upload/medical-report")
                                 .hasRole(Role.STUDENT.name())
                                 // category creation
-                                .requestMatchers(
-                                        HttpMethod.POST,
-                                        "api/v1/categories"
-                                )
-                                .hasAnyRole(
-                                        Role.ADMINISTRATOR.name(), Role.CHAIR.name(),
-                                        Role.VICE_CHAR.name(), Role.SECRETARY.name()
-                                )
+                                .requestMatchers(POST, "api/v1/categories")
+                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.VICE_CHAR.name(), Role.SECRETARY.name())
                                 // only secretary and admin can upload
-                                .requestMatchers(
-                                        HttpMethod.POST,
-                                        "api/v1/documents/upload",
-                                        "api/v1/documents/upload/internship"
-                                )
-                                .hasAnyRole(
-                                        Role.ADMINISTRATOR.name(), Role.SECRETARY.name()
-                                )
-                                // only admin can change category perms
-                                .requestMatchers("api/v1/categories/permissions/")
+                                .requestMatchers(POST, "api/v1/documents/upload", "api/v1/documents/upload/internship")
+                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.SECRETARY.name())
+                                // only admin can get access to all category perms and changing them
+                                .requestMatchers("api/v1/categories/permissions/**")
                                 .hasRole(Role.ADMINISTRATOR.name())
-                                // only advisors can approve petitions
+                                // only advisors can approve documents
                                 .requestMatchers("api/v1/documents/*/approve")
                                 .hasRole(Role.ADVISOR.name())
                                 .anyRequest()

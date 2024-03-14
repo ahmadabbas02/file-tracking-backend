@@ -1,14 +1,9 @@
 package com.ahmadabbas.filetracking.backend.category;
 
-import com.ahmadabbas.filetracking.backend.category.payload.CategoryPermissionRequestDto;
-import com.ahmadabbas.filetracking.backend.category.payload.FullCategoryResponse;
-import com.ahmadabbas.filetracking.backend.category.permission.CategoryPermission;
-import com.ahmadabbas.filetracking.backend.category.permission.CategoryPermissionRepository;
-import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
-import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
-import com.ahmadabbas.filetracking.backend.user.Role;
-import com.ahmadabbas.filetracking.backend.user.User;
-import com.ahmadabbas.filetracking.backend.user.UserService;
+import com.ahmadabbas.filetracking.backend.category.payload.*;
+import com.ahmadabbas.filetracking.backend.category.permission.*;
+import com.ahmadabbas.filetracking.backend.exception.*;
+import com.ahmadabbas.filetracking.backend.user.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -86,41 +81,25 @@ public class CategoryService {
     public List<Category> getAllowedCategories(Set<Role> roles) {
         List<Category> categories = new ArrayList<>(Collections.emptyList());
         if (roles.stream().anyMatch(role -> role.equals(Role.ADMINISTRATOR)
-                                            || role.equals(Role.CHAIR)
-                                            || role.equals(Role.VICE_CHAR)
-                                            || role.equals(Role.SECRETARY))) {
+                || role.equals(Role.CHAIR)
+                || role.equals(Role.VICE_CHAR)
+                || role.equals(Role.SECRETARY))) {
             return categoryRepository.findAll();
         }
         for (var role : roles) {
             Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findByRole(role);
             categoryPermissions.forEach(permission -> {
                 Category category = permission.getCategory();
-                if (category != null && category.getParentCategoryId() == -1) categories.add(category);
+                if (category != null) categories.add(category);
             });
         }
         return categories;
     }
 
     public List<Long> getAllowedCategoriesIds(Set<Role> roles) {
-        List<Long> categoryIds = new ArrayList<>(Collections.emptyList());
-        if (roles.stream().anyMatch(role -> role.equals(Role.ADMINISTRATOR)
-                                            || role.equals(Role.CHAIR)
-                                            || role.equals(Role.VICE_CHAR)
-                                            || role.equals(Role.SECRETARY))) {
-            return categoryRepository.findAll()
-                    .stream()
-                    .map(Category::getCategoryId).toList();
-        }
-        categoryIds.add(-1L);
-        for (var role : roles) {
-            Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findByRole(role);
-            categoryPermissions.forEach(permission -> {
-                Category category = permission.getCategory();
-                if (category != null && category.getParentCategoryId() == -1)
-                    categoryIds.add(category.getCategoryId());
-            });
-        }
-        return categoryIds;
+        var allCategories = getAllowedCategories(roles);
+        return allCategories.stream()
+                .map(Category::getCategoryId).toList();
     }
 
     public List<Category> getAllChildrenCategories(Long parentId) {
@@ -128,8 +107,8 @@ public class CategoryService {
     }
 
     public List<Category> getAllChildrenCategories(Long parentId, User user) {
-        List<Long> allowedCategories = getAllowedCategoriesIds(user.getRoles());
-        if (!allowedCategories.contains(parentId)) {
+        List<Long> allowedCategoriesIds = getAllowedCategoriesIds(user.getRoles());
+        if (!allowedCategoriesIds.contains(parentId)) {
             throw new AccessDeniedException("not allowed to get children categories of `%s`".formatted(parentId));
         }
         return categoryRepository.findByParentCategoryId(parentId);
@@ -181,5 +160,21 @@ public class CategoryService {
             ));
         }
         return category;
+    }
+
+    public List<FullCategoryPermissionResponse> getAllCategoryPermissions() {
+        Map<Long, FullCategoryPermissionResponse> categoryMap = new HashMap<>();
+        List<CategoryPermission> allPerms = categoryPermissionRepository.findAll();
+        for (var perm : allPerms) {
+            long categoryId = perm.getCategory().getCategoryId();
+            String name = perm.getCategory().getName();
+
+            FullCategoryPermissionResponse categoryResponse = categoryMap.getOrDefault(categoryId,
+                    new FullCategoryPermissionResponse(categoryId, name, new ArrayList<>()));
+
+            categoryResponse.permittedRoles().add(perm.getRole());
+            categoryMap.put(categoryId, categoryResponse);
+        }
+        return categoryMap.values().stream().toList();
     }
 }

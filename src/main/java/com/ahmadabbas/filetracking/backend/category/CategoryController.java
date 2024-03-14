@@ -1,13 +1,11 @@
 package com.ahmadabbas.filetracking.backend.category;
 
-import com.ahmadabbas.filetracking.backend.category.payload.CategoryPermissionRequestDto;
-import com.ahmadabbas.filetracking.backend.category.payload.FullCategoryResponse;
+import com.ahmadabbas.filetracking.backend.category.payload.*;
 import com.ahmadabbas.filetracking.backend.user.User;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,6 +50,15 @@ public class CategoryController {
     @GetMapping("{parentId}")
     public ResponseEntity<List<Category>> getAllChildrenCategories(@PathVariable Long parentId, @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(categoryService.getAllChildrenCategories(parentId, user));
+    }
+
+    @Operation(
+            summary = "Get all category permissions",
+            description = "Returns all the category visibility permissions."
+    )
+    @GetMapping("/permissions")
+    public ResponseEntity<List<FullCategoryPermissionResponse>> getAllCategoryPermissions() {
+        return ResponseEntity.ok(categoryService.getAllCategoryPermissions());
     }
 
     @Operation(

@@ -12,7 +12,7 @@ import java.util.StringJoiner;
 @Getter
 @Entity
 @NamedEntityGraph(
-        name = "CategoryPermission.eagerlyFetchCourse",
+        name = "CategoryPermission.eagerlyFetchCategory",
         attributeNodes = @NamedAttributeNode("category")
 )
 public class CategoryPermission {
