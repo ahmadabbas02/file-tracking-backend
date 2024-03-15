@@ -7,6 +7,6 @@ import jakarta.validation.constraints.Positive;
 public record CategoryPermissionRequestDto(
         boolean delete,
         @Positive Long categoryId,
-        @RoleTypeSubSet(anyOf = {Role.STUDENT, Role.ADVISOR}) Role role
+        @RoleTypeSubSet(anyOf = {Role.STUDENT, Role.ADVISOR, Role.SECRETARY, Role.CHAIR}) Role role
 ) {
 }
