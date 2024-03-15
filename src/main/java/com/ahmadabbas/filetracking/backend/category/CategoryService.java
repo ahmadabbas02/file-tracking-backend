@@ -54,15 +54,20 @@ public class CategoryService {
     }
 
     @Transactional
-    public Category createCategory(Category category, User user) {
+    public Category createCategory(AddCategoryRequest request, User user) {
         Set<Role> roles = user.getRoles();
-        if (roles.contains(Role.SECRETARY) && category.getParentCategoryId() == -1L) {
+        if (roles.contains(Role.SECRETARY) && request.parentCategoryId() == -1L) {
             throw new AccessDeniedException("only allowed to create sub categories");
         }
-        if (!categoryRepository.existsByName(category.getName())) {
-            return categoryRepository.save(category);
+        if (!categoryRepository.existsByName(request.name())) {
+            return categoryRepository.save(
+                    Category.builder()
+                            .parentCategoryId(request.parentCategoryId())
+                            .name(request.name())
+                            .build()
+            );
         }
-        throw new DuplicateResourceException("category with the name '%s' already exists!".formatted(category.getName()));
+        throw new DuplicateResourceException("category with the name '%s' already exists!".formatted(request.name()));
     }
 
     public List<Category> getAllParentCategories(User user) {

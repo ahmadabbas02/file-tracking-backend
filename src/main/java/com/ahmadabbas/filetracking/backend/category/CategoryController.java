@@ -22,7 +22,7 @@ public class CategoryController {
             summary = "Add category"
     )
     @PostMapping
-    public ResponseEntity<Category> addCategory(@RequestBody Category category, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Category> addCategory(@RequestBody AddCategoryRequest category, @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(categoryService.createCategory(category, user), HttpStatus.CREATED);
     }
 
