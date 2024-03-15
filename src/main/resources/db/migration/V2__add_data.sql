@@ -1,21 +1,15 @@
-INSERT INTO category (category_id, parent_category_id, name)
-VALUES (nextval('category_seq'), -1, 'Main Cat. 1');
-
-INSERT INTO category (category_id, parent_category_id, name)
-VALUES (nextval('category_seq'), 1, 'Sub Cat. 1');
-
-INSERT INTO category (category_id, parent_category_id, name)
-VALUES (nextval('category_seq'), 1, 'Sub Cat. 2');
-
 -- Initial Main Categories
 INSERT INTO category (category_id, parent_category_id, name)
-VALUES (nextval('category_seq'), -1, 'Medical Report');
+VALUES (nextval('category_seq'), -1, 'Medical Report'), -- id 1
+       (nextval('category_seq'), -1, 'Contact Form'),   -- id 2
+       (nextval('category_seq'), -1, 'Internship'),     -- id 3
+       (nextval('category_seq'), -1, 'Petition');       -- id 4
+
+-- TODO: TEST CATEGORIES TO BE REMOVED LATER
 INSERT INTO category (category_id, parent_category_id, name)
-VALUES (nextval('category_seq'), -1, 'Contact Form');
-INSERT INTO category (category_id, parent_category_id, name)
-VALUES (nextval('category_seq'), -1, 'Internship');
-INSERT INTO category (category_id, parent_category_id, name)
-VALUES (nextval('category_seq'), -1, 'Petition');
+VALUES (nextval('category_seq'), -1, 'Main Cat. 1'),    -- id 5
+       (nextval('category_seq'), 1, 'Sub Cat. 1'),      -- id 6
+       (nextval('category_seq'), 1, 'Sub Cat. 2');      -- id 7
 
 INSERT INTO _user (id, first_name, last_name, email, password, picture, is_enabled)
 VALUES (nextval('_user_seq'), 'Admin', 'Admin', 'admin@email.com',
@@ -83,25 +77,31 @@ VALUES ('24000003', 'CMSE', 4, 7, 'AP24000002', NOW(), 'INCOMPLETE', 'NOT_PAID')
 INSERT INTO user_roles (user_id, role)
 VALUES (7, 'STUDENT');
 
--- Medical Report
+-- Chair categories
 INSERT INTO category_permission (id, role, category_parent_category_id, category_category_id)
-VALUES (nextval('category_permission_seq'), 'ADVISOR', -1, 4);
--- Contact Form
-INSERT INTO category_permission (id, role, category_parent_category_id, category_category_id)
-VALUES (nextval('category_permission_seq'), 'ADVISOR', -1, 5);
--- Internship
-INSERT INTO category_permission (id, role, category_parent_category_id, category_category_id)
-VALUES (nextval('category_permission_seq'), 'ADVISOR', -1, 6);
--- Petition
-INSERT INTO category_permission (id, role, category_parent_category_id, category_category_id)
-VALUES (nextval('category_permission_seq'), 'ADVISOR', -1, 7);
+VALUES (nextval('category_permission_seq'), 'CHAIR', -1, 1),  -- Medical Report
+       (nextval('category_permission_seq'), 'CHAIR', -1, 2),  -- Contact Form
+       (nextval('category_permission_seq'), 'CHAIR', -1, 3),  -- Internship
+       (nextval('category_permission_seq'), 'CHAIR', -1, 4);  -- Petition
 
+-- Secretary categories
+-- Chair categories
+INSERT INTO category_permission (id, role, category_parent_category_id, category_category_id)
+VALUES (nextval('category_permission_seq'), 'SECRETARY', -1, 1),  -- Medical Report
+       (nextval('category_permission_seq'), 'SECRETARY', -1, 2),  -- Contact Form
+       (nextval('category_permission_seq'), 'SECRETARY', -1, 3),  -- Internship
+       (nextval('category_permission_seq'), 'SECRETARY', -1, 4);  -- Petition
+
+-- Advisor categories
 -- Medical Report
 INSERT INTO category_permission (id, role, category_parent_category_id, category_category_id)
-VALUES (nextval('category_permission_seq'), 'STUDENT', -1, 4);
--- Contact Form
+VALUES (nextval('category_permission_seq'), 'ADVISOR', -1, 1),  -- Medical Report
+       (nextval('category_permission_seq'), 'ADVISOR', -1, 2),  -- Contact Form
+       (nextval('category_permission_seq'), 'ADVISOR', -1, 3),  -- Internship
+       (nextval('category_permission_seq'), 'ADVISOR', -1, 4);  -- Petition
+
+-- Student categories
 INSERT INTO category_permission (id, role, category_parent_category_id, category_category_id)
-VALUES (nextval('category_permission_seq'), 'STUDENT', -1, 5);
--- Petition
-INSERT INTO category_permission (id, role, category_parent_category_id, category_category_id)
-VALUES (nextval('category_permission_seq'), 'STUDENT', -1, 7);
+VALUES (nextval('category_permission_seq'), 'STUDENT', -1, 1),  -- Medical Report
+       (nextval('category_permission_seq'), 'STUDENT', -1, 2),  -- Contact Form
+       (nextval('category_permission_seq'), 'STUDENT', -1, 4);  -- Petition

@@ -1,19 +1,12 @@
 package com.ahmadabbas.filetracking.backend.user;
 
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph("User.eagerlyFetchRoles")
     Optional<User> findByEmail(String email);
-
-    default List<User> findAllNonAdminUsers() {
-        return findByRolesNotIn(Role.CHAIR, Role.VICE_CHAR);
-    }
 
     @Query("""
             select u from User u

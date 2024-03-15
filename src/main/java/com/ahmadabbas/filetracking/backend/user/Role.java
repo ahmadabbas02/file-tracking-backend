@@ -10,7 +10,6 @@ public enum Role {
     ADVISOR,
     SECRETARY,
     CHAIR,
-    VICE_CHAR,
     ADMINISTRATOR;
 
     public List<SimpleGrantedAuthority> getAuthorities() {

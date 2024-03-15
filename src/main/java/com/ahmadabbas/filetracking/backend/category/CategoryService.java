@@ -85,10 +85,7 @@ public class CategoryService {
 
     public List<Category> getAllowedCategories(Set<Role> roles) {
         List<Category> categories = new ArrayList<>(Collections.emptyList());
-        if (roles.stream().anyMatch(role -> role.equals(Role.ADMINISTRATOR)
-                || role.equals(Role.CHAIR)
-                || role.equals(Role.VICE_CHAR)
-                || role.equals(Role.SECRETARY))) {
+        if (roles.stream().anyMatch(role -> role.equals(Role.ADMINISTRATOR))) {
             return categoryRepository.findAll();
         }
         for (var role : roles) {

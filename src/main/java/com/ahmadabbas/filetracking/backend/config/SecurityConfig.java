@@ -65,16 +65,16 @@ public class SecurityConfig {
                                 .hasAnyRole(Role.ADMINISTRATOR.name(), Role.SECRETARY.name())
                                 // Getting all advisors
                                 .requestMatchers(GET, "/api/v1/advisors")
-                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.VICE_CHAR.name(), Role.SECRETARY.name())
+                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.SECRETARY.name())
                                 // Getting all students
                                 .requestMatchers(GET, "/api/v1/students")
-                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.VICE_CHAR.name(), Role.SECRETARY.name(), Role.ADVISOR.name())
+                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.SECRETARY.name(), Role.ADVISOR.name())
                                 // Only students can add contact document
                                 .requestMatchers(POST, "api/v1/documents/upload/contact", "api/v1/documents/upload/petition", "api/v1/documents/upload/medical-report")
                                 .hasRole(Role.STUDENT.name())
                                 // category creation
                                 .requestMatchers(POST, "api/v1/categories")
-                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.VICE_CHAR.name(), Role.SECRETARY.name())
+                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.SECRETARY.name())
                                 // only secretary and admin can upload
                                 .requestMatchers(POST, "api/v1/documents/upload", "api/v1/documents/upload/internship")
                                 .hasAnyRole(Role.ADMINISTRATOR.name(), Role.SECRETARY.name())
