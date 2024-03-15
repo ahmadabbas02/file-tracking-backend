@@ -1,12 +1,14 @@
 package com.ahmadabbas.filetracking.backend.category;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public interface CategoryRepository extends JpaRepository<Category, SubCategoryPK> {
+
+    @Query("select c from Category c where c.parentCategoryId = -1")
+    List<Category> findAllParentCategories();
+
     @Query("select (count(c) > 0) from Category c where upper(c.name) = upper(:name)")
     boolean existsByName(String name);
 

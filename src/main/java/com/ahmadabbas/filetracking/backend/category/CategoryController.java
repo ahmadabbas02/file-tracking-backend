@@ -66,7 +66,7 @@ public class CategoryController {
             description = "Add/delete role view permissions for specific categories."
     )
     @PostMapping("/permissions/update")
-    public ResponseEntity<Category> updateCategoryPerms(@Valid @RequestBody CategoryPermissionRequestDto requestDto,
+    public ResponseEntity<FullCategoryPermissionResponse> updateCategoryPerms(@Valid @RequestBody CategoryPermissionRequestDto requestDto,
                                                         @AuthenticationPrincipal User loggedInUser) {
         return ResponseEntity.ok(categoryService.updateCategoryPermission(requestDto, loggedInUser));
     }

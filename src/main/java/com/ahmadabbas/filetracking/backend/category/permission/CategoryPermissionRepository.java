@@ -14,13 +14,16 @@ public interface CategoryPermissionRepository extends JpaRepository<CategoryPerm
     @EntityGraph(value = "CategoryPermission.eagerlyFetchCategory")
     List<CategoryPermission> findAll();
 
+    @Query("select c from CategoryPermission c where c.category.categoryId = :categoryId")
+    @EntityGraph(value = "CategoryPermission.eagerlyFetchCategory")
+    List<CategoryPermission> findAllByCategoryId(Long categoryId);
 
     @EntityGraph(value = "CategoryPermission.eagerlyFetchCategory")
     @Query("select c from CategoryPermission c where c.role = :role")
-    Set<CategoryPermission> findByRole(Role role);
+    Set<CategoryPermission> findAllByRole(Role role);
 
     @EntityGraph(value = "CategoryPermission.eagerlyFetchCategory")
     @Query("select c from CategoryPermission c where c.category.categoryId = :categoryId and c.role = :role")
-    Optional<CategoryPermission> findByCategoryIdAndRole(Long categoryId, Role role);
+    Optional<CategoryPermission> findAllByCategoryIdAndRole(Long categoryId, Role role);
 
 }

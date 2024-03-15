@@ -92,7 +92,7 @@ public class CategoryService {
             return categoryRepository.findAll();
         }
         for (var role : roles) {
-            Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findByRole(role);
+            Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findAllByRole(role);
             categoryPermissions.forEach(permission -> {
                 Category category = permission.getCategory();
                 if (category != null) categories.add(category);
@@ -146,16 +146,16 @@ public class CategoryService {
     }
 
     @Transactional
-    public Category updateCategoryPermission(CategoryPermissionRequestDto request, User loggedInUser) {
+    public FullCategoryPermissionResponse updateCategoryPermission(CategoryPermissionRequestDto request, User loggedInUser) {
         Category category = getParentCategory(request.categoryId(), loggedInUser);
         if (request.delete()) {
-            CategoryPermission permission = categoryPermissionRepository.findByCategoryIdAndRole(request.categoryId(), request.role())
+            CategoryPermission permission = categoryPermissionRepository.findAllByCategoryIdAndRole(request.categoryId(), request.role())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "category permission with id %s not found".formatted(request.categoryId())
                     ));
             categoryPermissionRepository.delete(permission);
         } else {
-            Optional<CategoryPermission> permission = categoryPermissionRepository.findByCategoryIdAndRole(request.categoryId(), request.role());
+            Optional<CategoryPermission> permission = categoryPermissionRepository.findAllByCategoryIdAndRole(request.categoryId(), request.role());
             if (permission.isPresent()) {
                 throw new DuplicateResourceException("category permission already exists!");
             }
@@ -164,14 +164,29 @@ public class CategoryService {
                     category
             ));
         }
-        return category;
+        return getCategoryPermissions(request.categoryId());
     }
 
     public List<FullCategoryPermissionResponse> getAllCategoryPermissions() {
         Map<Long, FullCategoryPermissionResponse> categoryMap = new HashMap<>();
-        List<CategoryPermission> allPerms = categoryPermissionRepository.findAll();
+        List<Category> allParentCategories = categoryRepository.findAllParentCategories();
+        for (var cat : allParentCategories) {
+            long categoryId = cat.getCategoryId();
+            String name = cat.getName();
+            var categoryResponse = categoryMap.getOrDefault(categoryId,
+                    new FullCategoryPermissionResponse(categoryId, name, new ArrayList<>()));
+            List<CategoryPermission> allPermsByCategoryId = categoryPermissionRepository.findAllByCategoryId(categoryId);
+            var roles = allPermsByCategoryId.stream().map(CategoryPermission::getRole).toList();
+            categoryResponse.permittedRoles().addAll(roles);
+            categoryMap.put(categoryId, categoryResponse);
+        }
+        return categoryMap.values().stream().toList();
+    }
+
+    private FullCategoryPermissionResponse getCategoryPermissions(Long categoryId) {
+        Map<Long, FullCategoryPermissionResponse> categoryMap = new HashMap<>();
+        List<CategoryPermission> allPerms = categoryPermissionRepository.findAllByCategoryId(categoryId);
         for (var perm : allPerms) {
-            long categoryId = perm.getCategory().getCategoryId();
             String name = perm.getCategory().getName();
 
             FullCategoryPermissionResponse categoryResponse = categoryMap.getOrDefault(categoryId,
@@ -180,6 +195,6 @@ public class CategoryService {
             categoryResponse.permittedRoles().add(perm.getRole());
             categoryMap.put(categoryId, categoryResponse);
         }
-        return categoryMap.values().stream().toList();
+        return categoryMap.get(categoryId);
     }
 }
