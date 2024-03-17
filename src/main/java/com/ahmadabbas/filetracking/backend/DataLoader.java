@@ -2,7 +2,7 @@ package com.ahmadabbas.filetracking.backend;
 
 import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
 import com.ahmadabbas.filetracking.backend.category.CategoryService;
-import com.ahmadabbas.filetracking.backend.document.base.DocumentRepository;
+import com.ahmadabbas.filetracking.backend.document.base.repository.DocumentRepository;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
