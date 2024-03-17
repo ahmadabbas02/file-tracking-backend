@@ -50,7 +50,7 @@ public class MedicalReportDocumentService {
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
         Category medicalCategory = categoryService.getCategoryByName("Medical Report");
         String cloudPath = azureBlobService.upload(file, student.getId(), medicalCategory.getName(), addRequest.title());
-        log.info("cloudPath received from uploading file: %s".formatted(cloudPath));
+        log.debug("cloudPath received from uploading file: %s".formatted(cloudPath));
         MedicalReportDocument document = MedicalReportDocument.builder()
                 .title(addRequest.title())
                 .description(addRequest.description())

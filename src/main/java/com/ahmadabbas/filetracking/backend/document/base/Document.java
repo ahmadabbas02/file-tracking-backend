@@ -1,19 +1,16 @@
 package com.ahmadabbas.filetracking.backend.document.base;
 
 import com.ahmadabbas.filetracking.backend.category.Category;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentMapper;
+import com.ahmadabbas.filetracking.backend.document.base.payload.*;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 
 @Setter
@@ -23,6 +20,9 @@ import java.util.UUID;
 @SuperBuilder
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
+@SQLDelete(sql = "UPDATE document SET deleted = true WHERE id=?")
+@FilterDef(name = "deletedDocumentFilter", parameters = @ParamDef(name = "isDeleted", type = Boolean.class))
+@Filter(name = "deletedDocumentFilter", condition = "deleted = :isDeleted")
 public class Document {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -47,6 +47,8 @@ public class Document {
     @CreationTimestamp
     private LocalDateTime uploadedAt;
 
+    private boolean deleted = Boolean.FALSE;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -56,7 +58,8 @@ public class Document {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getTitle(), getDescription(), getPath(), getCategory(), getStudent(), getUploadedAt());
+        return Objects.hash(getId(), getTitle(), getDescription(), getPath(), getCategory(), getStudent(),
+                getUploadedAt());
     }
 
     @JsonManagedReference

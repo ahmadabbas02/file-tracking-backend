@@ -1,23 +1,37 @@
 package com.ahmadabbas.filetracking.backend.document.base;
 
-import com.ahmadabbas.filetracking.backend.category.*;
-import com.ahmadabbas.filetracking.backend.document.base.payload.*;
+import com.ahmadabbas.filetracking.backend.category.Category;
+import com.ahmadabbas.filetracking.backend.category.CategoryService;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentAddRequest;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentModifyCategoryRequest;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
-import com.ahmadabbas.filetracking.backend.student.*;
-import com.ahmadabbas.filetracking.backend.user.*;
-import com.ahmadabbas.filetracking.backend.util.*;
-import com.ahmadabbas.filetracking.backend.util.payload.*;
+import com.ahmadabbas.filetracking.backend.student.Student;
+import com.ahmadabbas.filetracking.backend.student.StudentService;
+import com.ahmadabbas.filetracking.backend.user.Role;
+import com.ahmadabbas.filetracking.backend.user.User;
+import com.ahmadabbas.filetracking.backend.util.AzureBlobService;
+import com.ahmadabbas.filetracking.backend.util.PageableUtil;
+import com.ahmadabbas.filetracking.backend.util.payload.PaginatedMapResponse;
+import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.*;
+import org.hibernate.Filter;
+import org.hibernate.Session;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
-import java.util.zip.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Transactional(readOnly = true)
@@ -28,12 +42,17 @@ public class DocumentService {
     private final CategoryService categoryService;
     private final StudentService studentService;
     private final AzureBlobService azureBlobService;
+    private final EntityManager entityManager;
 
     public Document getDocument(UUID uuid, User loggedInUser) {
+        Session session = entityManager.unwrap(Session.class);
+        Filter filter = session.enableFilter("deletedDocumentFilter");
+        filter.setParameter("isDeleted", false);
         Document document = documentRepository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "document with id `%s` not found".formatted(uuid)
                 ));
+        session.disableFilter("deletedDocumentFilter");
         Set<Role> roles = getRoles(loggedInUser, document);
         List<Category> allowedCategories = categoryService.getAllowedCategories(roles);
         if (!allowedCategories.contains(document.getCategory())) {
@@ -52,7 +71,7 @@ public class DocumentService {
         Category category = categoryService.getCategory(addRequest.categoryId(), addRequest.parentCategoryId(), loggedInUser);
         Student student = studentService.getStudent(addRequest.studentId(), loggedInUser);
         String cloudPath = azureBlobService.upload(file, addRequest.studentId(), category.getName(), addRequest.title());
-        log.info("cloudPath received from uploading file: %s".formatted(cloudPath));
+        log.debug("cloudPath received from uploading file: %s".formatted(cloudPath));
         Document document = Document.builder()
                 .category(category)
                 .title(addRequest.title())
@@ -147,12 +166,15 @@ public class DocumentService {
             List<Long> categoryIds,
             List<Long> parentCategoryIds
     ) {
-        log.info("DocumentService.getAllDocuments");
+        log.debug("DocumentService.getAllDocuments");
+        Session session = entityManager.unwrap(Session.class);
+        Filter filter = session.enableFilter("deletedDocumentFilter");
+        filter.setParameter("isDeleted", false);
         List<String> studentIds = Collections.emptyList();
         if (loggedInUser.getRoles().contains(Role.STUDENT)) {
             Student student = studentService.getStudentByUserId(loggedInUser.getId());
             studentId = student.getId();
-            log.info("setting studentId to the logged in student: {}", student.getId());
+            log.debug("setting studentId to the logged in student: {}", student.getId());
         } else if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
             if (!studentId.equals("-1")) {
                 Student student = studentService.getStudent(studentId, loggedInUser);
@@ -167,14 +189,16 @@ public class DocumentService {
         boolean isMainCategoriesAllowed = categoryIds.isEmpty() || new HashSet<>(allowedCategoriesIds).containsAll(categoryIds);
         boolean isChildrenCategoriesAllowed = parentCategoryIds.isEmpty() || new HashSet<>(allowedCategoriesIds).containsAll(parentCategoryIds);
         if (!isMainCategoriesAllowed || !isChildrenCategoriesAllowed) {
-            log.info("categoryIds = {}", categoryIds);
-            log.info("parentCategoryIds = {}", parentCategoryIds);
-            log.info("allowedCategoriesIds = {}", allowedCategoriesIds);
+            log.debug("categoryIds = {}", categoryIds);
+            log.debug("parentCategoryIds = {}", parentCategoryIds);
+            log.debug("allowedCategoriesIds = {}", allowedCategoriesIds);
             throw new AccessDeniedException("you are not allowed to get documents in given categories");
         }
         Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
         Page<Document> documentPage;
-        log.debug("loggedInUser = {}, pageNo = {}, pageSize = {}, sortBy = {}, order = {}, studentId = {}, categoryIds = {}, parentCategoryIds = {}", loggedInUser, pageNo, pageSize, sortBy, order, studentId, categoryIds, parentCategoryIds);
+        log.debug("loggedInUser = {}, pageNo = {}, pageSize = {}, sortBy = {}, order = {}, studentId = {}, " +
+                  "categoryIds = {}, parentCategoryIds = {}",
+                loggedInUser, pageNo, pageSize, sortBy, order, studentId, categoryIds, parentCategoryIds);
         log.debug("allowedCategoriesIds = {}", allowedCategoriesIds);
         if (studentId.equals("-1")) {
             if (categoryIds.isEmpty() && parentCategoryIds.isEmpty()) {
@@ -203,6 +227,7 @@ public class DocumentService {
                 documentPage = documentRepository.findByStudentIdHavingCategoryIds(studentId, categoryIds, parentCategoryIds, pageable);
             }
         }
+        session.disableFilter("deletedDocumentFilter");
         List<DocumentDto> content = documentPage.getContent()
                 .stream()
                 .map(Document::toDto)
@@ -239,9 +264,8 @@ public class DocumentService {
             List<Long> categoryIds,
             List<Long> parentCategoryIds
     ) throws IOException {
-        log.info("DocumentService.getAllDocumentBlobs");
+        log.debug("DocumentService.getAllDocumentBlobs");
         PaginatedResponse<DocumentDto> documents = getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, studentId, categoryIds, parentCategoryIds);
-
 
         Map<String, byte[]> blobs = new HashMap<>();
 
@@ -264,7 +288,7 @@ public class DocumentService {
     private Set<Role> getRoles(User loggedInUser, Document document) {
         Set<Role> roles = loggedInUser.getRoles();
         if (roles.contains(Role.STUDENT)
-                && !Objects.equals(document.getStudent().getUser().getId(), loggedInUser.getId())) {
+            && !Objects.equals(document.getStudent().getUser().getId(), loggedInUser.getId())) {
             throw new AccessDeniedException("not authorized to get other student's documents");
         } else if (roles.contains(Role.ADVISOR)) {
             if (!document.getStudent().getAdvisor().getUser().getId().equals(loggedInUser.getId())) {
@@ -272,5 +296,12 @@ public class DocumentService {
             }
         }
         return roles;
+    }
+
+    @Transactional
+    public Document deleteDocument(UUID documentId, User loggedInUser) {
+        Document document = getDocument(documentId, loggedInUser);
+        documentRepository.delete(document);
+        return document;
     }
 }

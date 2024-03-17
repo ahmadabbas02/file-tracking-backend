@@ -52,7 +52,7 @@ public class ContactDocumentService {
         if (!loggedInUser.getRoles().contains(Role.STUDENT)) {
             throw new AccessDeniedException("not authorized, only students can do this.");
         }
-        log.info("ContactDocumentService.addContactDocument");
+        log.debug("ContactDocumentService.addContactDocument");
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
         Category category = categoryService.getCategoryByName("Contact Form");
         try {
@@ -61,7 +61,7 @@ public class ContactDocumentService {
                 throw new RuntimeException("couldn't generate contact form pdf.");
             }
             String cloudPath = azureBlobService.upload(filledPdf, student.getId(), category.getName(), addRequest.title());
-            log.info("cloudPath = {}", cloudPath);
+            log.debug("cloudPath = {}", cloudPath);
             if (!filledPdf.delete()) {
                 log.warn("Failed to delete temp file @ {}", filledPdf.getAbsolutePath());
             }

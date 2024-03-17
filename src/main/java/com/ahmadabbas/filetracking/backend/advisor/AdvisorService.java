@@ -9,7 +9,7 @@ import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentRepository;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
-import com.ahmadabbas.filetracking.backend.user.UserRepository;
+import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
 import com.ahmadabbas.filetracking.backend.util.PageableUtil;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
@@ -99,11 +99,11 @@ public class AdvisorService {
         Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
         Page<Advisor> advisorPage;
         if (searchQuery.isEmpty()) {
-            log.info("No search query provided, getting all advisors..");
+            log.debug("No search query provided, getting all advisors..");
             advisorPage = advisorRepository.findAll(pageable);
         } else {
             // TODO: Decide how we want searching to be done
-            log.info("Provided search query: '%s', getting all advisors..".formatted(searchQuery));
+            log.debug("Provided search query: '%s', getting all advisors..".formatted(searchQuery));
             advisorPage = StringUtils.isNumeric(searchQuery.replace("AP", ""))
                     ? advisorRepository.findAllByIdStartsWith(searchQuery, pageable)
                     : advisorRepository.findAllByNameContains(searchQuery, pageable);

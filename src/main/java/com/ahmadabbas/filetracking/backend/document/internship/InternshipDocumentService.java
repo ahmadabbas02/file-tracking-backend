@@ -34,11 +34,11 @@ public class InternshipDocumentService {
         if (!loggedInUser.getRoles().contains(Role.SECRETARY)) {
             throw new AccessDeniedException("not authorized, only secretary can do this.");
         }
-        log.info("InternshipDocumentService.saveInternship");
+        log.debug("InternshipDocumentService.saveInternship");
         Student student = studentService.getStudent(addRequest.studentId(), loggedInUser);
         Category category = categoryService.getCategoryByName("Internship");
         String cloudPath = azureBlobService.upload(file, addRequest.studentId(), category.getName(), addRequest.title());
-        log.info("cloudPath received from uploading file: %s".formatted(cloudPath));
+        log.debug("cloudPath received from uploading file: %s".formatted(cloudPath));
         InternshipDocument internshipDocument = InternshipDocument.builder()
                 .category(category)
                 .title(addRequest.title())

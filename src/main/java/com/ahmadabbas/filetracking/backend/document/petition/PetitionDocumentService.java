@@ -50,7 +50,7 @@ public class PetitionDocumentService {
         if (!loggedInUser.getRoles().contains(Role.STUDENT)) {
             throw new AccessDeniedException("not authorized, only students can do this.");
         }
-        log.info("PetitionDocumentService.addPetitionDocument");
+        log.debug("PetitionDocumentService.addPetitionDocument");
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
         Category category = categoryService.getCategoryByName("Petition");
         try {
@@ -59,7 +59,7 @@ public class PetitionDocumentService {
                 throw new RuntimeException("couldn't generate petition form pdf.");
             }
             String cloudPath = azureBlobService.upload(filledPdf, student.getId(), category.getName(), addRequest.title());
-            log.info("cloudPath = {}", cloudPath);
+            log.debug("cloudPath = {}", cloudPath);
             if (!filledPdf.delete()) {
                 log.warn("Failed to delete temp file @ {}", filledPdf.getAbsolutePath());
             }

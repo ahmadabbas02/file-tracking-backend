@@ -11,7 +11,7 @@ import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
-import com.ahmadabbas.filetracking.backend.user.UserRepository;
+import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
 import com.ahmadabbas.filetracking.backend.user.UserService;
 import com.ahmadabbas.filetracking.backend.util.PageableUtil;
 import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
@@ -86,16 +86,16 @@ public class StudentService {
                                                         String searchQuery) {
         Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
         Page<Student> studentPage;
-        log.info("Logged in user = %s".formatted(loggedInUser));
+        log.debug("Logged in user = %s".formatted(loggedInUser));
         Set<Role> roles = userService.getRoles(loggedInUser);
-        log.info("Roles = %s".formatted(roles));
+        log.debug("Roles = %s".formatted(roles));
         if (roles.contains(Role.ADVISOR)) {
             if (searchQuery.isEmpty()) {
-                log.info("No search query provided, getting all advisor students..");
+                log.debug("No search query provided, getting all advisor students..");
                 studentPage = studentDao.getAllStudentsByAdvisorUserId(loggedInUser.getId(), pageable);
             } else {
                 // TODO: Decide how we want searching to be done
-                log.info("Provided search query: '%s', getting all students..".formatted(searchQuery));
+                log.debug("Provided search query: '%s', getting all students..".formatted(searchQuery));
                 studentPage = StringUtils.isNumeric(searchQuery)
                         ? studentDao.getAllStudentsByIdAndAdvisorUserId(false, searchQuery, loggedInUser.getId(), pageable)
                         : studentDao.getAllStudentsByNameAndAdvisorUserId(true, searchQuery, loggedInUser.getId(), pageable);
@@ -103,22 +103,22 @@ public class StudentService {
         } else {
             if (advisorId.isBlank()) {
                 if (searchQuery.isEmpty()) {
-                    log.info("No search query provided, getting all students..");
+                    log.debug("No search query provided, getting all students..");
                     studentPage = studentDao.getAllStudents(pageable);
                 } else {
                     // TODO: Decide how we want searching to be done
-                    log.info("Provided search query: '%s', getting all students..".formatted(searchQuery));
+                    log.debug("Provided search query: '%s', getting all students..".formatted(searchQuery));
                     studentPage = StringUtils.isNumeric(searchQuery)
                             ? studentDao.getAllStudentsById(false, searchQuery, pageable)
                             : studentDao.getAllStudentsByName(true, searchQuery, pageable);
                 }
             } else {
                 if (searchQuery.isEmpty()) {
-                    log.info("No search query provided, getting all students..");
+                    log.debug("No search query provided, getting all students..");
                     studentPage = studentDao.getAllStudentsByAdvisorId(advisorId, pageable);
                 } else {
                     // TODO: Decide how we want searching to be done
-                    log.info("Provided search query: '%s', getting all students..".formatted(searchQuery));
+                    log.debug("Provided search query: '%s', getting all students..".formatted(searchQuery));
                     studentPage = StringUtils.isNumeric(searchQuery)
                             ? studentDao.getAllStudentsByIdAndAdvisorId(searchQuery, advisorId, pageable)
                             : studentDao.getAllStudentsByNameAndAdvisorId(searchQuery, advisorId, pageable);
@@ -145,9 +145,9 @@ public class StudentService {
     }
 
     public List<String> getAllStudentIds(User loggedInUser) {
-        log.info("Logged in user = %s".formatted(loggedInUser));
+        log.debug("Logged in user = %s".formatted(loggedInUser));
         Set<Role> roles = userService.getRoles(loggedInUser);
-        log.info("Roles = %s".formatted(roles));
+        log.debug("Roles = %s".formatted(roles));
         if (!roles.contains(Role.ADVISOR)) {
             throw new RuntimeException("Unexpected error! report");
         }
@@ -203,7 +203,7 @@ public class StudentService {
                                 }
                         )
                 );
-        log.info("partitionedStudents = %s".formatted(partitionedStudents));
+        log.debug("partitionedStudents = %s".formatted(partitionedStudents));
         Instant endPartition = Instant.now();
 
         Instant startFilter = Instant.now();
@@ -257,13 +257,13 @@ public class StudentService {
         List<Student> savedStudents = studentDao.saveAll(students);
         Instant endSaveStudents = Instant.now();
 
-        log.info("Time taken to parse csv: {}", Duration.between(startParseCsv, endParseCsv).toMillis());
-        log.info("Time taken to partition: {}", Duration.between(startPartition, endPartition).toMillis());
-        log.info("Time taken to filter: {}", Duration.between(startFilter, endFilter).toMillis());
-        log.info("Time taken to wrong information: {}", Duration.between(startWrongInformation, endWrongInformation).toMillis());
-        log.info("Time taken to build student list: {}", Duration.between(startBuildList, endBuildList).toMillis());
-        log.info("Time taken to save users list: {}", Duration.between(startSaveUsers, endSaveUsers).toMillis());
-        log.info("Time taken to save student list: {}", Duration.between(startSaveStudents, endSaveStudents).toMillis());
+        log.debug("Time taken to parse csv: {}", Duration.between(startParseCsv, endParseCsv).toMillis());
+        log.debug("Time taken to partition: {}", Duration.between(startPartition, endPartition).toMillis());
+        log.debug("Time taken to filter: {}", Duration.between(startFilter, endFilter).toMillis());
+        log.debug("Time taken to wrong information: {}", Duration.between(startWrongInformation, endWrongInformation).toMillis());
+        log.debug("Time taken to build student list: {}", Duration.between(startBuildList, endBuildList).toMillis());
+        log.debug("Time taken to save users list: {}", Duration.between(startSaveUsers, endSaveUsers).toMillis());
+        log.debug("Time taken to save student list: {}", Duration.between(startSaveStudents, endSaveStudents).toMillis());
         return CsvUploadResponse.builder()
                 .successCount(savedStudents.size())
                 .failedCount(studentsWithWrongInformation.size())

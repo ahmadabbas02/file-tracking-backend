@@ -47,7 +47,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                     WebRequest webRequest) {
         String logMessage = "[%s] %s".formatted(accessDeniedException.getClass().getSimpleName(),
                 accessDeniedException.getMessage());
-        log.info("Handing exception '{}'", logMessage);
+        log.debug("Handing exception '{}'", logMessage);
         ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(ZoneId.of("Europe/Athens")),
                 accessDeniedException.getMessage(),

@@ -1,51 +1,31 @@
 package com.ahmadabbas.filetracking.backend.document.base;
 
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentAddRequest;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDownloadRequest;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentModifyCategoryRequest;
-import com.ahmadabbas.filetracking.backend.document.contact.ContactDocument;
-import com.ahmadabbas.filetracking.backend.document.contact.ContactDocumentService;
-import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentAddRequest;
-import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentDto;
-import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocument;
-import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumentService;
-import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipAddRequest;
-import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentDto;
-import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocument;
-import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocumentService;
-import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportAddRequest;
-import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportDto;
-import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocument;
-import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocumentService;
-import com.ahmadabbas.filetracking.backend.document.petition.comment.Comment;
-import com.ahmadabbas.filetracking.backend.document.petition.comment.CommentService;
-import com.ahmadabbas.filetracking.backend.document.petition.comment.payload.CommentAddRequest;
-import com.ahmadabbas.filetracking.backend.document.petition.comment.payload.CommentDto;
-import com.ahmadabbas.filetracking.backend.document.petition.comment.payload.CommentMapper;
-import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentAddRequest;
-import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentDto;
+import com.ahmadabbas.filetracking.backend.document.base.payload.*;
+import com.ahmadabbas.filetracking.backend.document.contact.*;
+import com.ahmadabbas.filetracking.backend.document.contact.payload.*;
+import com.ahmadabbas.filetracking.backend.document.internship.*;
+import com.ahmadabbas.filetracking.backend.document.internship.payload.*;
+import com.ahmadabbas.filetracking.backend.document.medical.*;
+import com.ahmadabbas.filetracking.backend.document.medical.payload.*;
+import com.ahmadabbas.filetracking.backend.document.petition.*;
+import com.ahmadabbas.filetracking.backend.document.petition.comment.*;
+import com.ahmadabbas.filetracking.backend.document.petition.comment.payload.*;
+import com.ahmadabbas.filetracking.backend.document.petition.payload.*;
 import com.ahmadabbas.filetracking.backend.user.User;
-import com.ahmadabbas.filetracking.backend.util.payload.PaginatedMapResponse;
-import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
+import com.ahmadabbas.filetracking.backend.util.payload.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -87,6 +67,21 @@ public class DocumentController {
             @PathVariable UUID documentId
     ) {
         PetitionDocument document = petitionDocumentService.approvePetitionDocument(documentId, loggedInUser);
+        return ResponseEntity.ok(document.toDto());
+    }
+
+    @Operation(
+            summary = "Delete document",
+            description = """
+                    Soft deletes a document
+                    """
+    )
+    @DeleteMapping("/{documentId}/delete")
+    public ResponseEntity<DocumentDto> deleteDocument(
+            @AuthenticationPrincipal User user,
+            @PathVariable UUID documentId
+    ) {
+        Document document = documentService.deleteDocument(documentId, user);
         return ResponseEntity.ok(document.toDto());
     }
 
@@ -141,10 +136,12 @@ public class DocumentController {
     ) {
         if (!studentId.equals("-1")) {
             return ResponseEntity.ok(
-                    documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, studentId, categoryIds, parentCategoryIds)
+                    documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, studentId, categoryIds,
+                            parentCategoryIds)
             );
         }
-        return ResponseEntity.ok(documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, categoryIds, parentCategoryIds));
+        return ResponseEntity.ok(documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, categoryIds,
+                parentCategoryIds));
     }
 
     @Operation(
@@ -167,10 +164,12 @@ public class DocumentController {
     ) throws IOException {
         if (!studentId.equals("-1")) {
             return ResponseEntity.ok(
-                    documentService.getAllDocumentBlobs(user, pageNo, pageSize, sortBy, order, studentId, categoryIds, parentCategoryIds)
+                    documentService.getAllDocumentBlobs(user, pageNo, pageSize, sortBy, order, studentId, categoryIds
+                            , parentCategoryIds)
             );
         }
-        return ResponseEntity.ok(documentService.getAllDocumentBlobs(user, pageNo, pageSize, sortBy, order, categoryIds, parentCategoryIds));
+        return ResponseEntity.ok(documentService.getAllDocumentBlobs(user, pageNo, pageSize, sortBy, order,
+                categoryIds, parentCategoryIds));
     }
 
     @Operation(
@@ -222,20 +221,28 @@ public class DocumentController {
     ) throws IOException {
         switch (documentType) {
             case "contact":
-                ContactDocumentAddRequest contactAddRequest = new ObjectMapper().readValue(data, ContactDocumentAddRequest.class);
-                ContactDocument contactDocument = contactDocumentService.addContactDocument(contactAddRequest, loggedInUser);
+                ContactDocumentAddRequest contactAddRequest = new ObjectMapper().readValue(data,
+                        ContactDocumentAddRequest.class);
+                ContactDocument contactDocument = contactDocumentService.addContactDocument(contactAddRequest,
+                        loggedInUser);
                 return new ResponseEntity<>(contactDocument.toDto(), HttpStatus.CREATED);
             case "petition":
-                PetitionDocumentAddRequest petitionDocumentAddRequest = new ObjectMapper().readValue(data, PetitionDocumentAddRequest.class);
-                PetitionDocument petitionDocument = petitionDocumentService.addPetitionDocument(petitionDocumentAddRequest, loggedInUser);
+                PetitionDocumentAddRequest petitionDocumentAddRequest = new ObjectMapper().readValue(data,
+                        PetitionDocumentAddRequest.class);
+                PetitionDocument petitionDocument =
+                        petitionDocumentService.addPetitionDocument(petitionDocumentAddRequest, loggedInUser);
                 return new ResponseEntity<>(petitionDocument.toDto(), HttpStatus.CREATED);
             case "internship":
-                InternshipAddRequest internshipAddRequest = new ObjectMapper().readValue(data, InternshipAddRequest.class);
-                InternshipDocument internshipDocument = internshipDocumentService.addInternship(file, internshipAddRequest, loggedInUser);
+                InternshipAddRequest internshipAddRequest = new ObjectMapper().readValue(data,
+                        InternshipAddRequest.class);
+                InternshipDocument internshipDocument = internshipDocumentService.addInternship(file,
+                        internshipAddRequest, loggedInUser);
                 return new ResponseEntity<>(internshipDocument.toDto(), HttpStatus.CREATED);
             case "medical":
-                MedicalReportAddRequest medicalReportAddRequest = new ObjectMapper().readValue(data, MedicalReportAddRequest.class);
-                MedicalReportDocument medicalReportDocument = medicalReportDocumentService.addMedicalReport(file, medicalReportAddRequest, loggedInUser);
+                MedicalReportAddRequest medicalReportAddRequest = new ObjectMapper().readValue(data,
+                        MedicalReportAddRequest.class);
+                MedicalReportDocument medicalReportDocument = medicalReportDocumentService.addMedicalReport(file,
+                        medicalReportAddRequest, loggedInUser);
                 return new ResponseEntity<>(medicalReportDocument.toDto(), HttpStatus.CREATED);
             default:
                 DocumentAddRequest normalAddRequest = new ObjectMapper().readValue(data, DocumentAddRequest.class);
@@ -317,7 +324,8 @@ public class DocumentController {
             @AuthenticationPrincipal User loggedInUser
     ) throws IOException {
         MedicalReportAddRequest addRequest = new ObjectMapper().readValue(data, MedicalReportAddRequest.class);
-        MedicalReportDocument medicalReportDocument = medicalReportDocumentService.addMedicalReport(file, addRequest, loggedInUser);
+        MedicalReportDocument medicalReportDocument = medicalReportDocumentService.addMedicalReport(file, addRequest,
+                loggedInUser);
         return new ResponseEntity<>(medicalReportDocument.toDto(), HttpStatus.CREATED);
     }
 

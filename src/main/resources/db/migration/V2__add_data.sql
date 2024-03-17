@@ -9,8 +9,8 @@ VALUES (nextval('category_seq'), -1, 'Medical Report'), -- id 1
 -- TODO: TEST CATEGORIES TO BE REMOVED LATER
 INSERT INTO category (category_id, parent_category_id, name)
 VALUES (nextval('category_seq'), -1, 'Main Cat. 1'), -- id 5
-       (nextval('category_seq'), 1, 'Sub Cat. 1'),   -- id 6
-       (nextval('category_seq'), 1, 'Sub Cat. 2'); -- id 7
+       (nextval('category_seq'), 5, 'Sub Cat. 1'),   -- id 6
+       (nextval('category_seq'), 5, 'Sub Cat. 2'); -- id 7
 
 INSERT INTO _user (id, first_name, last_name, email, password, picture, is_enabled)
 VALUES (nextval('_user_seq'), 'Admin', 'Admin', 'admin@email.com',
