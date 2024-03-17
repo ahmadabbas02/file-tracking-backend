@@ -58,19 +58,21 @@ public class SecurityConfig {
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST_URL).permitAll()
                                 // Adding new students or advisor
-                                .requestMatchers(POST, "/api/v1/students", "/api/v1/students/upload", "/api/v1/advisors")
+                                .requestMatchers(POST, "api/v1/students", "api/v1/students/upload", "api/v1/advisors")
                                 .hasRole(Role.ADMINISTRATOR.name())
                                 // Modifying/changing category of a document
-                                .requestMatchers("/api/v1/documents/modify-category")
+                                .requestMatchers("api/v1/documents/modify-category")
                                 .hasAnyRole(Role.ADMINISTRATOR.name(), Role.SECRETARY.name())
                                 // Getting all advisors
-                                .requestMatchers(GET, "/api/v1/advisors")
+                                .requestMatchers(GET, "api/v1/advisors")
                                 .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.SECRETARY.name())
                                 // Getting all students
-                                .requestMatchers(GET, "/api/v1/students")
-                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.SECRETARY.name(), Role.ADVISOR.name())
+                                .requestMatchers(GET, "api/v1/students")
+                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.SECRETARY.name(),
+                                        Role.ADVISOR.name())
                                 // Only students can add contact document
-                                .requestMatchers(POST, "api/v1/documents/upload/contact", "api/v1/documents/upload/petition", "api/v1/documents/upload/medical-report")
+                                .requestMatchers(POST, "api/v1/documents/upload/contact", "api/v1/documents/upload" +
+                                        "/petition", "api/v1/documents/upload/medical-report")
                                 .hasRole(Role.STUDENT.name())
                                 // category creation
                                 .requestMatchers(POST, "api/v1/categories")
@@ -81,11 +83,16 @@ public class SecurityConfig {
                                 // only admin can get access to all category perms and changing them
                                 .requestMatchers("api/v1/categories/permissions/**")
                                 .hasRole(Role.ADMINISTRATOR.name())
+                                // only admin can delete document
+                                .requestMatchers("api/v1/documents/*/delete")
+                                .hasRole(Role.ADMINISTRATOR.name())
+                                // only admin can access users
+                                .requestMatchers("api/v1/users/**")
+                                .hasRole(Role.ADMINISTRATOR.name())
                                 // only advisors can approve documents
                                 .requestMatchers("api/v1/documents/*/approve")
                                 .hasRole(Role.ADVISOR.name())
-                                .anyRequest()
-                                .authenticated()
+                                .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

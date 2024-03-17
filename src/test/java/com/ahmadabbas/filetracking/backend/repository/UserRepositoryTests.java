@@ -1,17 +1,10 @@
 package com.ahmadabbas.filetracking.backend.repository;
 
-import com.ahmadabbas.filetracking.backend.user.Role;
-import com.ahmadabbas.filetracking.backend.user.User;
-import com.ahmadabbas.filetracking.backend.user.UserRepository;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
+import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-
-import java.util.Arrays;
-import java.util.List;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
