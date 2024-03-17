@@ -1,37 +1,26 @@
 package com.ahmadabbas.filetracking.backend.document.base;
 
-import com.ahmadabbas.filetracking.backend.category.Category;
-import com.ahmadabbas.filetracking.backend.category.CategoryService;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentAddRequest;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentModifyCategoryRequest;
+import com.ahmadabbas.filetracking.backend.category.*;
+import com.ahmadabbas.filetracking.backend.document.base.payload.*;
+import com.ahmadabbas.filetracking.backend.document.base.repository.DocumentRepository;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
-import com.ahmadabbas.filetracking.backend.student.Student;
-import com.ahmadabbas.filetracking.backend.student.StudentService;
-import com.ahmadabbas.filetracking.backend.user.Role;
-import com.ahmadabbas.filetracking.backend.user.User;
-import com.ahmadabbas.filetracking.backend.util.AzureBlobService;
-import com.ahmadabbas.filetracking.backend.util.PageableUtil;
-import com.ahmadabbas.filetracking.backend.util.payload.PaginatedMapResponse;
-import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
+import com.ahmadabbas.filetracking.backend.student.*;
+import com.ahmadabbas.filetracking.backend.user.*;
+import com.ahmadabbas.filetracking.backend.util.*;
+import com.ahmadabbas.filetracking.backend.util.payload.*;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Filter;
-import org.hibernate.Session;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.hibernate.*;
+import org.springframework.data.domain.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.zip.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -48,7 +37,7 @@ public class DocumentService {
         Session session = entityManager.unwrap(Session.class);
         Filter filter = session.enableFilter("deletedDocumentFilter");
         filter.setParameter("isDeleted", false);
-        Document document = documentRepository.findById(uuid)
+        Document document = documentRepository.findOneById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "document with id `%s` not found".formatted(uuid)
                 ));
@@ -123,49 +112,34 @@ public class DocumentService {
         return zipOutputStream.toByteArray();
     }
 
-    public PaginatedResponse<DocumentDto> getAllDocuments(
-            User loggedInUser,
-            int pageNo,
-            int pageSize,
-            String sortBy,
-            String order
-    ) {
-        return getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, "-1");
+    public PaginatedResponse<DocumentDto> getAllDocuments(User loggedInUser,
+                                                          int pageNo,
+                                                          int pageSize,
+                                                          String sortBy,
+                                                          String order,
+                                                          String searchQuery,
+                                                          List<Long> categoryIds) {
+        return getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, searchQuery, "-1", categoryIds);
     }
 
-    public PaginatedResponse<DocumentDto> getAllDocuments(
-            User loggedInUser,
-            int pageNo,
-            int pageSize,
-            String sortBy,
-            String order,
-            List<Long> categoryIds,
-            List<Long> parentCategoryIds
-    ) {
-        return getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, "-1", categoryIds, parentCategoryIds);
+    public PaginatedResponse<DocumentDto> getAllDocuments(User loggedInUser,
+                                                          int pageNo,
+                                                          int pageSize,
+                                                          String sortBy,
+                                                          String order,
+                                                          String searchQuery,
+                                                          String studentId) {
+        return getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, searchQuery, studentId, Collections.emptyList());
     }
 
-    public PaginatedResponse<DocumentDto> getAllDocuments(
-            User loggedInUser,
-            int pageNo,
-            int pageSize,
-            String sortBy,
-            String order,
-            String studentId
-    ) {
-        return getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, studentId, Collections.emptyList(), Collections.emptyList());
-    }
-
-    public PaginatedResponse<DocumentDto> getAllDocuments(
-            User loggedInUser,
-            int pageNo,
-            int pageSize,
-            String sortBy,
-            String order,
-            String studentId,
-            List<Long> categoryIds,
-            List<Long> parentCategoryIds
-    ) {
+    public PaginatedResponse<DocumentDto> getAllDocuments(User loggedInUser,
+                                                          int pageNo,
+                                                          int pageSize,
+                                                          String sortBy,
+                                                          String order,
+                                                          String searchQuery,
+                                                          String studentId,
+                                                          List<Long> categoryIds) {
         log.debug("DocumentService.getAllDocuments");
         Session session = entityManager.unwrap(Session.class);
         Filter filter = session.enableFilter("deletedDocumentFilter");
@@ -187,46 +161,19 @@ public class DocumentService {
         }
         List<Long> allowedCategoriesIds = categoryService.getAllowedCategoriesIds(loggedInUser.getRoles());
         boolean isMainCategoriesAllowed = categoryIds.isEmpty() || new HashSet<>(allowedCategoriesIds).containsAll(categoryIds);
-        boolean isChildrenCategoriesAllowed = parentCategoryIds.isEmpty() || new HashSet<>(allowedCategoriesIds).containsAll(parentCategoryIds);
-        if (!isMainCategoriesAllowed || !isChildrenCategoriesAllowed) {
+        if (!isMainCategoriesAllowed) {
             log.debug("categoryIds = {}", categoryIds);
-            log.debug("parentCategoryIds = {}", parentCategoryIds);
             log.debug("allowedCategoriesIds = {}", allowedCategoriesIds);
             throw new AccessDeniedException("you are not allowed to get documents in given categories");
         }
+
         Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
         Page<Document> documentPage;
         log.debug("loggedInUser = {}, pageNo = {}, pageSize = {}, sortBy = {}, order = {}, studentId = {}, " +
-                  "categoryIds = {}, parentCategoryIds = {}",
-                loggedInUser, pageNo, pageSize, sortBy, order, studentId, categoryIds, parentCategoryIds);
+                  "categoryIds = {}",
+                loggedInUser, pageNo, pageSize, sortBy, order, studentId, categoryIds);
         log.debug("allowedCategoriesIds = {}", allowedCategoriesIds);
-        if (studentId.equals("-1")) {
-            if (categoryIds.isEmpty() && parentCategoryIds.isEmpty()) {
-                if (studentIds.isEmpty()) {
-                    documentPage = documentRepository.findAll(pageable);
-                } else {
-                    documentPage = documentRepository.findAll(pageable, studentIds);
-                }
-            } else {
-                if (parentCategoryIds.isEmpty()) {
-                    parentCategoryIds.add(-1L);
-                }
-                if (studentIds.isEmpty()) {
-                    documentPage = documentRepository.findByHavingCategoryIds(categoryIds, parentCategoryIds, pageable);
-                } else {
-                    documentPage = documentRepository.findByHavingCategoryIds(categoryIds, parentCategoryIds, pageable, studentIds);
-                }
-            }
-        } else {
-            if (categoryIds.isEmpty() && parentCategoryIds.isEmpty()) {
-                documentPage = documentRepository.findByStudentIdHavingCategoryIds(studentId, allowedCategoriesIds, pageable);
-            } else {
-                if (parentCategoryIds.isEmpty()) {
-                    parentCategoryIds.add(-1L);
-                }
-                documentPage = documentRepository.findByStudentIdHavingCategoryIds(studentId, categoryIds, parentCategoryIds, pageable);
-            }
-        }
+        documentPage = documentRepository.findAllDocuments(studentId, studentIds, categoryIds, searchQuery, pageable);
         session.disableFilter("deletedDocumentFilter");
         List<DocumentDto> content = documentPage.getContent()
                 .stream()
@@ -242,30 +189,24 @@ public class DocumentService {
         );
     }
 
-    public PaginatedMapResponse<String, byte[]> getAllDocumentBlobs(
-            User loggedInUser,
-            int pageNo,
-            int pageSize,
-            String sortBy,
-            String order,
-            List<Long> categoryIds,
-            List<Long> parentCategoryIds
-    ) throws IOException {
-        return getAllDocumentBlobs(loggedInUser, pageNo, pageSize, sortBy, order, "-1", categoryIds, parentCategoryIds);
+    public PaginatedMapResponse<String, byte[]> getAllDocumentBlobs(User loggedInUser,
+                                                                    int pageNo,
+                                                                    int pageSize,
+                                                                    String sortBy,
+                                                                    String order,
+                                                                    List<Long> categoryIds) throws IOException {
+        return getAllDocumentBlobs(loggedInUser, pageNo, pageSize, sortBy, order, "-1", categoryIds);
     }
 
-    public PaginatedMapResponse<String, byte[]> getAllDocumentBlobs(
-            User loggedInUser,
-            int pageNo,
-            int pageSize,
-            String sortBy,
-            String order,
-            String studentId,
-            List<Long> categoryIds,
-            List<Long> parentCategoryIds
-    ) throws IOException {
+    public PaginatedMapResponse<String, byte[]> getAllDocumentBlobs(User loggedInUser,
+                                                                    int pageNo,
+                                                                    int pageSize,
+                                                                    String sortBy,
+                                                                    String order,
+                                                                    String studentId,
+                                                                    List<Long> categoryIds) throws IOException {
         log.debug("DocumentService.getAllDocumentBlobs");
-        PaginatedResponse<DocumentDto> documents = getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, studentId, categoryIds, parentCategoryIds);
+        PaginatedResponse<DocumentDto> documents = getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, studentId, categoryIds);
 
         Map<String, byte[]> blobs = new HashMap<>();
 

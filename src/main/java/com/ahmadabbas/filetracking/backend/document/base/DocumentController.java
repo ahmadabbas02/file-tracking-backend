@@ -131,17 +131,12 @@ public class DocumentController {
             @RequestParam(defaultValue = "uploadedAt", required = false) String sortBy,
             @RequestParam(defaultValue = "desc", required = false) String order,
             @RequestParam(defaultValue = "-1", required = false) String studentId,
-            @RequestParam(defaultValue = "", required = false) List<Long> categoryIds,
-            @RequestParam(defaultValue = "", required = false) List<Long> parentCategoryIds
+            @RequestParam(defaultValue = "", required = false) String searchQuery,
+            @RequestParam(defaultValue = "", required = false) List<Long> categoryIds
     ) {
-        if (!studentId.equals("-1")) {
-            return ResponseEntity.ok(
-                    documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, studentId, categoryIds,
-                            parentCategoryIds)
-            );
-        }
-        return ResponseEntity.ok(documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, categoryIds,
-                parentCategoryIds));
+        return ResponseEntity.ok(
+                documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, searchQuery, studentId, categoryIds)
+        );
     }
 
     @Operation(
@@ -159,17 +154,11 @@ public class DocumentController {
             @RequestParam(defaultValue = "uploadedAt", required = false) String sortBy,
             @RequestParam(defaultValue = "desc", required = false) String order,
             @RequestParam(defaultValue = "-1", required = false) String studentId,
-            @RequestParam(defaultValue = "", required = false) List<Long> categoryIds,
-            @RequestParam(defaultValue = "", required = false) List<Long> parentCategoryIds
+            @RequestParam(defaultValue = "", required = false) List<Long> categoryIds
     ) throws IOException {
-        if (!studentId.equals("-1")) {
-            return ResponseEntity.ok(
-                    documentService.getAllDocumentBlobs(user, pageNo, pageSize, sortBy, order, studentId, categoryIds
-                            , parentCategoryIds)
-            );
-        }
-        return ResponseEntity.ok(documentService.getAllDocumentBlobs(user, pageNo, pageSize, sortBy, order,
-                categoryIds, parentCategoryIds));
+        return ResponseEntity.ok(
+                documentService.getAllDocumentBlobs(user, pageNo, pageSize, sortBy, order, studentId, categoryIds)
+        );
     }
 
     @Operation(
