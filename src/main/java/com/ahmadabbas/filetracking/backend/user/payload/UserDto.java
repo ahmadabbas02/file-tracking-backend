@@ -3,7 +3,6 @@ package com.ahmadabbas.filetracking.backend.user.payload;
 import com.ahmadabbas.filetracking.backend.user.User;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
 /**

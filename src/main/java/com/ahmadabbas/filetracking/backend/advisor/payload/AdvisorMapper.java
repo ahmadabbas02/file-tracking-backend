@@ -1,7 +1,6 @@
 package com.ahmadabbas.filetracking.backend.advisor.payload;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentMapper;
 import com.ahmadabbas.filetracking.backend.user.User;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
