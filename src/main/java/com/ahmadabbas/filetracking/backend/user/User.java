@@ -8,8 +8,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.*;
-import java.util.stream.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Setter
 @Getter
@@ -17,17 +21,11 @@ import java.util.stream.*;
 @RequiredArgsConstructor
 @Builder
 @Entity
-@Table(
-        name = "_user"
-//        indexes = {
-//                @Index(name = "idx_user_name", columnList = "name")
-//        }
-)
+@Table(name = "_user")
 @NamedEntityGraph(
         name = "User.eagerlyFetchRoles",
         attributeNodes = @NamedAttributeNode("roles")
 )
-@Inheritance(strategy = InheritanceType.JOINED)
 public class User implements UserDetails {
 
     @Id
