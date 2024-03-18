@@ -10,7 +10,7 @@ import com.ahmadabbas.filetracking.backend.student.StudentRepository;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
-import com.ahmadabbas.filetracking.backend.util.PageableUtil;
+import com.ahmadabbas.filetracking.backend.util.PagingUtils;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -96,7 +96,7 @@ public class AdvisorService {
     }
 
     public PaginatedResponse<AdvisorDto> getAllAdvisors(int pageNo, int pageSize, String sortBy, String order, String searchQuery) {
-        Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
+        Pageable pageable = PagingUtils.getPageable(pageNo, pageSize, sortBy, order);
         Page<Advisor> advisorPage;
         if (searchQuery.isEmpty()) {
             log.debug("No search query provided, getting all advisors..");

@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.document.base.repository;
 
 import com.ahmadabbas.filetracking.backend.document.base.Document;
+import com.ahmadabbas.filetracking.backend.util.PagingUtils;
 import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaBuilderFactory;
 import com.blazebit.persistence.PagedList;
@@ -11,13 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
@@ -67,13 +65,7 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
 
     private Page<Document> getOrderedDocumentsPage(Pageable pageable,
                                                    PaginatedCriteriaBuilder<Document> criteriaBuilder) {
-        Map<String, Sort.Direction> sortProperties = pageable.getSort()
-                .stream()
-                .collect(Collectors.toMap(Sort.Order::getProperty, Sort.Order::getDirection));
-        for (var entry : sortProperties.entrySet()) {
-            criteriaBuilder.orderBy(entry.getKey(), entry.getValue().equals(Sort.Direction.ASC));
-        }
-        criteriaBuilder.orderBy("id", true);
+        PagingUtils.applySorting(pageable, criteriaBuilder);
         PagedList<Document> resultList = criteriaBuilder.getResultList();
         return new PageImpl<>(resultList, pageable, resultList.getTotalSize());
     }

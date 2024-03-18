@@ -13,7 +13,7 @@ import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
 import com.ahmadabbas.filetracking.backend.user.UserService;
-import com.ahmadabbas.filetracking.backend.util.PageableUtil;
+import com.ahmadabbas.filetracking.backend.util.PagingUtils;
 import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import com.opencsv.bean.CsvToBean;
@@ -84,7 +84,7 @@ public class StudentService {
                                                         String order,
                                                         String advisorId,
                                                         String searchQuery) {
-        Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
+        Pageable pageable = PagingUtils.getPageable(pageNo, pageSize, sortBy, order);
         Page<Student> studentPage;
         log.debug("Logged in user = %s".formatted(loggedInUser));
         Set<Role> roles = userService.getRoles(loggedInUser);

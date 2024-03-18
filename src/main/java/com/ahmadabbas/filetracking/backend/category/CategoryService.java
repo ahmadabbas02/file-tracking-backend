@@ -1,9 +1,16 @@
 package com.ahmadabbas.filetracking.backend.category;
 
-import com.ahmadabbas.filetracking.backend.category.payload.*;
-import com.ahmadabbas.filetracking.backend.category.permission.*;
-import com.ahmadabbas.filetracking.backend.exception.*;
-import com.ahmadabbas.filetracking.backend.user.*;
+import com.ahmadabbas.filetracking.backend.category.payload.AddCategoryRequest;
+import com.ahmadabbas.filetracking.backend.category.payload.CategoryPermissionRequestDto;
+import com.ahmadabbas.filetracking.backend.category.payload.FullCategoryPermissionResponse;
+import com.ahmadabbas.filetracking.backend.category.payload.FullCategoryResponse;
+import com.ahmadabbas.filetracking.backend.category.permission.CategoryPermission;
+import com.ahmadabbas.filetracking.backend.category.permission.CategoryPermissionRepository;
+import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
+import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
+import com.ahmadabbas.filetracking.backend.user.Role;
+import com.ahmadabbas.filetracking.backend.user.User;
+import com.ahmadabbas.filetracking.backend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -173,8 +180,7 @@ public class CategoryService {
             String name = cat.getName();
             var categoryResponse = categoryMap.getOrDefault(categoryId,
                     new FullCategoryPermissionResponse(categoryId, name, new ArrayList<>()));
-            List<CategoryPermission> allPermsByCategoryId =
-                    categoryPermissionRepository.findAllByCategoryId(categoryId);
+            List<CategoryPermission> allPermsByCategoryId = categoryPermissionRepository.findAllByCategoryId(categoryId);
             var roles = allPermsByCategoryId.stream().map(CategoryPermission::getRole).toList();
             categoryResponse.permittedRoles().addAll(roles);
             categoryMap.put(categoryId, categoryResponse);

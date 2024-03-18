@@ -103,21 +103,21 @@ public class AzureBlobService {
                                            String originalFileName,
                                            String parentFolder) {
         log.debug("categoryName = {}, title = {}, originalFileName = {}, parentFolder = {}", categoryName, title, originalFileName, parentFolder);
-        title = FileNameUtil.sanitizeFileName(title);
-        originalFileName = FileNameUtil.sanitizeFileName(originalFileName);
+        title = FileNameUtils.sanitizeFileName(title);
+        originalFileName = FileNameUtils.sanitizeFileName(originalFileName);
         log.debug("title = {}", title);
         log.debug("originalFileName = {}", originalFileName);
         String fileNameWithoutExtension = "%s-%s"
                 .formatted(categoryName, title);
         String fileName = "%s%s"
                 .formatted(fileNameWithoutExtension,
-                        FileNameUtil.getFileExtension(originalFileName));
+                        FileNameUtils.getFileExtension(originalFileName));
         List<String> blobsInParentFolder = getBlobsInParentFolder(parentFolder);
         blobsInParentFolder = blobsInParentFolder
                 .stream()
                 .map(name ->
                         name.replaceAll(parentFolder + "/", "")
-                                .replace(FileNameUtil.getFileExtension(name), "")
+                                .replace(FileNameUtils.getFileExtension(name), "")
                 )
                 .toList();
         log.debug("blobsInParentFolder = {}", blobsInParentFolder);
@@ -135,7 +135,7 @@ public class AzureBlobService {
                     .formatted(categoryName, title, count);
             fileName = "%s%s"
                     .formatted(fileNameWithoutExtension,
-                            FileNameUtil.getFileExtension(originalFileName));
+                            FileNameUtils.getFileExtension(originalFileName));
             count++;
         }
         return parentFolder + "/" + fileName;

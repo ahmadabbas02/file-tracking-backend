@@ -1,26 +1,38 @@
 package com.ahmadabbas.filetracking.backend.document.base;
 
-import com.ahmadabbas.filetracking.backend.category.*;
-import com.ahmadabbas.filetracking.backend.document.base.payload.*;
+import com.ahmadabbas.filetracking.backend.category.Category;
+import com.ahmadabbas.filetracking.backend.category.CategoryService;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentAddRequest;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentModifyCategoryRequest;
 import com.ahmadabbas.filetracking.backend.document.base.repository.DocumentRepository;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
-import com.ahmadabbas.filetracking.backend.student.*;
-import com.ahmadabbas.filetracking.backend.user.*;
-import com.ahmadabbas.filetracking.backend.util.*;
-import com.ahmadabbas.filetracking.backend.util.payload.*;
+import com.ahmadabbas.filetracking.backend.student.Student;
+import com.ahmadabbas.filetracking.backend.student.StudentService;
+import com.ahmadabbas.filetracking.backend.user.Role;
+import com.ahmadabbas.filetracking.backend.user.User;
+import com.ahmadabbas.filetracking.backend.util.AzureBlobService;
+import com.ahmadabbas.filetracking.backend.util.PagingUtils;
+import com.ahmadabbas.filetracking.backend.util.payload.PaginatedMapResponse;
+import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.*;
-import org.springframework.data.domain.*;
+import org.hibernate.Filter;
+import org.hibernate.Session;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
-import java.util.zip.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Transactional(readOnly = true)
@@ -128,16 +140,6 @@ public class DocumentService {
                                                           String sortBy,
                                                           String order,
                                                           String searchQuery,
-                                                          String studentId) {
-        return getAllDocuments(loggedInUser, pageNo, pageSize, sortBy, order, searchQuery, studentId, Collections.emptyList());
-    }
-
-    public PaginatedResponse<DocumentDto> getAllDocuments(User loggedInUser,
-                                                          int pageNo,
-                                                          int pageSize,
-                                                          String sortBy,
-                                                          String order,
-                                                          String searchQuery,
                                                           String studentId,
                                                           List<Long> categoryIds) {
         log.debug("DocumentService.getAllDocuments");
@@ -167,7 +169,7 @@ public class DocumentService {
             throw new AccessDeniedException("you are not allowed to get documents in given categories");
         }
 
-        Pageable pageable = PageableUtil.getPageable(pageNo, pageSize, sortBy, order);
+        Pageable pageable = PagingUtils.getPageable(pageNo, pageSize, sortBy, order);
         Page<Document> documentPage;
         log.debug("loggedInUser = {}, pageNo = {}, pageSize = {}, sortBy = {}, order = {}, studentId = {}, " +
                   "categoryIds = {}",
@@ -187,15 +189,6 @@ public class DocumentService {
                 documentPage.getTotalPages(),
                 documentPage.isLast()
         );
-    }
-
-    public PaginatedMapResponse<String, byte[]> getAllDocumentBlobs(User loggedInUser,
-                                                                    int pageNo,
-                                                                    int pageSize,
-                                                                    String sortBy,
-                                                                    String order,
-                                                                    List<Long> categoryIds) throws IOException {
-        return getAllDocumentBlobs(loggedInUser, pageNo, pageSize, sortBy, order, "-1", categoryIds);
     }
 
     public PaginatedMapResponse<String, byte[]> getAllDocumentBlobs(User loggedInUser,
@@ -233,7 +226,7 @@ public class DocumentService {
             throw new AccessDeniedException("not authorized to get other student's documents");
         } else if (roles.contains(Role.ADVISOR)) {
             if (!document.getStudent().getAdvisor().getUser().getId().equals(loggedInUser.getId())) {
-                throw new AccessDeniedException("not authorized to get not own student's documents.");
+                throw new AccessDeniedException("not authorized to get not own students documents.");
             }
         }
         return roles;
