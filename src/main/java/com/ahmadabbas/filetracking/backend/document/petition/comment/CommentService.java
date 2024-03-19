@@ -31,13 +31,18 @@ public class CommentService {
     @Transactional
     public Comment addComment(CommentAddRequest addRequest, UUID documentId, User loggedInUser) {
         Set<Role> roles = loggedInUser.getRoles();
-        if (roles.contains(Role.STUDENT)) {
-            throw new AccessDeniedException("not authorized to add comments");
-        }
         Document doc = documentService.getDocument(documentId, loggedInUser);
         String categoryName = doc.getCategory().getName().toLowerCase();
+        if (roles.contains(Role.STUDENT)) {
+            if (!doc.getStudent().getUser().getId().equals(loggedInUser.getId())) {
+                throw new AccessDeniedException("not authorized..");
+            }
+            if (!categoryName.contains("medical report")) {
+                throw new AccessDeniedException("comments can only be added as a student on medical report!");
+            }
+        }
         if (!categoryName.contains("petition")
-                && !categoryName.contains("medical report")) {
+            && !categoryName.contains("medical report")) {
             throw new AccessDeniedException("comments can only be added to petition and medical report!");
         }
         Comment comment = Comment.builder()
