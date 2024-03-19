@@ -7,7 +7,7 @@ import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorRepository;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.student.Student;
-import com.ahmadabbas.filetracking.backend.student.StudentRepository;
+import com.ahmadabbas.filetracking.backend.student.repository.StudentRepository;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;

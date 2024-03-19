@@ -22,7 +22,9 @@ public class StudentCsvRepresentation {
     @CsvBindByName
     private String email;
     @CsvBindByName
-    private String department;
+    private String program;
+    @CsvBindByName
+    private String phoneNumber;
     @CsvBindByName
     private short year;
     @CsvBindByName

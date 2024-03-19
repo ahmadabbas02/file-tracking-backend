@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.student;
 
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
+import com.ahmadabbas.filetracking.backend.student.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

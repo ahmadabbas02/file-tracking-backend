@@ -1,14 +1,15 @@
 package com.ahmadabbas.filetracking.backend.student;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
-import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorRepository;
 import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
+import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorRepository;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentCsvRepresentation;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentDto;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
+import com.ahmadabbas.filetracking.backend.student.repository.StudentRepository;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserService;
@@ -173,6 +174,7 @@ public class StudentService {
                 .lastName(studentRegistrationRequest.surname())
                 .email(studentRegistrationRequest.email())
                 .password(passwordEncoder.encode(studentRegistrationRequest.password()))
+                .phoneNumber(studentRegistrationRequest.phoneNumber())
                 .picture(studentRegistrationRequest.picture())
                 .role(Role.STUDENT)
                 .build();
@@ -231,6 +233,7 @@ public class StudentService {
                             .lastName(s.getSurname())
                             .email(s.getEmail())
                             .password(passwordEncoder.encode(s.getPassword()))
+                            .phoneNumber(s.getPhoneNumber())
                             .role(Role.STUDENT)
                             .picture(s.getPicture())
                             .isEnabled(s.isEnabled())
@@ -242,7 +245,7 @@ public class StudentService {
                     return Student.builder()
                             .id(s.getStudentId())
                             .advisor(advisor)
-                            .program(s.getDepartment())
+                            .program(s.getProgram())
                             .year(s.getYear())
                             .user(user)
                             .build();

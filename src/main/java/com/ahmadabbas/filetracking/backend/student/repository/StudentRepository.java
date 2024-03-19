@@ -1,6 +1,6 @@
-package com.ahmadabbas.filetracking.backend.student;
+package com.ahmadabbas.filetracking.backend.student.repository;
 
-import com.ahmadabbas.filetracking.backend.student.repository.CustomStudentRepository;
+import com.ahmadabbas.filetracking.backend.student.Student;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;

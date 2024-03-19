@@ -16,6 +16,7 @@ public record StudentRegistrationRequest(
         @Email(message = "Student email should be valid") String email,
         @NotEmpty(message = "Student name should not be empty") String password,
         @NotEmpty(message = "Student program should not be empty") String program,
+        @NotEmpty(message = "Student phone number should not be empty") String phoneNumber,
         @Positive @Min(1) Short year,
         @NotEmpty(message = "Student picture should not be empty") String picture,
         @NotEmpty(message = "Student's advisor id should not be empty") String advisorId

@@ -60,7 +60,9 @@ public class StudentController {
 
     @Operation(
             summary = "Batch add students",
-            description = "Adds the students in the csv to the database with their specified IDs.\nThe csv should have the following format: `studentId,advisorId,name,email,password,department,year,picture,isEnabled` as headers."
+            description = """
+                    Adds the students in the csv to the database with their specified IDs.
+                    The csv should have the following format: `studentId,advisorId,name,surname,email,password,phoneNumber,program,year,picture,isEnabled` as headers."""
     )
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
     public ResponseEntity<CsvUploadResponse> uploadStudents(@RequestPart("file") MultipartFile file,

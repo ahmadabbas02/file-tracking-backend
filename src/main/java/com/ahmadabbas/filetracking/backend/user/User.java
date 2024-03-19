@@ -50,9 +50,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String picture;
 
-    @Column(nullable = false, columnDefinition = "varchar(255) default ''")
-    @Builder.Default
-    private String phoneNumber = "";
+    @Column(nullable = false)
+    private String phoneNumber;
 
     @Singular
     @NotEmpty(message = "At least one role must be specified")

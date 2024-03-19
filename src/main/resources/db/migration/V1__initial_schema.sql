@@ -10,14 +10,14 @@ CREATE SEQUENCE IF NOT EXISTS token_id_seq START WITH 1 INCREMENT BY 1;
 
 CREATE TABLE _user
 (
-    id           BIGINT                  NOT NULL,
-    email        VARCHAR(255)            NOT NULL,
-    password     VARCHAR(255)            NOT NULL,
-    picture      VARCHAR(255)            NOT NULL,
-    phone_number VARCHAR(255) DEFAULT '' NOT NULL,
-    is_enabled   BOOLEAN                 NOT NULL,
-    first_name   VARCHAR(255)            NOT NULL,
-    last_name    VARCHAR(255)            NOT NULL,
+    id           BIGINT       NOT NULL,
+    email        VARCHAR(255) NOT NULL,
+    password     VARCHAR(255) NOT NULL,
+    picture      VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(255) NOT NULL,
+    is_enabled   BOOLEAN      NOT NULL,
+    first_name   VARCHAR(255) NOT NULL,
+    last_name    VARCHAR(255) NOT NULL,
     CONSTRAINT pk__user PRIMARY KEY (id)
 );
 

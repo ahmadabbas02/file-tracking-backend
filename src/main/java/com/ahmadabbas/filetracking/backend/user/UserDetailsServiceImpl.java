@@ -4,7 +4,7 @@ package com.ahmadabbas.filetracking.backend.user;
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorRepository;
 import com.ahmadabbas.filetracking.backend.student.Student;
-import com.ahmadabbas.filetracking.backend.student.StudentRepository;
+import com.ahmadabbas.filetracking.backend.student.repository.StudentRepository;
 import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.EmailValidator;

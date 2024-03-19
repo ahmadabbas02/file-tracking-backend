@@ -12,21 +12,28 @@ VALUES (nextval('category_seq'), -1, 'Main Cat. 1'), -- id 5
        (nextval('category_seq'), 5, 'Sub Cat. 1'),   -- id 6
        (nextval('category_seq'), 5, 'Sub Cat. 2'); -- id 7
 
-INSERT INTO _user (id, first_name, last_name, email, password, picture, is_enabled)
+INSERT INTO _user (id, first_name, last_name, email, password, picture, is_enabled, phone_number)
 VALUES (nextval('_user_seq'), 'Admin', 'Admin', 'admin@email.com',
-        '$2y$10$hkvMZ8EQBrOcNhwEjbEVCuex9L2u4UeSyE5aotM/9S/l0TYAu7HeK', 'picture url', TRUE), -- id 1 admin
+        '$2y$10$hkvMZ8EQBrOcNhwEjbEVCuex9L2u4UeSyE5aotM/9S/l0TYAu7HeK', 'picture url', TRUE,
+        '+90 533 123 4567'), -- id 1 admin
        (nextval('_user_seq'), 'Duygu', 'Çelik', 'duygu.celik@emu.edu.tr',
-        '$2a$10$.iDveRrBWZh1dZsoBrguzOxQ0NhfvVJ1cjr7KHcNLuzSycVKbzgii', 'picture url', TRUE), -- id 2 duygu
+        '$2a$10$.iDveRrBWZh1dZsoBrguzOxQ0NhfvVJ1cjr7KHcNLuzSycVKbzgii', 'picture url', TRUE,
+        '+90 533 123 4417'), -- id 2 duygu
        (nextval('_user_seq'), 'Alexander', 'Chefranov', 'alexander@emu.edu.tr',
-        '$2y$10$i44NP/3q3eitSIjqJjgdnemLoGcnhxmPU1Em3ZHr.DN6WD3PM3V66', 'picture url', TRUE), -- id 3 alexander
+        '$2y$10$i44NP/3q3eitSIjqJjgdnemLoGcnhxmPU1Em3ZHr.DN6WD3PM3V66', 'picture url', TRUE,
+        '+90 533 123 4465'), -- id 3 alexander
        (nextval('_user_seq'), 'Hilal', 'Özbilgen', 'hilal.ozbilgen@emu.edu.tr',
-        '$2y$10$3FeSckArqHEZhnDHZV5FvOvBc.ZEC/W6/qzm8lDVAZNzyfQfA.95K', 'picture url', TRUE), -- id 4 secretary
+        '$2y$10$3FeSckArqHEZhnDHZV5FvOvBc.ZEC/W6/qzm8lDVAZNzyfQfA.95K', 'picture url', TRUE,
+        '+90 533 123 8456'), -- id 4 secretary
        (nextval('_user_seq'), 'Ahmad', 'Abbas', 'ahmad@email.com',
-        '$2a$10$2O8NtpqXVLdESlILln1pWeuwAedflBgaNPSQ8zA4yWIfDZAXZn.um', 'picture url', TRUE), -- id 5 ahmad
+        '$2a$10$2O8NtpqXVLdESlILln1pWeuwAedflBgaNPSQ8zA4yWIfDZAXZn.um', 'picture url', TRUE,
+        '+90 533 123 8464'), -- id 5 ahmad
        (nextval('_user_seq'), 'Hussein', 'Barada', 'hussein@email.com',
-        '$2a$10$dhADRWo0dnf64Ip4mSto3e3CdzHvMjJXHOpnxgdUOOKJ6KaFQAcyu', 'picture url', TRUE), -- id 6 hussein
+        '$2a$10$dhADRWo0dnf64Ip4mSto3e3CdzHvMjJXHOpnxgdUOOKJ6KaFQAcyu', 'picture url', TRUE,
+        '+90 533 123 7854'), -- id 6 hussein
        (nextval('_user_seq'), 'Rama', 'Ayache', 'rama@email.com',
-        '$2y$10$cUo8URaI8M2Risv36FuW9ODF.QUdYCyzEuWWC.Xkkh8l3XhxBkwNi', 'picture url', TRUE); -- id 7 rama
+        '$2y$10$cUo8URaI8M2Risv36FuW9ODF.QUdYCyzEuWWC.Xkkh8l3XhxBkwNi', 'picture url', TRUE,
+        '+90 533 123 1645'); -- id 7 rama
 
 INSERT INTO user_roles (user_id, role)
 VALUES (1, 'ADMINISTRATOR'),
