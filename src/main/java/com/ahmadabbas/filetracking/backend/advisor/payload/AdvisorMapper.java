@@ -11,7 +11,7 @@ public interface AdvisorMapper {
     @InheritInverseConfiguration(name = "toDto")
     Advisor toEntity(AdvisorDto advisorDto);
 
-    @Mapping(source = "user.fullName", target = "name")
+    @Mapping(source = "user.fullName", target = "fullName")
     @Mapping(source = "user.firstName", target = "firstName")
     @Mapping(source = "user.lastName", target = "lastName")
     AdvisorDto toDto(Advisor advisor);
