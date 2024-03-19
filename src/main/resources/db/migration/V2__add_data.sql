@@ -3,8 +3,7 @@ INSERT INTO category (category_id, parent_category_id, name)
 VALUES (nextval('category_seq'), -1, 'Medical Report'), -- id 1
        (nextval('category_seq'), -1, 'Contact Form'),   -- id 2
        (nextval('category_seq'), -1, 'Internship'),     -- id 3
-       (nextval('category_seq'), -1, 'Petition');
--- id 4
+       (nextval('category_seq'), -1, 'Petition');       -- id 4
 
 -- TODO: TEST CATEGORIES TO BE REMOVED LATER
 INSERT INTO category (category_id, parent_category_id, name)
@@ -33,7 +32,10 @@ VALUES (nextval('_user_seq'), 'Admin', 'Admin', 'admin@email.com',
         '+90 533 123 7854'), -- id 6 hussein
        (nextval('_user_seq'), 'Rama', 'Ayache', 'rama@email.com',
         '$2y$10$cUo8URaI8M2Risv36FuW9ODF.QUdYCyzEuWWC.Xkkh8l3XhxBkwNi', 'picture url', TRUE,
-        '+90 533 123 1645'); -- id 7 rama
+        '+90 533 123 1645'), -- id 7 rama
+       (nextval('_user_seq'), 'Zeki', 'Bayram', 'zeki.bayram@emu.edu.tr',
+        '$2y$10$LZHGRKf./k89lLM1lD2vOeV1rrQsG5BWKiFbLXHrYgTmQLeLvtRyq', 'picture url', TRUE,
+        '+90 533 854 4158'); -- id 8 zeki
 
 INSERT INTO user_roles (user_id, role)
 VALUES (1, 'ADMINISTRATOR'),
@@ -42,7 +44,8 @@ VALUES (1, 'ADMINISTRATOR'),
        (4, 'SECRETARY'),
        (5, 'STUDENT'),
        (6, 'STUDENT'),
-       (7, 'STUDENT');
+       (7, 'STUDENT'),
+       (8, 'CHAIR');
 
 INSERT INTO advisor (id, user_id, created_at)
 VALUES ('AP24000001', 2, NOW()),
@@ -58,8 +61,7 @@ INSERT INTO category_permission (id, role, category_parent_category_id, category
 VALUES (nextval('category_permission_seq'), 'CHAIR', -1, 1), -- Medical Report
        (nextval('category_permission_seq'), 'CHAIR', -1, 2), -- Contact Form
        (nextval('category_permission_seq'), 'CHAIR', -1, 3), -- Internship
-       (nextval('category_permission_seq'), 'CHAIR', -1, 4);
--- Petition
+       (nextval('category_permission_seq'), 'CHAIR', -1, 4); -- Petition
 
 -- Secretary categories
 -- Chair categories
@@ -67,8 +69,7 @@ INSERT INTO category_permission (id, role, category_parent_category_id, category
 VALUES (nextval('category_permission_seq'), 'SECRETARY', -1, 1), -- Medical Report
        (nextval('category_permission_seq'), 'SECRETARY', -1, 2), -- Contact Form
        (nextval('category_permission_seq'), 'SECRETARY', -1, 3), -- Internship
-       (nextval('category_permission_seq'), 'SECRETARY', -1, 4);
--- Petition
+       (nextval('category_permission_seq'), 'SECRETARY', -1, 4); -- Petition
 
 -- Advisor categories
 -- Medical Report
@@ -76,8 +77,7 @@ INSERT INTO category_permission (id, role, category_parent_category_id, category
 VALUES (nextval('category_permission_seq'), 'ADVISOR', -1, 1), -- Medical Report
        (nextval('category_permission_seq'), 'ADVISOR', -1, 2), -- Contact Form
        (nextval('category_permission_seq'), 'ADVISOR', -1, 3), -- Internship
-       (nextval('category_permission_seq'), 'ADVISOR', -1, 4);
--- Petition
+       (nextval('category_permission_seq'), 'ADVISOR', -1, 4); -- Petition
 
 -- Student categories
 INSERT INTO category_permission (id, role, category_parent_category_id, category_category_id)
