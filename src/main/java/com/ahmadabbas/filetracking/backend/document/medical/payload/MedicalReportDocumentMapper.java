@@ -12,11 +12,13 @@ public interface MedicalReportDocumentMapper {
     @InheritInverseConfiguration(name = "toDto")
     MedicalReportDocument toEntity(MedicalReportDto medicalReportDto);
 
+    @Deprecated
     @Mapping(source = "category.name", target = "categoryName")
     @Mapping(source = "category.categoryId", target = "categoryId")
     @Mapping(source = "category.parentCategoryId", target = "categoryParentId")
-    @Mapping(source = "student.id", target = "studentId")
-    @Mapping(expression = "java(getStudentFullName(medicalReportDocument))", target = "studentName")
+    @Mapping(source = "student.user.firstName", target = "studentFirstName")
+    @Mapping(source = "student.user.lastName", target = "studentLastName")
+    @Mapping(source = "student.user.fullName", target = "studentFullName")
     @Mapping(source = "student.program", target = "studentProgram")
     @Mapping(source = "student.year", target = "studentYear")
     @Mapping(source = "student.user.picture", target = "studentPicture")
@@ -25,8 +27,4 @@ public interface MedicalReportDocumentMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     MedicalReportDocument partialUpdate(MedicalReportDto medicalReportDto, @MappingTarget MedicalReportDocument medicalReportDocument);
 
-    default String getStudentFullName(MedicalReportDocument medicalReportDocument) {
-        User user = medicalReportDocument.getStudent().getUser();
-        return user.getName().getFullName();
-    }
 }

@@ -54,7 +54,10 @@ public class PetitionDocumentService {
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
         Category category = categoryService.getCategoryByName("Petition");
         try {
-            File filledPdf = generatedFilledPetition(addRequest, student.getId(), loggedInUser.getName());
+            File filledPdf = generatedFilledPetition(addRequest,
+                    student.getId(),
+                    loggedInUser.getFirstName(),
+                    loggedInUser.getLastName());
             if (filledPdf == null) {
                 throw new RuntimeException("couldn't generate petition form pdf.");
             }
@@ -90,7 +93,8 @@ public class PetitionDocumentService {
 
     private File generatedFilledPetition(PetitionDocumentAddRequest addRequest,
                                          String studentId,
-                                         User.Name name) throws IOException {
+                                         String firstName,
+                                         String lastName) throws IOException {
         Resource pdfResource = resourceLoader.getResource("classpath:static/Student Petition Fillable.pdf");
         PdfReader reader = new PdfReader(pdfResource.getInputStream());
         File outputFile = File.createTempFile(studentId, ".pdf");
@@ -100,13 +104,13 @@ public class PetitionDocumentService {
             LocalDate localDate = LocalDate.now(ZoneId.of("Europe/Athens"));
             form.setField("studentNumber", studentId);
             form.setField("department", "Computer Engineering");
-            form.setField("name", name.getFirstName());
-            form.setField("surname", name.getLastName());
+            form.setField("name", firstName);
+            form.setField("surname", lastName);
             form.setField("email", addRequest.email());
             form.setField("phoneNumber", addRequest.phoneNumber());
             form.setField("subject", addRequest.subject());
             form.setField("date", localDate.format(formatter));
-            form.setField("signature", name.getFullName());
+            form.setField("signature", firstName + " " + lastName);
             form.setField("reason", addRequest.reasoning());
             stamp.setFormFlattening(true);
             return outputFile;

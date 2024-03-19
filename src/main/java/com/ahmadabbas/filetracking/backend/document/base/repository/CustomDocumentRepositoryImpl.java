@@ -39,6 +39,7 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
                                            Pageable pageable) {
         PaginatedCriteriaBuilder<Document> criteriaBuilder = criteriaBuilderFactory
                 .create(entityManager, Document.class)
+                .fetch("student", "student.user", "student.user.roles")
                 .page(
                         (int) pageable.getOffset(),
                         pageable.getPageSize()

@@ -1,8 +1,8 @@
 package com.ahmadabbas.filetracking.backend.user.payload;
 
-import com.ahmadabbas.filetracking.backend.advisor.AdvisorRepository;
+import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorMapper;
-import com.ahmadabbas.filetracking.backend.student.StudentRepository;
+import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
@@ -18,34 +18,25 @@ import java.util.Map;
 public interface UserMapper {
 
 
-    @Mapping(source = "user.name.firstName", target = "firstName")
-    @Mapping(source = "user.name.lastName", target = "lastName")
-    @Mapping(expression = "java(getUserFullName(user))", target = "name")
     @Mapping(
-            expression = "java(getAdditionalInformation(user, studentRepository, advisorRepository))",
+            expression = "java(getAdditionalInformation(user))",
             target = "roles"
     )
-    UserDto toDto(User user, StudentRepository studentRepository, AdvisorRepository advisorRepository);
+    UserDto toDto(User user);
 
-    default String getUserFullName(User user) {
-        return user.getName().getFullName();
-    }
-
-    default Map<String, Object> getAdditionalInformation(User user,
-                                                         StudentRepository studentRepository,
-                                                         AdvisorRepository advisorRepository) {
+    default Map<String, Object> getAdditionalInformation(User user) {
         Map<String, Object> additionalInfo = new HashMap<>();
-        if (user.getRoles().contains(Role.ADVISOR)) {
-            advisorRepository.findByUserId(user.getId())
-                    .ifPresent(
-                            advisor -> additionalInfo.put(Role.ADVISOR.name(), AdvisorMapper.INSTANCE.toAdvisorUserDto(advisor))
-                    );
+
+        Advisor advisor = user.getAdvisor();
+        Student student = user.getStudent();
+        if (advisor != null) {
+            additionalInfo.put(Role.ADVISOR.name(), AdvisorMapper.INSTANCE.toAdvisorUserDto(advisor));
         }
-        if (user.getRoles().contains(Role.STUDENT)) {
-            studentRepository.findByUserId(user.getId())
-                    .ifPresent(
-                            student -> additionalInfo.put(Role.STUDENT.name(), StudentMapper.INSTANCE.toStudentUserDto(student))
-                    );
+        if (student != null) {
+            additionalInfo.put(Role.STUDENT.name(), StudentMapper.INSTANCE.toStudentUserDto(student));
+        }
+        if (additionalInfo.isEmpty()) {
+            user.getRoles().forEach(role -> additionalInfo.put(role.name(), ""));
         }
 
         return additionalInfo;

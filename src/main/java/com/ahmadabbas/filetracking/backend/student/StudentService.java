@@ -1,7 +1,7 @@
 package com.ahmadabbas.filetracking.backend.student;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
-import com.ahmadabbas.filetracking.backend.advisor.AdvisorRepository;
+import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorRepository;
 import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
@@ -11,8 +11,8 @@ import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
-import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
 import com.ahmadabbas.filetracking.backend.user.UserService;
+import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
 import com.ahmadabbas.filetracking.backend.util.PagingUtils;
 import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
@@ -55,6 +55,7 @@ public class StudentService {
     private final AdvisorService advisorService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final StudentRepository studentRepository;
 
     public Student getStudent(String id, User loggedInUser) {
         if (loggedInUser.getRoles().contains(Role.STUDENT)) {
@@ -83,27 +84,30 @@ public class StudentService {
                                                         String sortBy,
                                                         String order,
                                                         String advisorId,
-                                                        String searchQuery) {
+                                                        String searchQuery,
+                                                        String roleId) {
+        log.debug("roleId = {}", roleId);
         Pageable pageable = PagingUtils.getPageable(pageNo, pageSize, sortBy, order);
         Page<Student> studentPage;
         log.debug("Logged in user = %s".formatted(loggedInUser));
         Set<Role> roles = userService.getRoles(loggedInUser);
         log.debug("Roles = %s".formatted(roles));
         if (roles.contains(Role.ADVISOR)) {
-            if (searchQuery.isEmpty()) {
-                log.debug("No search query provided, getting all advisor students..");
-                studentPage = studentDao.getAllStudentsByAdvisorUserId(loggedInUser.getId(), pageable);
-            } else {
-                // TODO: Decide how we want searching to be done
-                log.debug("Provided search query: '%s', getting all students..".formatted(searchQuery));
-                studentPage = StringUtils.isNumeric(searchQuery)
-                        ? studentDao.getAllStudentsByIdAndAdvisorUserId(false, searchQuery, loggedInUser.getId(), pageable)
-                        : studentDao.getAllStudentsByNameAndAdvisorUserId(true, searchQuery, loggedInUser.getId(), pageable);
-            }
+            studentPage = studentRepository.getAllStudents(searchQuery, loggedInUser.getId(), pageable);
+//            if (searchQuery.isEmpty()) {
+//                log.debug("No search query provided, getting all advisor students..");
+//                studentPage = studentDao.getAllStudentsByAdvisorUserId(loggedInUser.getId(), pageable);
+//            } else {
+//                // TODO: Decide how we want searching to be done
+//                log.debug("Provided search query: '%s', getting all advisor students..".formatted(searchQuery));
+//                studentPage = StringUtils.isNumeric(searchQuery)
+//                        ? studentDao.getAllStudentsByIdAndAdvisorUserId(false, searchQuery, loggedInUser.getId(), pageable)
+//                        : studentDao.getAllStudentsByNameAndAdvisorUserId(true, searchQuery, loggedInUser.getId(), pageable);
+//            }
         } else {
             if (advisorId.isBlank()) {
                 if (searchQuery.isEmpty()) {
-                    log.debug("No search query provided, getting all students..");
+                    log.debug("No search query provided, no advisor id, getting all students..");
                     studentPage = studentDao.getAllStudents(pageable);
                 } else {
                     // TODO: Decide how we want searching to be done
@@ -164,9 +168,9 @@ public class StudentService {
 
         Advisor advisor = advisorService.getAdvisorByAdvisorId(studentRegistrationRequest.advisorId(), loggedInUser);
 
-        User.Name name = new User.Name(studentRegistrationRequest.name(), studentRegistrationRequest.surname());
         User user = User.builder()
-                .name(name)
+                .firstName(studentRegistrationRequest.name())
+                .lastName(studentRegistrationRequest.surname())
                 .email(studentRegistrationRequest.email())
                 .password(passwordEncoder.encode(studentRegistrationRequest.password()))
                 .picture(studentRegistrationRequest.picture())
@@ -223,7 +227,8 @@ public class StudentService {
                 .map(s -> {
                     Advisor advisor = null;
                     User user = User.builder()
-                            .name(new User.Name(s.getName(), s.getSurname()))
+                            .firstName(s.getName())
+                            .lastName(s.getSurname())
                             .email(s.getEmail())
                             .password(passwordEncoder.encode(s.getPassword()))
                             .role(Role.STUDENT)

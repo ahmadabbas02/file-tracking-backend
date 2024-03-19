@@ -3,8 +3,6 @@ package com.ahmadabbas.filetracking.backend.student.payload;
 import com.opencsv.bean.CsvBindByName;
 import lombok.*;
 
-import java.util.StringJoiner;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -31,19 +29,4 @@ public class StudentCsvRepresentation {
     private String picture;
     @CsvBindByName
     private boolean isEnabled;
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", StudentCsvRepresentation.class.getSimpleName() + "[", "]")
-                .add("studentId='" + studentId + "'")
-                .add("advisorId='" + advisorId + "'")
-                .add("name='" + name + "'")
-                .add("password='" + password + "'")
-                .add("email='" + email + "'")
-                .add("department='" + department + "'")
-                .add("year=" + year)
-                .add("picture='" + picture + "'")
-                .add("isEnabled=" + isEnabled)
-                .toString();
-    }
 }

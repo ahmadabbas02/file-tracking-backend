@@ -7,5 +7,5 @@ import java.io.Serializable;
 /**
  * DTO for {@link Advisor}
  */
-public record AdvisorDto(String id, String name) implements Serializable {
+public record AdvisorDto(String id, String name, String firstName, String lastName) implements Serializable {
 }

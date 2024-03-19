@@ -1,7 +1,6 @@
 package com.ahmadabbas.filetracking.backend.advisor.payload;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
-import com.ahmadabbas.filetracking.backend.user.User;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -9,11 +8,12 @@ import org.mapstruct.factory.Mappers;
 public interface AdvisorMapper {
     AdvisorMapper INSTANCE = Mappers.getMapper(AdvisorMapper.class);
 
-
     @InheritInverseConfiguration(name = "toDto")
     Advisor toEntity(AdvisorDto advisorDto);
 
-    @Mapping(expression = "java(getUserFullName(advisor.getUser()))", target = "name")
+    @Mapping(source = "user.fullName", target = "name")
+    @Mapping(source = "user.firstName", target = "firstName")
+    @Mapping(source = "user.lastName", target = "lastName")
     AdvisorDto toDto(Advisor advisor);
 
     AdvisorUserDto toAdvisorUserDto(Advisor advisor);
@@ -21,7 +21,4 @@ public interface AdvisorMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Advisor partialUpdate(AdvisorDto advisorDto, @MappingTarget Advisor advisor);
 
-    default String getUserFullName(User user) {
-        return user.getName().getFullName();
-    }
 }

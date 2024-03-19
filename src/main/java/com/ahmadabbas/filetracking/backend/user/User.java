@@ -1,5 +1,7 @@
 package com.ahmadabbas.filetracking.backend.user;
 
+import com.ahmadabbas.filetracking.backend.advisor.Advisor;
+import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.token.Token;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
@@ -33,7 +35,11 @@ public class User implements UserDetails {
     @SequenceGenerator(name = "user_generator", sequenceName = "_user_seq", allocationSize = 1)
     private Long id;
 
-    private Name name;
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -62,6 +68,11 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private Set<Token> tokens;
+
+    @OneToOne(mappedBy = "user")
+    private Advisor advisor;
+    @OneToOne(mappedBy = "user")
+    private Student student;
 
     public void setRoles(Role... roles) {
         this.roles = Stream.of(roles).collect(Collectors.toSet());
@@ -107,33 +118,22 @@ public class User implements UserDetails {
     public String toString() {
         return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
                 .add("id=" + id)
-                .add("name='" + name + "'")
+                .add("firstName='" + firstName + "'")
+                .add("lastName='" + lastName + "'")
                 .add("email='" + email + "'")
+                .add("picture='" + picture + "'")
+                .add("phoneNumber='" + phoneNumber + "'")
                 .add("roles=" + roles)
-                .add("isEnabled=" + isEnabled)
                 .toString();
     }
 
-    @Getter
-    @Embeddable
-    public static class Name {
-        @Column(nullable = false)
-        private String firstName;
-        @Column(nullable = false)
-        private String lastName;
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 
-        public Name(String firstName, String lastName) {
-            this.firstName = firstName;
-            this.lastName = lastName;
-        }
+    @Deprecated
+    public void setFullName(String fullName) {
 
-        public Name() {
-
-        }
-
-        public String getFullName() {
-            return "%s %s".formatted(getFirstName(), getLastName());
-        }
     }
 }
 

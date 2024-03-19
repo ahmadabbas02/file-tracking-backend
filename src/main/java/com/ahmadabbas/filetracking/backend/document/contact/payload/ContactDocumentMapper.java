@@ -13,7 +13,9 @@ public interface ContactDocumentMapper {
     ContactDocument toEntity(ContactDocumentDto contactDocumentDto);
 
     @Deprecated
-    @Mapping(expression = "java(getStudentFullName(contactDocument))", target = "studentName")
+    @Mapping(source = "student.user.firstName", target = "studentFirstName")
+    @Mapping(source = "student.user.lastName", target = "studentLastName")
+    @Mapping(source = "student.user.fullName", target = "studentFullName")
     @Mapping(source = "student.user.picture", target = "studentPicture")
     @Mapping(source = "student.year", target = "studentYear")
     @Mapping(source = "student.program", target = "studentProgram")
@@ -27,8 +29,4 @@ public interface ContactDocumentMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     ContactDocument partialUpdate(ContactDocumentDto contactDocumentDto, @MappingTarget ContactDocument contactDocument);
 
-    default String getStudentFullName(ContactDocument contactDocument) {
-        User user = contactDocument.getStudent().getUser();
-        return user.getName().getFullName();
-    }
 }

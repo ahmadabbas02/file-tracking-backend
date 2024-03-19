@@ -1,7 +1,8 @@
 package com.ahmadabbas.filetracking.backend.document.base;
 
 import com.ahmadabbas.filetracking.backend.category.Category;
-import com.ahmadabbas.filetracking.backend.document.base.payload.*;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentMapper;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -10,7 +11,8 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Objects;
+import java.util.UUID;
 
 
 @Setter
@@ -47,6 +49,7 @@ public class Document {
     @CreationTimestamp
     private LocalDateTime uploadedAt;
 
+    @Builder.Default
     private boolean deleted = Boolean.FALSE;
 
     @Override

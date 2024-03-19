@@ -1,5 +1,6 @@
 package com.ahmadabbas.filetracking.backend.student;
 
+import com.ahmadabbas.filetracking.backend.student.repository.CustomStudentRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -10,7 +11,7 @@ import org.springframework.lang.NonNull;
 import java.util.List;
 import java.util.Optional;
 
-public interface StudentRepository extends JpaRepository<Student, String> {
+public interface StudentRepository extends JpaRepository<Student, String>, CustomStudentRepository {
 
     @Override
     @Query("""
@@ -89,8 +90,8 @@ public interface StudentRepository extends JpaRepository<Student, String> {
 
     @Query("""
             select s from Student s
-            where upper(s.user.name.firstName) like upper(concat(?1, '%'))
-            or upper(s.user.name.lastName) like upper(concat(?1, '%'))
+            where upper(s.user.firstName) like upper(concat(?1, '%'))
+            or upper(s.user.lastName) like upper(concat(?1, '%'))
             """)
     @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAllByNameStartsWith(@NonNull String name,
@@ -98,15 +99,15 @@ public interface StudentRepository extends JpaRepository<Student, String> {
 
     @Query("""
             select s from Student s
-            where upper(s.user.name.firstName) like upper(concat('%', ?1, '%'))
-            or upper(s.user.name.lastName) like upper(concat('%', ?1, '%'))""")
+            where upper(s.user.firstName) like upper(concat('%', ?1, '%'))
+            or upper(s.user.lastName) like upper(concat('%', ?1, '%'))""")
     @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAllByNameContains(@NonNull String name, Pageable pageable);
 
     @Query("""
             select s from Student s
-            where (upper(s.user.name.firstName) like upper(concat(?1, '%'))
-            or upper(s.user.name.lastName) like upper(concat(?1, '%')))
+            where (upper(s.user.firstName) like upper(concat(?1, '%'))
+            or upper(s.user.lastName) like upper(concat(?1, '%')))
             and s.advisor.user.id = ?2
             """)
     @EntityGraph(value = "Student.eagerlyFetchUser")
@@ -114,21 +115,22 @@ public interface StudentRepository extends JpaRepository<Student, String> {
                                                           Long userId,
                                                           Pageable pageable);
 
+    @EntityGraph(attributePaths = {"advisor.user", "user", "user.roles", "user.advisor", "user.student"})
     @Query("""
             select s from Student s
-            where (upper(s.user.name.firstName) like upper(concat('%', ?1, '%'))
-            or upper(s.user.name.lastName) like upper(concat('%', ?1, '%')))
+            where (upper(s.user.firstName) like upper(concat('%', ?1, '%'))
+            or upper(s.user.lastName) like upper(concat('%', ?1, '%')))
             and s.advisor.user.id = ?2
             """)
-    @EntityGraph(value = "Student.eagerlyFetchUser")
+//    @EntityGraph(value = "Student.eagerlyFetchUser")
     Page<Student> findAllByNameContainsAndAdvisorUserId(@NonNull String name,
                                                         Long userId,
                                                         Pageable pageable);
 
     @Query("""
             select s from Student s
-            where (upper(s.user.name.firstName) like upper(concat('%', ?1, '%'))
-            or upper(s.user.name.lastName) like upper(concat('%', ?1, '%')))
+            where (upper(s.user.firstName) like upper(concat('%', ?1, '%'))
+            or upper(s.user.lastName) like upper(concat('%', ?1, '%')))
             and s.advisor.id = ?2
             """)
     @EntityGraph(value = "Student.eagerlyFetchUser")

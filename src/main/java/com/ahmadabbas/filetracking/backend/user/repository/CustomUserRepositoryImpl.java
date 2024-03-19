@@ -24,22 +24,10 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
     private final CriteriaBuilderFactory criteriaBuilderFactory;
 
     @Override
-    public Page<User> findAll(Pageable pageable) {
-        PaginatedCriteriaBuilder<User> criteriaBuilder = criteriaBuilderFactory
-                .create(entityManager, User.class)
-                .fetch("roles", "advisor", "student")
-                .page(
-                        (int) pageable.getOffset(),
-                        pageable.getPageSize()
-                );
-        return getOrderedPage(criteriaBuilder, pageable);
-    }
-
-    @Override
     public Page<User> findAll(String name, List<Role> roles, Pageable pageable) {
         PaginatedCriteriaBuilder<User> criteriaBuilder = criteriaBuilderFactory
                 .create(entityManager, User.class)
-                .fetch("roles")
+                .fetch("advisor", "student", "roles")
                 .page(
                         (int) pageable.getOffset(),
                         pageable.getPageSize()
@@ -50,8 +38,8 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
         if (!name.isBlank()) {
             name = "%" + name + "%";
             criteriaBuilder.whereOr()
-                    .where("name.firstName").like(false).value(name).noEscape()
-                    .where("name.lastName").like(false).value(name).noEscape()
+                    .where("firstName").like(false).value(name).noEscape()
+                    .where("lastName").like(false).value(name).noEscape()
                     .endOr();
         }
         return getOrderedPage(criteriaBuilder, pageable);

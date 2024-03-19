@@ -18,7 +18,9 @@ public class DocumentDto implements Serializable {
     Long categoryId;
     String categoryName;
     String studentId;
-    String studentName;
+    String studentFirstName;
+    String studentLastName;
+    String studentFullName;
     String studentProgram;
     Short studentYear;
     String studentPicture;

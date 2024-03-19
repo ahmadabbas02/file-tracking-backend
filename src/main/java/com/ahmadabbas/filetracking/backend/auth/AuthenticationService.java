@@ -32,7 +32,7 @@ public class AuthenticationService {
         User user = (User) authentication.getPrincipal();
         Map<String, Object> extraClaims = Map.of(
                 "role", user.getRoles(),
-                "name", user.getName().getFullName()
+                "name", user.getFullName()
         );
         String jwtToken = jwtService.generateToken(
                 extraClaims,

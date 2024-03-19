@@ -1,7 +1,5 @@
 package com.ahmadabbas.filetracking.backend.user;
 
-import com.ahmadabbas.filetracking.backend.advisor.AdvisorRepository;
-import com.ahmadabbas.filetracking.backend.student.StudentRepository;
 import com.ahmadabbas.filetracking.backend.user.payload.UserDto;
 import com.ahmadabbas.filetracking.backend.user.payload.UserMapper;
 import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
@@ -23,8 +21,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class UserService {
-    private final AdvisorRepository advisorRepository;
-    private final StudentRepository studentRepository;
 
     private final UserMapper userMapper;
     private final UserRepository userRepository;
@@ -65,7 +61,7 @@ public class UserService {
 
         List<UserDto> content = userPage.getContent()
                 .stream()
-                .map(user -> userMapper.toDto(user, studentRepository, advisorRepository))
+                .map(userMapper::toDto)
                 .toList();
         return new PaginatedResponse<>(
                 content,

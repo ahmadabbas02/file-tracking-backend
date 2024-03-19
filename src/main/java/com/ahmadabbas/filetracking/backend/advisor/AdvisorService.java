@@ -3,6 +3,7 @@ package com.ahmadabbas.filetracking.backend.advisor;
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorDto;
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorMapper;
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorRegistrationRequest;
+import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorRepository;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.student.Student;
@@ -14,7 +15,6 @@ import com.ahmadabbas.filetracking.backend.util.PagingUtils;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -81,7 +81,8 @@ public class AdvisorService {
 
         User savedUser = userRepository.save(
                 User.builder()
-                        .name(new User.Name(advisorRegistrationRequest.name(), advisorRegistrationRequest.surname()))
+                        .firstName(advisorRegistrationRequest.name())
+                        .lastName(advisorRegistrationRequest.surname())
                         .email(advisorRegistrationRequest.email())
                         .password(passwordEncoder.encode(advisorRegistrationRequest.password()))
                         .role(Role.ADVISOR)
@@ -97,17 +98,8 @@ public class AdvisorService {
 
     public PaginatedResponse<AdvisorDto> getAllAdvisors(int pageNo, int pageSize, String sortBy, String order, String searchQuery) {
         Pageable pageable = PagingUtils.getPageable(pageNo, pageSize, sortBy, order);
-        Page<Advisor> advisorPage;
-        if (searchQuery.isEmpty()) {
-            log.debug("No search query provided, getting all advisors..");
-            advisorPage = advisorRepository.findAll(pageable);
-        } else {
-            // TODO: Decide how we want searching to be done
-            log.debug("Provided search query: '%s', getting all advisors..".formatted(searchQuery));
-            advisorPage = StringUtils.isNumeric(searchQuery.replace("AP", ""))
-                    ? advisorRepository.findAllByIdStartsWith(searchQuery, pageable)
-                    : advisorRepository.findAllByNameContains(searchQuery, pageable);
-        }
+        log.debug("Provided search query: '%s', getting all advisors..".formatted(searchQuery));
+        Page<Advisor> advisorPage = advisorRepository.findAllAdvisors(searchQuery, pageable);
         List<AdvisorDto> content = advisorPage.getContent()
                 .stream()
                 .map(advisorMapper::toDto)

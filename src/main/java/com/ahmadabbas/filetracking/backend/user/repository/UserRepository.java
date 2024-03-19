@@ -37,7 +37,7 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
 
     @Query("""
             select (count(u) > 0) from User u
-            where upper(u.name.firstName) = upper(?1) and upper(u.name.lastName) = upper(?2)
+            where upper(u.firstName) = upper(?1) and upper(u.lastName) = upper(?2)
             """)
     boolean existsByName(String firstName, String lastName);
 

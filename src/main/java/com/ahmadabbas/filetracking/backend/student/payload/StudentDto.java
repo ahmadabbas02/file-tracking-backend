@@ -8,8 +8,18 @@ import java.io.Serializable;
 /**
  * DTO for {@link Student}
  */
-public record StudentDto(String id, String name, String email, String phoneNumber, String program, Short year,
-                         String picture, String advisorName,
-                         InternshipStatus.CompletionStatus internshipCompletionStatus,
-                         InternshipStatus.PaymentStatus paymentStatus) implements Serializable {
+public record StudentDto(
+        String id,
+        String fullName,
+        String firstName,
+        String lastName,
+        String email,
+        String phoneNumber,
+        String program,
+        Short year,
+        String picture,
+        String advisorName,
+        InternshipStatus.CompletionStatus internshipCompletionStatus,
+        InternshipStatus.PaymentStatus paymentStatus
+) implements Serializable {
 }

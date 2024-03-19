@@ -12,10 +12,9 @@ public record UserDto(
         Long id,
         String firstName,
         String lastName,
-        String name,
+        String fullName,
         String email,
         String phoneNumber,
-//        Set<Role> roles,
         Map<String, Object> roles
 ) implements Serializable {
 }

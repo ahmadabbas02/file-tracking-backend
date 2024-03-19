@@ -1,11 +1,15 @@
 package com.ahmadabbas.filetracking.backend.student;
 
-import com.ahmadabbas.filetracking.backend.student.payload.*;
+import com.ahmadabbas.filetracking.backend.student.payload.StudentDto;
+import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
+import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.user.User;
-import com.ahmadabbas.filetracking.backend.util.payload.*;
+import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
+import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,9 +43,10 @@ public class StudentController {
             @RequestParam(defaultValue = "asc", required = false) String order,
             @RequestParam(defaultValue = "", required = false) String advisorId,
             @RequestParam(defaultValue = "", required = false) String searchQuery,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal User user,
+            @RequestAttribute("roleId") String roleId
     ) {
-        return ResponseEntity.ok(studentService.getAllStudents(user, pageNo, pageSize, sortBy, order, advisorId, searchQuery));
+        return ResponseEntity.ok(studentService.getAllStudents(user, pageNo, pageSize, sortBy, order, advisorId, searchQuery, roleId));
     }
 
     @Operation(summary = "Add new student", description = "Adds a new student to the database with the specified information.")

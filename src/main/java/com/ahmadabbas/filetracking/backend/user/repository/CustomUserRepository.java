@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface CustomUserRepository {
 
-    Page<User> findAll(Pageable pageable);
-
     Page<User> findAll(String name,
                        List<Role> roles,
                        Pageable pageable);

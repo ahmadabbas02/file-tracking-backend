@@ -159,11 +159,13 @@ public class DocumentService {
                 }
             } else {
                 studentIds = studentService.getAllStudentIds(loggedInUser);
+                log.debug("setting studentIds to the advisor's students: {}", studentIds);
             }
         }
         List<Long> allowedCategoriesIds = categoryService.getAllowedCategoriesIds(loggedInUser.getRoles());
         boolean isMainCategoriesAllowed = categoryIds.isEmpty() || new HashSet<>(allowedCategoriesIds).containsAll(categoryIds);
         if (!isMainCategoriesAllowed) {
+            log.debug("not allowed!");
             log.debug("categoryIds = {}", categoryIds);
             log.debug("allowedCategoriesIds = {}", allowedCategoriesIds);
             throw new AccessDeniedException("you are not allowed to get documents in given categories");

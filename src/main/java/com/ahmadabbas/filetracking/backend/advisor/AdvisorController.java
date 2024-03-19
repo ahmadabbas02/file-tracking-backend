@@ -21,7 +21,8 @@ public class AdvisorController {
 
     @Operation(summary = "Get advisor")
     @GetMapping("/{advisorId}")
-    public ResponseEntity<AdvisorDto> getAdvisor(@PathVariable String advisorId, @AuthenticationPrincipal User loggedInUser) {
+    public ResponseEntity<AdvisorDto> getAdvisor(@PathVariable String advisorId,
+                                                 @AuthenticationPrincipal User loggedInUser) {
         Advisor advisor = advisorService.getAdvisorByAdvisorId(advisorId, loggedInUser);
         return ResponseEntity.ok(advisorMapper.toDto(advisor));
     }

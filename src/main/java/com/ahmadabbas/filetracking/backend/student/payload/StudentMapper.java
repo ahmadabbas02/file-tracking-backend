@@ -11,21 +11,18 @@ public interface StudentMapper {
 
     Student toEntity(StudentDto studentDto);
 
-    @Mapping(expression = "java(getUserFullName(student.getUser()))", target = "name")
-    @Mapping(expression = "java(getUserFullName(student.getAdvisor().getUser()))", target = "advisorName")
     @Mapping(source = "user.picture", target = "picture")
     @Mapping(source = "user.email", target = "email")
     @Mapping(source = "user.phoneNumber", target = "phoneNumber")
+    @Mapping(source = "user.firstName", target = "firstName")
+    @Mapping(source = "user.lastName", target = "lastName")
+    @Mapping(source = "user.fullName", target = "fullName")
+    @Mapping(source = "advisor.user.fullName", target = "advisorName")
     StudentDto toDto(Student student);
 
     StudentUserDto toStudentUserDto(Student student);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Student partialUpdate(StudentDto studentDto, @MappingTarget Student student);
-
-    default String getUserFullName(User user) {
-        return user.getName().getFullName();
-    }
-
 
 }
