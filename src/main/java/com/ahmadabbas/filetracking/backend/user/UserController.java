@@ -46,7 +46,7 @@ public class UserController {
             description = "Update user partially"
     )
     @PatchMapping("{userId}")
-    public ResponseEntity<UserDto> getAllUsers(
+    public ResponseEntity<UserDto> updateUser(
             @PathVariable Long userId,
             @RequestBody UserUpdateDto updateDto,
             @AuthenticationPrincipal User loggedInUser
