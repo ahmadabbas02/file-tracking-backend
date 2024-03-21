@@ -16,12 +16,23 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class CustomUserRepositoryImpl implements CustomUserRepository {
     @PersistenceContext
     private final EntityManager entityManager;
     private final CriteriaBuilderFactory criteriaBuilderFactory;
+
+    @Override
+    public Optional<User> findUserById(Long id) {
+        User user = criteriaBuilderFactory
+                .create(entityManager, User.class)
+                .fetch("advisor", "student", "roles")
+                .where("id").eq(id)
+                .getSingleResult();
+        return Optional.ofNullable(user);
+    }
 
     @Override
     public Page<User> findAll(String name, List<Role> roles, Pageable pageable) {

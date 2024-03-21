@@ -1,7 +1,6 @@
 package com.ahmadabbas.filetracking.backend.student.payload;
 
 import com.ahmadabbas.filetracking.backend.student.Student;
-import com.ahmadabbas.filetracking.backend.user.User;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -9,6 +8,7 @@ import org.mapstruct.factory.Mappers;
 public interface StudentMapper {
     StudentMapper INSTANCE = Mappers.getMapper(StudentMapper.class);
 
+    @InheritInverseConfiguration(name = "toDto")
     Student toEntity(StudentDto studentDto);
 
     @Mapping(source = "user.picture", target = "picture")

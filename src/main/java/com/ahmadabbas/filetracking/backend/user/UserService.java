@@ -1,7 +1,9 @@
 package com.ahmadabbas.filetracking.backend.user;
 
+import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.user.payload.UserDto;
 import com.ahmadabbas.filetracking.backend.user.payload.UserMapper;
+import com.ahmadabbas.filetracking.backend.user.payload.UserUpdateDto;
 import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
 import com.ahmadabbas.filetracking.backend.util.PagingUtils;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
@@ -9,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +27,14 @@ public class UserService {
 
     private final UserMapper userMapper;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public User getUserById(Long userId) {
+        return userRepository.findUserById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "user with id `%s` not found".formatted(userId)
+                ));
+    }
 
     public Set<Role> getRoles(User user) {
         return user.getAuthorities().stream()
@@ -71,5 +82,19 @@ public class UserService {
                 userPage.getTotalPages(),
                 userPage.isLast()
         );
+    }
+
+
+    @Transactional
+    public User updateUser(Long userId, UserUpdateDto updateDto) {
+        User userById = userRepository.findByIdLocked(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "user with id `%s` not found".formatted(userId)
+                ));
+        userMapper.partialUpdate(updateDto, userById);
+        if (updateDto.password() != null) {
+            userById.setPassword(passwordEncoder.encode(updateDto.password()));
+        }
+        return userRepository.save(userById);
     }
 }

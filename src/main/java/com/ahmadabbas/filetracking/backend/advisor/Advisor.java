@@ -34,6 +34,9 @@ public class Advisor {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Version
+    private Integer version;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -54,4 +57,13 @@ public class Advisor {
                 .add("createdAt=" + createdAt)
                 .toString();
     }
+
+//    public static class AdvisorBuilder {
+//        public AdvisorBuilder user(User user) {
+//            this.user = user;
+//            user.setAdvisor(this.build());
+//            return this;
+//        }
+//    }
+
 }

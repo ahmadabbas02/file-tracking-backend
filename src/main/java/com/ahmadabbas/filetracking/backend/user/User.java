@@ -13,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -73,6 +72,9 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user")
     private Student student;
 
+    @Version
+    private Integer version;
+
     public void setRoles(Role... roles) {
         this.roles = Stream.of(roles).collect(Collectors.toSet());
     }
@@ -115,15 +117,15 @@ public class User implements UserDetails {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("firstName='" + firstName + "'")
-                .add("lastName='" + lastName + "'")
-                .add("email='" + email + "'")
-                .add("picture='" + picture + "'")
-                .add("phoneNumber='" + phoneNumber + "'")
-                .add("roles=" + roles)
-                .toString();
+        return "User{" +
+               "id=" + id +
+               ", firstName='" + firstName + '\'' +
+               ", lastName='" + lastName + '\'' +
+               ", email='" + email + '\'' +
+               ", picture='" + picture + '\'' +
+               ", phoneNumber='" + phoneNumber + '\'' +
+               ", roles=" + roles +
+               '}';
     }
 
     public String getFullName() {

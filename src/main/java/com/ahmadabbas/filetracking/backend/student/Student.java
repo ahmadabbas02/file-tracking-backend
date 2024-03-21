@@ -56,6 +56,9 @@ public class Student {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Version
+    private Integer version;
+
     @Override
     public String toString() {
         return new StringJoiner(", ", Student.class.getSimpleName() + "[", "]")
@@ -77,4 +80,12 @@ public class Student {
     public int hashCode() {
         return Objects.hash(getId(), getProgram(), getYear(), getUser(), getAdvisor(), getInternshipCompletionStatus(), getPaymentStatus(), getCreatedAt());
     }
+
+//    public static class StudentBuilder {
+//        public StudentBuilder user(User user) {
+//            this.user = user;
+//            user.setStudent(this.build());
+//            return this;
+//        }
+//    }
 }

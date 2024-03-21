@@ -1,37 +1,22 @@
 package com.ahmadabbas.filetracking.backend.user.repository;
 
 import com.ahmadabbas.filetracking.backend.user.User;
-import org.springframework.data.jpa.repository.*;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, CustomUserRepository {
 
+    @EntityGraph(attributePaths = {"advisor", "student", "roles"})
+    @Query("select u from User u where u.id = :id")
+    @Lock(LockModeType.OPTIMISTIC)
+    Optional<User> findByIdLocked(Long id);
+
     Optional<User> findByEmail(String email);
-
-//    @Query("""
-//            select u from User u
-//            left join u.roles roles
-//            where roles in :roles
-//            """)
-//    Page<User> findAllByRoles(List<Role> roles, Pageable pageable);
-
-//    @Query("""
-//            select u from User u
-//            where upper(u.name.firstName) like upper(concat('%', :name, '%'))
-//            or upper(u.name.lastName) like upper(concat('%', :name, '%'))
-//            """)
-//    Page<User> findAllByNameContains(String name, Pageable pageable);
-
-//    @Query("""
-//            select u from User u
-//            left join u.roles roles
-//            where roles in :roles
-//            and (upper(u.name.firstName) like upper(concat('%', :name, '%'))
-//            or upper(u.name.lastName) like upper(concat('%', :name, '%')))
-//            """)
-//    Page<User> findAllByNameAndRoles(String name, List<Role> roles, Pageable pageable);
-
 
     boolean existsByEmail(String email);
 
@@ -40,5 +25,4 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
             where upper(u.firstName) = upper(?1) and upper(u.lastName) = upper(?2)
             """)
     boolean existsByName(String firstName, String lastName);
-
 }
