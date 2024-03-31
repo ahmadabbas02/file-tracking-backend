@@ -17,7 +17,8 @@ public interface StudentMapper {
     @Mapping(source = "user.firstName", target = "firstName")
     @Mapping(source = "user.lastName", target = "lastName")
     @Mapping(source = "user.fullName", target = "fullName")
-    @Mapping(source = "advisor.user.fullName", target = "advisorName")
+    @Mapping(source = "advisor.id", target = "advisor.id")
+    @Mapping(source = "advisor.user.fullName", target = "advisor.fullName")
     StudentDto toDto(Student student);
 
     StudentUserDto toStudentUserDto(Student student);
