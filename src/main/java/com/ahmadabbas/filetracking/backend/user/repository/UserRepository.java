@@ -11,10 +11,10 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, CustomUserRepository {
 
-    @EntityGraph(attributePaths = {"advisor", "student", "roles"})
-    @Query("select u from User u where u.id = :id")
+//    @EntityGraph(attributePaths = {"advisor", "student", "roles"})
     @Lock(LockModeType.OPTIMISTIC)
-    Optional<User> findByIdLocked(Long id);
+    @Query("select u from User u where u.id = :id")
+    Optional<User> lockUserById(Long id);
 
     Optional<User> findByEmail(String email);
 

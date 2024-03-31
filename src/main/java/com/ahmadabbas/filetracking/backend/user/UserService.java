@@ -87,14 +87,22 @@ public class UserService {
 
     @Transactional
     public User updateUser(Long userId, UserUpdateDto updateDto) {
-        User userById = userRepository.findByIdLocked(userId)
+        User user = userRepository.lockUserById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "user with id `%s` not found".formatted(userId)
                 ));
-        userMapper.partialUpdate(updateDto, userById);
+        log.info("user = {}", user);
+        userMapper.partialUpdate(updateDto, user);
         if (updateDto.password() != null) {
-            userById.setPassword(passwordEncoder.encode(updateDto.password()));
+            user.setPassword(passwordEncoder.encode(updateDto.password()));
         }
-        return userRepository.save(userById);
+        log.info("updated user = {}", user);
+        User savedUser = null;
+        try {
+            savedUser = userRepository.save(user);
+        } catch (Exception e) {
+            log.error("error updating user", e);
+        }
+        return savedUser;
     }
 }
