@@ -58,7 +58,8 @@ public class Student {
 
     @Column(nullable = false)
     @Version
-    private Integer version;
+    @Builder.Default
+    private Integer version = 0;
 
     @Override
     public String toString() {

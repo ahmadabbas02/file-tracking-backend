@@ -35,8 +35,9 @@ public class Advisor {
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
+    @Builder.Default
     @Version
-    private Integer version;
+    private Integer version = 0;
 
     @Override
     public boolean equals(Object o) {

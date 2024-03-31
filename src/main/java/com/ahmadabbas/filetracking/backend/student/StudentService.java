@@ -245,6 +245,7 @@ public class StudentService {
                             .advisor(advisor)
                             .program(s.getProgram())
                             .year(s.getYear())
+                            .version(0)
                             .user(user)
                             .build();
                 }).toList();

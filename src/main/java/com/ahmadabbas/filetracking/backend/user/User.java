@@ -73,8 +73,9 @@ public class User implements UserDetails {
     private Student student;
 
     @Column(nullable = false)
+    @Builder.Default
     @Version
-    private Integer version;
+    private Integer version = 0;
 
     public void setRoles(Role... roles) {
         this.roles = Stream.of(roles).collect(Collectors.toSet());
