@@ -85,6 +85,8 @@ public class AdvisorService {
                         .lastName(advisorRegistrationRequest.surname())
                         .email(advisorRegistrationRequest.email())
                         .password(passwordEncoder.encode(advisorRegistrationRequest.password()))
+                        .picture(advisorRegistrationRequest.picture())
+                        .phoneNumber(advisorRegistrationRequest.phoneNumber())
                         .role(Role.ADVISOR)
                         .build()
         );
