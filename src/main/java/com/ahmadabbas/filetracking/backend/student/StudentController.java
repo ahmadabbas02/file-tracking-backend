@@ -35,7 +35,7 @@ public class StudentController {
             summary = "Get all students",
             description = "Returns a pagination result of all students in the database sorted by default on id and ascending order."
     )
-    @GetMapping
+    @GetMapping("")
     public ResponseEntity<PaginatedResponse<StudentDto>> getAllStudents(
             @RequestParam(defaultValue = "1", required = false) int pageNo,
             @RequestParam(defaultValue = "10", required = false) int pageSize,
@@ -50,7 +50,7 @@ public class StudentController {
     }
 
     @Operation(summary = "Add new student", description = "Adds a new student to the database with the specified information.")
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<StudentDto> registerStudent(@RequestBody StudentRegistrationRequest studentRegistrationRequest,
                                                       @AuthenticationPrincipal User loggedInUser) {
         Student createdStudent = studentService.addStudent(studentRegistrationRequest, loggedInUser);

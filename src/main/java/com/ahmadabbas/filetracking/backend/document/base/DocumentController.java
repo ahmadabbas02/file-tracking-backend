@@ -123,7 +123,7 @@ public class DocumentController {
                     sorted by default on `uploadedAt` and `descending` order.
                     """
     )
-    @GetMapping
+    @GetMapping("")
     public ResponseEntity<PaginatedResponse<DocumentDto>> getAllDocuments(
             @AuthenticationPrincipal User user,
             @RequestParam(defaultValue = "1", required = false) int pageNo,
@@ -322,7 +322,7 @@ public class DocumentController {
             summary = "Modify document category",
             description = "Modifies a specific document category, mainly used to organize uploaded documents. "
     )
-    @PatchMapping(value = "/modify-category")
+    @PatchMapping("/modify-category")
     public ResponseEntity<DocumentDto> modifyCategory(@Valid @RequestBody DocumentModifyCategoryRequest body,
                                                       @AuthenticationPrincipal User loggedInUser) {
         Document modifiedDocument = documentService.modifyDocumentCategory(body, loggedInUser);

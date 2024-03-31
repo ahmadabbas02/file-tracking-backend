@@ -25,7 +25,7 @@ public class UserController {
             description = "Returns a pagination result of all students in the database sorted by default on id and " +
                           "ascending order."
     )
-    @GetMapping
+    @GetMapping("")
     public ResponseEntity<PaginatedResponse<UserDto>> getAllUsers(
             @RequestParam(defaultValue = "1", required = false) int pageNo,
             @RequestParam(defaultValue = "10", required = false) int pageSize,
@@ -45,7 +45,7 @@ public class UserController {
             summary = "Update user",
             description = "Update user partially"
     )
-    @PatchMapping("{userId}")
+    @PatchMapping("/{userId}")
     public ResponseEntity<UserDto> updateUser(
             @PathVariable Long userId,
             @RequestBody UserUpdateDto updateDto,

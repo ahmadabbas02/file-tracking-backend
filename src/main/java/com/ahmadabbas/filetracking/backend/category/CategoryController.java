@@ -21,7 +21,7 @@ public class CategoryController {
     @Operation(
             summary = "Add category"
     )
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<Category> addCategory(@RequestBody AddCategoryRequest category, @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(categoryService.createCategory(category, user), HttpStatus.CREATED);
     }
@@ -30,7 +30,7 @@ public class CategoryController {
             summary = "Get All Categories",
             description = "Returns a list of all categories"
     )
-    @GetMapping
+    @GetMapping("")
     public ResponseEntity<List<?>> getAllCategories(
             @RequestParam(value = "parents_only", required = false, defaultValue = "false") boolean parentsOnly,
             @AuthenticationPrincipal User user
@@ -47,7 +47,7 @@ public class CategoryController {
             summary = "Get all children categories",
             description = "Returns a list of all categories with `parentId` as their parent category."
     )
-    @GetMapping("{parentId}")
+    @GetMapping("/{parentId}")
     public ResponseEntity<List<Category>> getAllChildrenCategories(@PathVariable Long parentId, @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(categoryService.getAllChildrenCategories(parentId, user));
     }

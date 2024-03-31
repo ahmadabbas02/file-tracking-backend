@@ -28,7 +28,7 @@ public class AdvisorController {
     }
 
     @Operation(summary = "Add advisor")
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<AdvisorDto> registerAdvisor(@RequestBody AdvisorRegistrationRequest advisorRegistrationRequest) {
         Advisor addedAdvisor = advisorService.addAdvisor(advisorRegistrationRequest);
         return new ResponseEntity<>(advisorMapper.toDto(addedAdvisor), HttpStatus.CREATED);
@@ -38,7 +38,7 @@ public class AdvisorController {
             summary = "Get all advisors",
             description = "Returns a pagination result of all advisors in the database sorted by default on id and ascending order."
     )
-    @GetMapping
+    @GetMapping("")
     public ResponseEntity<PaginatedResponse<AdvisorDto>> getAllStudents(
             @RequestParam(defaultValue = "1", required = false) int pageNo,
             @RequestParam(defaultValue = "10", required = false) int pageSize,
