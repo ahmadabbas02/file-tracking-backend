@@ -91,18 +91,10 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "user with id `%s` not found".formatted(userId)
                 ));
-        log.info("user = {}", user);
         userMapper.partialUpdate(updateDto, user);
         if (updateDto.password() != null) {
             user.setPassword(passwordEncoder.encode(updateDto.password()));
         }
-        log.info("updated user = {}", user);
-        User savedUser = null;
-        try {
-            savedUser = userRepository.save(user);
-        } catch (Exception e) {
-            log.error("error updating user", e);
-        }
-        return savedUser;
+        return userRepository.save(user);
     }
 }

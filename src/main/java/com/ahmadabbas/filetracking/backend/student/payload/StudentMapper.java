@@ -23,6 +23,6 @@ public interface StudentMapper {
     StudentUserDto toStudentUserDto(Student student);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Student partialUpdate(StudentDto studentDto, @MappingTarget Student student);
+    Student partialUpdate(StudentUpdateDto updateDto, @MappingTarget Student student);
 
 }

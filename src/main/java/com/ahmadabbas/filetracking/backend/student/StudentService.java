@@ -5,10 +5,8 @@ import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
 import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorRepository;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
-import com.ahmadabbas.filetracking.backend.student.payload.StudentCsvRepresentation;
-import com.ahmadabbas.filetracking.backend.student.payload.StudentDto;
-import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
-import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
+import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
+import com.ahmadabbas.filetracking.backend.student.payload.*;
 import com.ahmadabbas.filetracking.backend.student.repository.StudentRepository;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
@@ -295,5 +293,22 @@ public class StudentService {
                             .build();
             return new HashSet<>(csvToBean.parse());
         }
+    }
+
+    @Transactional
+    public Student updateStudent(String studentId, StudentUpdateDto updateDto, User loggedInUser) {
+        Student student = studentRepository.lockStudentById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "student with id `%s` not found".formatted(studentId)
+                ));
+        if (!loggedInUser.getRoles().contains(Role.ADMINISTRATOR)) {
+            updateDto.setAdvisorId(null);
+        }
+        studentMapper.partialUpdate(updateDto, student);
+        if (updateDto.getAdvisorId() != null) {
+            Advisor advisor = advisorService.getAdvisorByAdvisorId(updateDto.getAdvisorId(), loggedInUser);
+            student.setAdvisor(advisor);
+        }
+        return studentRepository.save(student);
     }
 }

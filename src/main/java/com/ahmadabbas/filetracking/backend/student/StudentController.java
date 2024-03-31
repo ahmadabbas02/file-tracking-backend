@@ -3,10 +3,12 @@ package com.ahmadabbas.filetracking.backend.student;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentDto;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
+import com.ahmadabbas.filetracking.backend.student.payload.StudentUpdateDto;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,5 +70,19 @@ public class StudentController {
     public ResponseEntity<CsvUploadResponse> uploadStudents(@RequestPart("file") MultipartFile file,
                                                             @AuthenticationPrincipal User loggedInUser) throws IOException {
         return new ResponseEntity<>(studentService.uploadStudents(file, loggedInUser), HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Update student",
+            description = "Update student details"
+    )
+    @PatchMapping("/{studentId}")
+    public ResponseEntity<StudentDto> updateStudent(
+            @PathVariable String studentId,
+            @RequestBody @Valid StudentUpdateDto updateDto,
+            @AuthenticationPrincipal User loggedInUser
+    ) {
+        Student student = studentService.updateStudent(studentId, updateDto, loggedInUser);
+        return ResponseEntity.ok(studentMapper.toDto(student));
     }
 }

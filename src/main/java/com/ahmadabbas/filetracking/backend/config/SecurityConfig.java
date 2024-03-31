@@ -4,7 +4,8 @@ import com.ahmadabbas.filetracking.backend.auth.JwtAuthenticationFilter;
 import com.ahmadabbas.filetracking.backend.exception.AuthEntryPoint;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -17,8 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.*;
 
 
 @Configuration
@@ -72,7 +72,7 @@ public class SecurityConfig {
                                         Role.ADVISOR.name())
                                 // Only students can add contact document
                                 .requestMatchers(POST, "api/v1/documents/upload/contact", "api/v1/documents/upload" +
-                                        "/petition", "api/v1/documents/upload/medical-report")
+                                                                                          "/petition", "api/v1/documents/upload/medical-report")
                                 .hasRole(Role.STUDENT.name())
                                 // category creation
                                 .requestMatchers(POST, "api/v1/categories")
@@ -89,6 +89,9 @@ public class SecurityConfig {
                                 // only admin can access users
                                 .requestMatchers("api/v1/users/**")
                                 .hasRole(Role.ADMINISTRATOR.name())
+                                // only admin and secretary can update students
+                                .requestMatchers(PATCH, "api/v1/students/{studentId}")
+                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.SECRETARY.name())
                                 // only advisors can approve documents
                                 .requestMatchers("api/v1/documents/*/approve")
                                 .hasRole(Role.ADVISOR.name())

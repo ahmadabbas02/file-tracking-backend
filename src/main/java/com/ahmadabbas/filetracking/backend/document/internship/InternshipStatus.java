@@ -5,7 +5,12 @@ import org.apache.commons.text.WordUtils;
 public class InternshipStatus {
     public enum PaymentStatus {
         PAID,
-        NOT_PAID
+        NOT_PAID;
+
+        @Override
+        public String toString() {
+            return WordUtils.capitalize(name().toLowerCase().replaceAll("_", " "));
+        }
     }
 
     public enum CompletionStatus {
