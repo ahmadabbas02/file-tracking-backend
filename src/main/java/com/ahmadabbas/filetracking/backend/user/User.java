@@ -72,6 +72,7 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user")
     private Student student;
 
+    @Column(nullable = false)
     @Version
     private Integer version;
 

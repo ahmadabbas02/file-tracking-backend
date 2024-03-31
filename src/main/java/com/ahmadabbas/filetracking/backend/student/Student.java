@@ -56,6 +56,7 @@ public class Student {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
     @Version
     private Integer version;
 

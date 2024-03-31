@@ -34,6 +34,7 @@ public class Advisor {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
     @Version
     private Integer version;
 
