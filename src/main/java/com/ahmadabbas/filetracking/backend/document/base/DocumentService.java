@@ -177,6 +177,9 @@ public class DocumentService {
                   "categoryIds = {}",
                 loggedInUser, pageNo, pageSize, sortBy, order, studentId, categoryIds);
         log.debug("allowedCategoriesIds = {}", allowedCategoriesIds);
+        if (categoryIds.isEmpty()) {
+            categoryIds = allowedCategoriesIds;
+        }
         documentPage = documentRepository.findAllDocuments(studentId, studentIds, categoryIds, searchQuery, pageable);
         session.disableFilter("deletedDocumentFilter");
         List<DocumentDto> content = documentPage.getContent()
