@@ -1,19 +1,18 @@
 package com.ahmadabbas.filetracking.backend.advisor.repository;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
-import com.ahmadabbas.filetracking.backend.util.PagingUtils;
+import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaBuilderFactory;
-import com.blazebit.persistence.PagedList;
-import com.blazebit.persistence.PaginatedCriteriaBuilder;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
+
+import static com.ahmadabbas.filetracking.backend.util.PagingUtils.getOrderedPage;
 
 @RequiredArgsConstructor
 public class CustomAdvisorRepositoryImpl implements CustomAdvisorRepository {
@@ -24,13 +23,9 @@ public class CustomAdvisorRepositoryImpl implements CustomAdvisorRepository {
 
     @Override
     public Page<Advisor> findAllAdvisors(String searchQuery, Pageable pageable) {
-        PaginatedCriteriaBuilder<Advisor> criteriaBuilder = criteriaBuilderFactory
+        CriteriaBuilder<Advisor> criteriaBuilder = criteriaBuilderFactory
                 .create(entityManager, Advisor.class)
-                .fetch("user", "user.roles", "user.advisor", "user.student")
-                .page(
-                        (int) pageable.getOffset(),
-                        pageable.getPageSize()
-                );
+                .fetch("user", "user.roles", "user.advisor", "user.student");
         if (!searchQuery.isBlank()) {
             if (StringUtils.isNumeric(searchQuery.replace("AP", ""))) {
                 searchQuery = searchQuery + "%";
@@ -43,7 +38,13 @@ public class CustomAdvisorRepositoryImpl implements CustomAdvisorRepository {
                         .endOr();
             }
         }
-        return getOrderedPage(criteriaBuilder, pageable);
+        return getOrderedPage(
+                criteriaBuilder.page(
+                        (int) pageable.getOffset(),
+                        pageable.getPageSize()
+                ),
+                pageable
+        );
     }
 
     @Override
@@ -56,10 +57,4 @@ public class CustomAdvisorRepositoryImpl implements CustomAdvisorRepository {
         return Optional.ofNullable(advisor);
     }
 
-    private <T> Page<T> getOrderedPage(PaginatedCriteriaBuilder<T> criteriaBuilder,
-                                       Pageable pageable) {
-        PagingUtils.applySorting(pageable, criteriaBuilder);
-        PagedList<T> resultList = criteriaBuilder.getResultList();
-        return new PageImpl<>(resultList, pageable, resultList.getTotalSize());
-    }
 }

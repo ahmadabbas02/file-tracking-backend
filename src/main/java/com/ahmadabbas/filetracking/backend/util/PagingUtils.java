@@ -1,9 +1,8 @@
 package com.ahmadabbas.filetracking.backend.util;
 
+import com.blazebit.persistence.PagedList;
 import com.blazebit.persistence.PaginatedCriteriaBuilder;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,5 +25,12 @@ public class PagingUtils {
         }
         if (!sortProperties.containsKey("id"))
             criteriaBuilder.orderBy("id", true);
+    }
+
+    public static <T> Page<T> getOrderedPage(PaginatedCriteriaBuilder<T> criteriaBuilder,
+                                             Pageable pageable) {
+        PagingUtils.applySorting(pageable, criteriaBuilder);
+        PagedList<T> resultList = criteriaBuilder.getResultList();
+        return new PageImpl<>(resultList, pageable, resultList.getTotalSize());
     }
 }

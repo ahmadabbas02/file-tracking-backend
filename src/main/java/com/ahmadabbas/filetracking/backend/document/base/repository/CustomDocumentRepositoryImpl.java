@@ -1,21 +1,19 @@
 package com.ahmadabbas.filetracking.backend.document.base.repository;
 
 import com.ahmadabbas.filetracking.backend.document.base.Document;
-import com.ahmadabbas.filetracking.backend.util.PagingUtils;
 import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaBuilderFactory;
-import com.blazebit.persistence.PagedList;
-import com.blazebit.persistence.PaginatedCriteriaBuilder;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.ahmadabbas.filetracking.backend.util.PagingUtils.getOrderedPage;
 
 @RequiredArgsConstructor
 public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
@@ -37,13 +35,9 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
                                            List<Long> categoryIds,
                                            String searchQuery,
                                            Pageable pageable) {
-        PaginatedCriteriaBuilder<Document> criteriaBuilder = criteriaBuilderFactory
+        CriteriaBuilder<Document> criteriaBuilder = criteriaBuilderFactory
                 .create(entityManager, Document.class)
-                .fetch("student", "student.user", "student.user.roles")
-                .page(
-                        (int) pageable.getOffset(),
-                        pageable.getPageSize()
-                );
+                .fetch("student", "student.user", "student.user.roles");
         if (!studentId.equals("-1")) {
             studentId = studentId + "%";
             criteriaBuilder.where("student.id").like().value(studentId).noEscape();
@@ -61,13 +55,13 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
                     .where("description").like(false).value(searchQuery).noEscape()
                     .endOr();
         }
-        return getOrderedDocumentsPage(pageable, criteriaBuilder);
+        return getOrderedPage(
+                criteriaBuilder.page(
+                        (int) pageable.getOffset(),
+                        pageable.getPageSize()
+                ),
+                pageable
+        );
     }
 
-    private Page<Document> getOrderedDocumentsPage(Pageable pageable,
-                                                   PaginatedCriteriaBuilder<Document> criteriaBuilder) {
-        PagingUtils.applySorting(pageable, criteriaBuilder);
-        PagedList<Document> resultList = criteriaBuilder.getResultList();
-        return new PageImpl<>(resultList, pageable, resultList.getTotalSize());
-    }
 }

@@ -4,9 +4,8 @@ import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
-import com.ahmadabbas.filetracking.backend.util.PagingUtils;
+import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaBuilderFactory;
-import com.blazebit.persistence.PagedList;
 import com.blazebit.persistence.PaginatedCriteriaBuilder;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -17,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
+
+import static com.ahmadabbas.filetracking.backend.util.PagingUtils.getOrderedPage;
 
 @RequiredArgsConstructor
 public class CustomUserRepositoryImpl implements CustomUserRepository {
@@ -36,13 +37,9 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 
     @Override
     public Page<User> findAll(String name, List<Role> roles, Pageable pageable) {
-        PaginatedCriteriaBuilder<User> criteriaBuilder = criteriaBuilderFactory
+        CriteriaBuilder<User> criteriaBuilder = criteriaBuilderFactory
                 .create(entityManager, User.class)
-                .fetch("advisor", "student", "roles")
-                .page(
-                        (int) pageable.getOffset(),
-                        pageable.getPageSize()
-                );
+                .fetch("advisor", "student", "roles");
         if (!roles.isEmpty()) {
             criteriaBuilder.where("roles").in(roles);
         }
@@ -53,7 +50,13 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
                     .where("lastName").like(false).value(name).noEscape()
                     .endOr();
         }
-        return getOrderedPage(criteriaBuilder, pageable);
+        return getOrderedPage(
+                criteriaBuilder.page(
+                        (int) pageable.getOffset(),
+                        pageable.getPageSize()
+                ),
+                pageable
+        );
     }
 
     @Override
@@ -88,10 +91,4 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
         return new PageImpl<>(users, pageable, orderedPage.getTotalElements());
     }
 
-    private <T> Page<T> getOrderedPage(PaginatedCriteriaBuilder<T> criteriaBuilder,
-                                       Pageable pageable) {
-        PagingUtils.applySorting(pageable, criteriaBuilder);
-        PagedList<T> resultList = criteriaBuilder.getResultList();
-        return new PageImpl<>(resultList, pageable, resultList.getTotalSize());
-    }
 }
