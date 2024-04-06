@@ -8,6 +8,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,6 +30,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorDetails> handleResourceNotFoundException(ResourceNotFoundException exception,
                                                                         WebRequest webRequest) {
+        log.error("ResourceNotFoundException: ", exception);
         ErrorDetails errorDetails = new ErrorDetails(
                 null,
                 exception.getMessage(),
@@ -39,6 +43,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(APIException.class)
     public ResponseEntity<ErrorDetails> handleAPIException(APIException exception,
                                                            WebRequest webRequest) {
+        log.error("APIException: ", exception);
         ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(ZoneId.of("Europe/Athens")),
                 exception.getMessage(),
@@ -51,6 +56,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorDetails> handleAccessDeniedException(AccessDeniedException accessDeniedException,
                                                                     WebRequest webRequest) {
+        log.error("AccessDeniedException: ", accessDeniedException);
         String logMessage = "[%s] %s".formatted(accessDeniedException.getClass().getSimpleName(),
                 accessDeniedException.getMessage());
         log.debug("Handing exception '{}'", logMessage);
@@ -65,10 +71,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorDetails> handleAuthenticationException(AuthenticationException authenticationException,
                                                                       WebRequest webRequest) {
-
+        log.error("AuthenticationException: ", authenticationException);
+        String message = authenticationException.getMessage();
+        if (authenticationException instanceof BadCredentialsException) {
+            message = "Incorrect email or password";
+        } else if (authenticationException instanceof CredentialsExpiredException) {
+            message = "User credentials are expired";
+        } else if (authenticationException instanceof DisabledException) {
+            message = "User is disabled";
+        }
         ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(ZoneId.of("Europe/Athens")),
-                authenticationException.getMessage(),
+                message,
                 webRequest.getDescription(false)
         );
 
@@ -78,7 +92,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ErrorDetails> handleDuplicateResourceException(Exception exception,
                                                                          WebRequest webRequest) {
-
+        log.error("DuplicateResourceException: ", exception);
         ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(ZoneId.of("Europe/Athens")),
                 exception.getMessage(),
@@ -90,6 +104,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDetails> handleGlobalException(Exception exception,
                                                               WebRequest webRequest) {
+        log.error("GlobalException: ", exception);
         ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(ZoneId.of("Europe/Athens")),
                 exception.getMessage(),
@@ -104,6 +119,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpHeaders headers,
                                                                   HttpStatusCode status,
                                                                   WebRequest request) {
+        log.error("MethodArgumentNotValidException: ", ex);
         HashMap<Object, Object> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
@@ -119,6 +135,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpHeaders headers,
                                                                   HttpStatusCode status,
                                                                   WebRequest webRequest) {
+        log.error("HttpMessageNotReadableException: ", exception);
         String message = exception.getMessage();
         if (exception.getMessage().toLowerCase().contains("cannot deserialize")) {
             message = "Problem deserializing fields, make sure fields are sent correctly!";

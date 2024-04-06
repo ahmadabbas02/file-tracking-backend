@@ -71,8 +71,7 @@ public class SecurityConfig {
                                 .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.SECRETARY.name(),
                                         Role.ADVISOR.name())
                                 // Only students can add contact document
-                                .requestMatchers(POST, "api/v1/documents/upload/contact", "api/v1/documents/upload" +
-                                                                                          "/petition", "api/v1/documents/upload/medical-report")
+                                .requestMatchers(POST, "api/v1/documents/upload/contact", "api/v1/documents/upload/petition", "api/v1/documents/upload/medical-report")
                                 .hasRole(Role.STUDENT.name())
                                 // category creation
                                 .requestMatchers(POST, "api/v1/categories")
