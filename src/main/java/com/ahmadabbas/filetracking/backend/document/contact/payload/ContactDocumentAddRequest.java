@@ -15,10 +15,6 @@ public record ContactDocumentAddRequest(
         @NotEmpty(message = "Contact form phone number description should not be empty") String emergencyPhoneNumber
 ) implements Serializable {
     public ContactDocumentAddRequest {
-//        if (title == null || title.isBlank()) {
-//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-//            LocalDate localDate = LocalDate.now(ZoneId.of("Europe/Athens"));
-//            title = "Contact Form " + localDate.format(formatter);
-//        }
+        email = email.toLowerCase();
     }
 }

@@ -27,5 +27,6 @@ public record StudentRegistrationRequest(
             throw new APIException(HttpStatus.BAD_REQUEST,
                     "Only %s are accepted values for student programs".formatted(allowedProgramValues));
         }
+        email = email.toLowerCase();
     }
 }

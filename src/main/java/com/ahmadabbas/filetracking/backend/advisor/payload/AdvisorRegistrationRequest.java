@@ -11,4 +11,7 @@ public record AdvisorRegistrationRequest(
         @NotEmpty(message = "Advisor picture should not be empty") String picture,
         @NotEmpty(message = "Advisor phoneNumber should not be empty") String phoneNumber
 ) {
+    public AdvisorRegistrationRequest {
+        email = email.toLowerCase();
+    }
 }

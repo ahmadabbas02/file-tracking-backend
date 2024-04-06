@@ -11,4 +11,7 @@ public record PetitionDocumentAddRequest(
         @NotEmpty(message = "Petition phone number should not be empty") String phoneNumber,
         @NotEmpty(message = "Petition reasoning should not be empty") String reasoning
 ) {
+    public PetitionDocumentAddRequest {
+        email = email.toLowerCase();
+    }
 }
