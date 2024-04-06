@@ -20,7 +20,6 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -91,42 +90,12 @@ public class StudentService {
         log.debug("Logged in user = %s".formatted(loggedInUser));
         Set<Role> roles = userService.getRoles(loggedInUser);
         log.debug("Roles = %s".formatted(roles));
+
         if (roles.contains(Role.ADVISOR)) {
-            studentPage = studentRepository.getAllStudents(searchQuery, loggedInUser.getId(), pageable);
-//            if (searchQuery.isEmpty()) {
-//                log.debug("No search query provided, getting all advisor students..");
-//                studentPage = studentDao.getAllStudentsByAdvisorUserId(loggedInUser.getId(), pageable);
-//            } else {
-//                // TODO: Decide how we want searching to be done
-//                log.debug("Provided search query: '%s', getting all advisor students..".formatted(searchQuery));
-//                studentPage = StringUtils.isNumeric(searchQuery)
-//                        ? studentDao.getAllStudentsByIdAndAdvisorUserId(false, searchQuery, loggedInUser.getId(), pageable)
-//                        : studentDao.getAllStudentsByNameAndAdvisorUserId(true, searchQuery, loggedInUser.getId(), pageable);
-//            }
+            Advisor advisor = advisorService.getAdvisorByUserId(loggedInUser.getId());
+            studentPage = studentRepository.getAllStudents(searchQuery, advisor.getId(), pageable);
         } else {
-            if (advisorId.isBlank()) {
-                if (searchQuery.isEmpty()) {
-                    log.debug("No search query provided, no advisor id, getting all students..");
-                    studentPage = studentDao.getAllStudents(pageable);
-                } else {
-                    // TODO: Decide how we want searching to be done
-                    log.debug("Provided search query: '%s', getting all students..".formatted(searchQuery));
-                    studentPage = StringUtils.isNumeric(searchQuery)
-                            ? studentDao.getAllStudentsById(false, searchQuery, pageable)
-                            : studentDao.getAllStudentsByName(true, searchQuery, pageable);
-                }
-            } else {
-                if (searchQuery.isEmpty()) {
-                    log.debug("No search query provided, getting all students..");
-                    studentPage = studentDao.getAllStudentsByAdvisorId(advisorId, pageable);
-                } else {
-                    // TODO: Decide how we want searching to be done
-                    log.debug("Provided search query: '%s', getting all students..".formatted(searchQuery));
-                    studentPage = StringUtils.isNumeric(searchQuery)
-                            ? studentDao.getAllStudentsByIdAndAdvisorId(searchQuery, advisorId, pageable)
-                            : studentDao.getAllStudentsByNameAndAdvisorId(searchQuery, advisorId, pageable);
-                }
-            }
+            studentPage = studentRepository.getAllStudents(searchQuery, advisorId, pageable);
         }
 
         if (studentPage == null) {

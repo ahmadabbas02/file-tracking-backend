@@ -21,11 +21,13 @@ public class CustomStudentRepositoryImpl implements CustomStudentRepository {
     private final CriteriaBuilderFactory criteriaBuilderFactory;
 
     @Override
-    public Page<Student> getAllStudents(String searchQuery, Long advisorUserId, Pageable pageable) {
+    public Page<Student> getAllStudents(String searchQuery, String advisorId, Pageable pageable) {
         CriteriaBuilder<Student> criteriaBuilder = criteriaBuilderFactory
                 .create(entityManager, Student.class)
-                .fetch("advisor.user", "user", "user.roles", "user.advisor", "user.student")
-                .where("advisor.user.id").eq(advisorUserId);
+                .fetch("advisor.user", "user", "user.roles", "user.advisor", "user.student");
+        if (!advisorId.isEmpty()) {
+            criteriaBuilder.where("advisor.id").eq(advisorId);
+        }
         if (!searchQuery.isEmpty()) {
             if (StringUtils.isNumeric(searchQuery)) {
                 searchQuery = searchQuery + "%";
