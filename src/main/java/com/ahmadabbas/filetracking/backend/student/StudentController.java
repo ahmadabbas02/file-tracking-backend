@@ -53,7 +53,7 @@ public class StudentController {
 
     @Operation(summary = "Add new student", description = "Adds a new student to the database with the specified information.")
     @PostMapping("")
-    public ResponseEntity<StudentDto> registerStudent(@RequestBody StudentRegistrationRequest studentRegistrationRequest,
+    public ResponseEntity<StudentDto> registerStudent(@RequestBody @Valid StudentRegistrationRequest studentRegistrationRequest,
                                                       @AuthenticationPrincipal User loggedInUser) {
         Student createdStudent = studentService.addStudent(studentRegistrationRequest, loggedInUser);
         StudentDto dto = studentMapper.toDto(createdStudent);
