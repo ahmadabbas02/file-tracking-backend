@@ -16,8 +16,10 @@ public interface UserRepository extends JpaRepository<User, Long>, CustomUserRep
     @Query("select u from User u where u.id = :id")
     Optional<User> lockUserById(Long id);
 
+    @Query("select u from User u where lower(u.email) = lower(:email)")
     Optional<User> findByEmail(String email);
 
+    @Query("select (count(u) > 0) from User u where lower(u.email) = lower(:email)")
     boolean existsByEmail(String email);
 
     @Query("""

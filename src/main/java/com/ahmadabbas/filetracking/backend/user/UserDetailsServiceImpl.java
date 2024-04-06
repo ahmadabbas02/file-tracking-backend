@@ -35,13 +35,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 }
             } else {
                 User user = getUser(username);
-                if (user != null)
+                if (user != null) {
                     return user;
+                }
             }
         } else {
             User user = getUser(username);
-            if (user != null)
+            if (user != null) {
                 return user;
+            }
         }
         throw new UsernameNotFoundException("Email/ID %s not found!".formatted(username));
     }
