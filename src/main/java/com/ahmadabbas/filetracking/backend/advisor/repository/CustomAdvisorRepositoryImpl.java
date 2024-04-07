@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.advisor.repository;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
+import com.ahmadabbas.filetracking.backend.util.SearchCriteriaUtils;
 import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaBuilderFactory;
 import jakarta.persistence.EntityManager;
@@ -31,11 +32,12 @@ public class CustomAdvisorRepositoryImpl implements CustomAdvisorRepository {
                 searchQuery = searchQuery + "%";
                 criteriaBuilder.where("id").like(false).value(searchQuery).noEscape();
             } else {
-                searchQuery = "%" + searchQuery + "%";
-                criteriaBuilder.whereOr()
-                        .where("user.firstName").like(false).value(searchQuery).noEscape()
-                        .where("user.lastName").like(false).value(searchQuery).noEscape()
-                        .endOr();
+                SearchCriteriaUtils.addNameCriteria(
+                        criteriaBuilder,
+                        searchQuery,
+                        "user.firstName",
+                        "user.lastName"
+                );
             }
         }
         return getOrderedPage(

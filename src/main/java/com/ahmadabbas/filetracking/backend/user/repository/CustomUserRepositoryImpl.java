@@ -4,6 +4,7 @@ import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
+import com.ahmadabbas.filetracking.backend.util.SearchCriteriaUtils;
 import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaBuilderFactory;
 import com.blazebit.persistence.PaginatedCriteriaBuilder;
@@ -43,12 +44,13 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
         if (!roles.isEmpty()) {
             criteriaBuilder.where("roles").in(roles);
         }
-        if (!name.isBlank()) {
-            name = "%" + name + "%";
-            criteriaBuilder.whereOr()
-                    .where("firstName").like(false).value(name).noEscape()
-                    .where("lastName").like(false).value(name).noEscape()
-                    .endOr();
+        if (!name.isEmpty()) {
+            SearchCriteriaUtils.addNameCriteria(
+                    criteriaBuilder,
+                    name,
+                    "firstName",
+                    "lastName"
+            );
         }
         return getOrderedPage(
                 criteriaBuilder.page(

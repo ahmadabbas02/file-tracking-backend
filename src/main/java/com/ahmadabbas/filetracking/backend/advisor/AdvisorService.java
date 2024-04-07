@@ -98,9 +98,14 @@ public class AdvisorService {
         );
     }
 
-    public PaginatedResponse<AdvisorDto> getAllAdvisors(int pageNo, int pageSize, String sortBy, String order, String searchQuery) {
+    public PaginatedResponse<AdvisorDto> getAllAdvisors(int pageNo,
+                                                        int pageSize,
+                                                        String sortBy,
+                                                        String order,
+                                                        String searchQuery) {
         Pageable pageable = PagingUtils.getPageable(pageNo, pageSize, sortBy, order);
         log.debug("Provided search query: '%s', getting all advisors..".formatted(searchQuery));
+        searchQuery = searchQuery.trim();
         Page<Advisor> advisorPage = advisorRepository.findAllAdvisors(searchQuery, pageable);
         List<AdvisorDto> content = advisorPage.getContent()
                 .stream()

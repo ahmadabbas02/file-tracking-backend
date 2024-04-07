@@ -63,11 +63,8 @@ public class UserService {
                 userPage = userRepository.findAllStudent(roleId, pageable);
             }
         } else {
+            name = name.trim();
             userPage = userRepository.findAll(name, roles, pageable);
-        }
-
-        if (userPage == null) {
-            userPage = Page.empty();
         }
 
         List<UserDto> content = userPage.getContent()
