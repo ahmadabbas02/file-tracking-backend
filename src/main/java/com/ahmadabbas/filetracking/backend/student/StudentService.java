@@ -90,7 +90,7 @@ public class StudentService {
         log.debug("Logged in user = %s".formatted(loggedInUser));
         Set<Role> roles = userService.getRoles(loggedInUser);
         log.debug("Roles = %s".formatted(roles));
-
+        searchQuery = searchQuery.trim();
         if (roles.contains(Role.ADVISOR)) {
             Advisor advisor = advisorService.getAdvisorByUserId(loggedInUser.getId());
             studentPage = studentRepository.getAllStudents(searchQuery, advisor.getId(), pageable);
