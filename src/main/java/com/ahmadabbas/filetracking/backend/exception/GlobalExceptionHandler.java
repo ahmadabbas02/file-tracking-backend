@@ -2,6 +2,7 @@ package com.ahmadabbas.filetracking.backend.exception;
 
 import com.ahmadabbas.filetracking.backend.exception.payload.ErrorDetails;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -105,9 +106,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorDetails> handleGlobalException(Exception exception,
                                                               WebRequest webRequest) {
         log.error("GlobalException: ", exception);
+        String message = exception.getMessage();
+        if (exception instanceof InvalidDataAccessApiUsageException) {
+            message = "Incorrect data";
+        }
         ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(ZoneId.of("Europe/Athens")),
-                exception.getMessage(),
+                message,
                 webRequest.getDescription(false)
         );
 

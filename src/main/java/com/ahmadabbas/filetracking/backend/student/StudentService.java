@@ -3,6 +3,7 @@ package com.ahmadabbas.filetracking.backend.student;
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
 import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorRepository;
+import com.ahmadabbas.filetracking.backend.document.internship.InternshipStatus;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
@@ -81,10 +82,10 @@ public class StudentService {
                                                         int pageSize,
                                                         String sortBy,
                                                         String order,
-                                                        String advisorId,
                                                         String searchQuery,
-                                                        String roleId) {
-        log.debug("roleId = {}", roleId);
+                                                        String advisorId,
+                                                        List<String> programs,
+                                                        List<InternshipStatus.CompletionStatus> completionStatuses) {
         Pageable pageable = PagingUtils.getPageable(pageNo, pageSize, sortBy, order);
         Page<Student> studentPage;
         log.debug("Logged in user = %s".formatted(loggedInUser));
@@ -93,9 +94,17 @@ public class StudentService {
         searchQuery = searchQuery.trim();
         if (roles.contains(Role.ADVISOR)) {
             Advisor advisor = advisorService.getAdvisorByUserId(loggedInUser.getId());
-            studentPage = studentRepository.getAllStudents(searchQuery, advisor.getId(), pageable);
+            studentPage = studentRepository.getAllStudents(searchQuery,
+                    advisor.getId(),
+                    programs,
+                    completionStatuses,
+                    pageable);
         } else {
-            studentPage = studentRepository.getAllStudents(searchQuery, advisorId, pageable);
+            studentPage = studentRepository.getAllStudents(searchQuery,
+                    advisorId,
+                    programs,
+                    completionStatuses,
+                    pageable);
         }
 
         if (studentPage == null) {

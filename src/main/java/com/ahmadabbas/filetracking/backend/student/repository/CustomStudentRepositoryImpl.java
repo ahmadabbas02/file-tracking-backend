@@ -1,5 +1,6 @@
 package com.ahmadabbas.filetracking.backend.student.repository;
 
+import com.ahmadabbas.filetracking.backend.document.internship.InternshipStatus;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.util.SearchCriteriaUtils;
 import com.blazebit.persistence.CriteriaBuilder;
@@ -11,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 import static com.ahmadabbas.filetracking.backend.util.PagingUtils.getOrderedPage;
 
 @RequiredArgsConstructor
@@ -20,12 +23,22 @@ public class CustomStudentRepositoryImpl implements CustomStudentRepository {
     private final CriteriaBuilderFactory criteriaBuilderFactory;
 
     @Override
-    public Page<Student> getAllStudents(String searchQuery, String advisorId, Pageable pageable) {
+    public Page<Student> getAllStudents(String searchQuery,
+                                        String advisorId,
+                                        List<String> programs,
+                                        List<InternshipStatus.CompletionStatus> completionStatuses,
+                                        Pageable pageable) {
         CriteriaBuilder<Student> criteriaBuilder = criteriaBuilderFactory
                 .create(entityManager, Student.class)
                 .fetch("advisor.user", "user", "user.roles", "user.advisor", "user.student");
         if (!advisorId.isEmpty()) {
             criteriaBuilder.where("advisor.id").eq(advisorId);
+        }
+        if (!programs.isEmpty()) {
+            criteriaBuilder.where("program").in(programs);
+        }
+        if (!completionStatuses.isEmpty()) {
+            criteriaBuilder.where("internshipCompletionStatus").in(completionStatuses);
         }
         if (!searchQuery.isEmpty()) {
             if (StringUtils.isNumeric(searchQuery)) {
@@ -46,5 +59,4 @@ public class CustomStudentRepositoryImpl implements CustomStudentRepository {
                 pageable
         );
     }
-
 }

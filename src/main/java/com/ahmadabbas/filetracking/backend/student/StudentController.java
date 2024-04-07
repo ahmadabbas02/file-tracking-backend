@@ -1,5 +1,6 @@
 package com.ahmadabbas.filetracking.backend.student;
 
+import com.ahmadabbas.filetracking.backend.document.internship.InternshipStatus;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentDto;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,12 +45,23 @@ public class StudentController {
             @RequestParam(defaultValue = "10", required = false) int pageSize,
             @RequestParam(defaultValue = "id", required = false) String sortBy,
             @RequestParam(defaultValue = "asc", required = false) String order,
-            @RequestParam(defaultValue = "", required = false) String advisorId,
             @RequestParam(defaultValue = "", required = false) String searchQuery,
-            @AuthenticationPrincipal User user,
-            @RequestAttribute("roleId") String roleId
+            @RequestParam(defaultValue = "", required = false) String advisorId,
+            @RequestParam(defaultValue = "", required = false) List<String> programs,
+            @RequestParam(defaultValue = "", required = false) List<InternshipStatus.CompletionStatus> completionStatuses,
+            @AuthenticationPrincipal User user
     ) {
-        return ResponseEntity.ok(studentService.getAllStudents(user, pageNo, pageSize, sortBy, order, advisorId, searchQuery, roleId));
+        return ResponseEntity.ok(
+                studentService.getAllStudents(user,
+                        pageNo,
+                        pageSize,
+                        sortBy,
+                        order,
+                        searchQuery,
+                        advisorId,
+                        programs,
+                        completionStatuses)
+        );
     }
 
     @Operation(summary = "Add new student", description = "Adds a new student to the database with the specified information.")
