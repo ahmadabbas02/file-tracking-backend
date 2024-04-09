@@ -34,7 +34,7 @@ public class AuthenticationService {
                 "role", user.getRoles(),
                 "name", user.getFullName()
         );
-        String jwtToken = jwtService.generateToken(
+        String jwtToken = jwtService.buildToken(
                 extraClaims,
                 authentication
         );

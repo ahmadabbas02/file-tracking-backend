@@ -8,7 +8,6 @@ import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +16,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -47,22 +45,11 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(Authentication authentication) {
-        return generateToken(new HashMap<>(), authentication);
-    }
-
-    public String generateToken(
+    public String buildToken(
             Map<String, Object> extraClaims,
             Authentication authentication
     ) {
         return buildToken(extraClaims, authentication, jwtExpiration);
-    }
-
-    public String generateToken(
-            Map<String, Object> extraClaims,
-            String subject
-    ) {
-        return buildToken(extraClaims, subject, jwtExpiration);
     }
 
     private String buildToken(
@@ -71,16 +58,24 @@ public class JwtService {
             long expiration
     ) {
         String subject = getSubjectFromAuthentication(authentication);
+        return buildToken(extraClaims, subject, expiration);
+    }
+
+    private String buildToken(
+            Map<String, Object> extraClaims,
+            String subject,
+            long expiration
+    ) {
         return Jwts
                 .builder()
-                .setClaims(extraClaims)
-                .setSubject(subject)
-                .setIssuer(issuer)
-                .setIssuedAt(Date.from(Instant.now()))
-                .setExpiration(
+                .claims(extraClaims)
+                .subject(subject)
+                .issuedAt(Date.from(Instant.now()))
+                .expiration(
                         Date.from(Instant.now().plus(expiration, ChronoUnit.DAYS))
                 )
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .issuer(issuer)
+                .signWith(getSignInKey())
                 .compact();
     }
 
@@ -95,24 +90,6 @@ public class JwtService {
         } else {
             return String.valueOf(user.getId());
         }
-    }
-
-    private String buildToken(
-            Map<String, Object> extraClaims,
-            String subject,
-            long expiration
-    ) {
-        return Jwts
-                .builder()
-                .setClaims(extraClaims)
-                .setSubject(subject)
-                .setIssuedAt(Date.from(Instant.now()))
-                .setExpiration(
-                        Date.from(Instant.now().plus(expiration, ChronoUnit.DAYS))
-                )
-                .setIssuer(issuer)
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                .compact();
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -142,14 +119,14 @@ public class JwtService {
 
     private Claims extractAllClaims(String token) {
         return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey())
+                .parser()
+                .verifyWith(getSignInKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
-    private Key getSignInKey() {
+    private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
