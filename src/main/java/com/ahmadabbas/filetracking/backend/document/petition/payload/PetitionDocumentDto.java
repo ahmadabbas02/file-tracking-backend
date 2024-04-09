@@ -15,6 +15,4 @@ public class PetitionDocumentDto extends DocumentDto implements Serializable {
     String email;
     String subject;
     boolean isApproved;
-//    LocalDateTime latestComment;
-//    int numberOfComments;
 }

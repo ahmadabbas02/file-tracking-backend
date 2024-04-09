@@ -25,9 +25,6 @@ public class PetitionDocument extends Document {
     @Builder.Default
     private boolean isApproved = false;
 
-//    @OneToMany(mappedBy = "document", fetch = FetchType.LAZY)
-//    private List<Comment> comments;
-
     @Override
     public PetitionDocumentDto toDto() {
         return PetitionDocumentMapper.INSTANCE.toDto(this);

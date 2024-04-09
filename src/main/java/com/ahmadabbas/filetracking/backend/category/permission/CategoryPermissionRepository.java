@@ -2,6 +2,7 @@ package com.ahmadabbas.filetracking.backend.category.permission;
 
 import com.ahmadabbas.filetracking.backend.user.Role;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.lang.NonNull;
 
 import java.util.*;
 
@@ -12,6 +13,7 @@ public interface CategoryPermissionRepository extends JpaRepository<CategoryPerm
             order by c_perm.role
             """)
     @EntityGraph(value = "CategoryPermission.eagerlyFetchCategory")
+    @NonNull
     List<CategoryPermission> findAll();
 
     @Query("select c from CategoryPermission c where c.category.categoryId = :categoryId")

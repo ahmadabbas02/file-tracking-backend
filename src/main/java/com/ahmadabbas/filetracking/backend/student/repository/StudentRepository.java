@@ -25,6 +25,7 @@ public interface StudentRepository extends JpaRepository<Student, String>, Custo
             select s from Student s
             """)
     @EntityGraph(value = "Student.eagerlyFetchUser")
+    @NonNull
     Page<Student> findAll(@NonNull Pageable pageable);
 
     @Query("""

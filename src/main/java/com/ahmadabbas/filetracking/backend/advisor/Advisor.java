@@ -60,12 +60,4 @@ public class Advisor {
                 .toString();
     }
 
-//    public static class AdvisorBuilder {
-//        public AdvisorBuilder user(User user) {
-//            this.user = user;
-//            user.setAdvisor(this.build());
-//            return this;
-//        }
-//    }
-
 }

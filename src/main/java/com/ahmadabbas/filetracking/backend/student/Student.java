@@ -83,11 +83,4 @@ public class Student {
         return Objects.hash(getId(), getProgram(), getYear(), getUser(), getAdvisor(), getInternshipCompletionStatus(), getPaymentStatus(), getCreatedAt());
     }
 
-//    public static class StudentBuilder {
-//        public StudentBuilder user(User user) {
-//            this.user = user;
-//            user.setStudent(this.build());
-//            return this;
-//        }
-//    }
 }
