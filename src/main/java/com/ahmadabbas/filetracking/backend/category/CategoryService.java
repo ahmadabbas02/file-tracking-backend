@@ -81,7 +81,7 @@ public class CategoryService {
         List<Category> categories;
         Set<Role> roles = userService.getRoles(user);
         if (roles.contains(Role.ADMINISTRATOR)) {
-            return categoryRepository.findByParentCategoryId(-1L);
+            return categoryRepository.findAllByParentCategoryId(-1L);
         } else {
             categories = getAllowedCategories(roles);
         }
@@ -89,7 +89,7 @@ public class CategoryService {
     }
 
     public List<Category> getAllowedCategories(Set<Role> roles) {
-        List<Category> categories = new ArrayList<>(Collections.emptyList());
+        List<Category> categories = new ArrayList<>();
         if (roles.stream().anyMatch(role -> role.equals(Role.ADMINISTRATOR))) {
             return categoryRepository.findAll();
         }
@@ -97,10 +97,17 @@ public class CategoryService {
             Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findAllByRole(role);
             categoryPermissions.forEach(permission -> {
                 Category category = permission.getCategory();
-                if (category != null) categories.add(category);
+                if (category != null) {
+                    categories.add(category);
+                    if (category.getParentCategoryId() == -1) {
+                        List<Category> childrenCategories = categoryRepository.findAllByParentCategoryId(category.getCategoryId());
+                        categories.addAll(childrenCategories);
+                    }
+                }
             });
         }
-        return categories;
+        // to remove duplicates
+        return new ArrayList<>(new HashSet<>(categories));
     }
 
     public List<Long> getAllowedCategoriesIds(Set<Role> roles) {
@@ -110,7 +117,7 @@ public class CategoryService {
     }
 
     public List<Category> getAllChildrenCategories(Long parentId) {
-        return categoryRepository.findByParentCategoryId(parentId);
+        return categoryRepository.findAllByParentCategoryId(parentId);
     }
 
     public List<Category> getAllChildrenCategories(Long parentId, User user) {
@@ -118,7 +125,7 @@ public class CategoryService {
         if (!allowedCategoriesIds.contains(parentId)) {
             throw new AccessDeniedException("not allowed to get children categories of `%s`".formatted(parentId));
         }
-        return categoryRepository.findByParentCategoryId(parentId);
+        return categoryRepository.findAllByParentCategoryId(parentId);
     }
 
     public List<FullCategoryResponse> getAllCategories(User user) {
