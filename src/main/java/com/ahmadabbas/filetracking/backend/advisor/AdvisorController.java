@@ -6,6 +6,7 @@ import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorRegistrationRe
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/advisors")
+@Tag(name = "Advisor")
 public class AdvisorController {
     private final AdvisorService advisorService;
     private final AdvisorMapper advisorMapper;

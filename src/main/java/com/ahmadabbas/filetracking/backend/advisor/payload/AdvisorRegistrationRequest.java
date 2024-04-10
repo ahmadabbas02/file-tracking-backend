@@ -7,7 +7,7 @@ public record AdvisorRegistrationRequest(
         @NotEmpty(message = "Advisor name should not be empty") String name,
         @NotEmpty(message = "Advisor surname should not be empty") String surname,
         @Email(message = "Advisor email should be valid") String email,
-        @NotEmpty(message = "Advisor password should not be empty") String password,
+//        @NotEmpty(message = "Advisor password should not be empty") String password,
         @NotEmpty(message = "Advisor picture should not be empty") String picture,
         @NotEmpty(message = "Advisor phoneNumber should not be empty") String phoneNumber
 ) {

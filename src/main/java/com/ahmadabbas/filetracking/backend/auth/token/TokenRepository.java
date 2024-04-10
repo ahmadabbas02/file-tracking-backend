@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.token;
+package com.ahmadabbas.filetracking.backend.auth.token;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

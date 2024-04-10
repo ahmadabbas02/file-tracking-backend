@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +32,6 @@ public class AdvisorService {
     private final StudentRepository studentRepository;
     private final AdvisorRepository advisorRepository;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     private final AdvisorMapper advisorMapper;
 
@@ -84,7 +82,7 @@ public class AdvisorService {
                         .firstName(advisorRegistrationRequest.name())
                         .lastName(advisorRegistrationRequest.surname())
                         .email(advisorRegistrationRequest.email())
-                        .password(passwordEncoder.encode(advisorRegistrationRequest.password()))
+//                        .password(passwordEncoder.encode(advisorRegistrationRequest.password()))
                         .picture(advisorRegistrationRequest.picture())
                         .phoneNumber(advisorRegistrationRequest.phoneNumber())
                         .role(Role.ADVISOR)

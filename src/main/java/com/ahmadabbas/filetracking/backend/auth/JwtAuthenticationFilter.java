@@ -1,6 +1,6 @@
 package com.ahmadabbas.filetracking.backend.auth;
 
-import com.ahmadabbas.filetracking.backend.token.TokenRepository;
+import com.ahmadabbas.filetracking.backend.auth.token.TokenRepository;
 import com.ahmadabbas.filetracking.backend.user.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

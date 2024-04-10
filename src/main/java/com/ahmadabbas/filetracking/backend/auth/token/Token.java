@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.token;
+package com.ahmadabbas.filetracking.backend.auth.token;
 
 import com.ahmadabbas.filetracking.backend.user.User;
 import jakarta.persistence.*;

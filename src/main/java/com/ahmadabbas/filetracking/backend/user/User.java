@@ -1,8 +1,8 @@
 package com.ahmadabbas.filetracking.backend.user;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
+import com.ahmadabbas.filetracking.backend.auth.token.Token;
 import com.ahmadabbas.filetracking.backend.student.Student;
-import com.ahmadabbas.filetracking.backend.token.Token;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
@@ -43,7 +43,6 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
@@ -63,6 +62,10 @@ public class User implements UserDetails {
     @Builder.Default
     @Column(nullable = false)
     private boolean isEnabled = true;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean isCredentialsNonExpired = false;
 
     @OneToMany(mappedBy = "user")
     private Set<Token> tokens;
@@ -109,7 +112,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return isCredentialsNonExpired;
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.ahmadabbas.filetracking.backend.auth;
 
-import com.ahmadabbas.filetracking.backend.token.Token;
-import com.ahmadabbas.filetracking.backend.token.TokenRepository;
+import com.ahmadabbas.filetracking.backend.auth.token.Token;
+import com.ahmadabbas.filetracking.backend.auth.token.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.AccessDeniedException;

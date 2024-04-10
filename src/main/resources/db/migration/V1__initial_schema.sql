@@ -12,7 +12,7 @@ CREATE TABLE _user
 (
     id           BIGINT       NOT NULL,
     email        VARCHAR(255) NOT NULL,
-    password     VARCHAR(255) NOT NULL,
+    password     VARCHAR(255),
     picture      VARCHAR(255) NOT NULL,
     phone_number VARCHAR(255) NOT NULL,
     is_enabled   BOOLEAN      NOT NULL,

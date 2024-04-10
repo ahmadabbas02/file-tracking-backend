@@ -1,11 +1,13 @@
 package com.ahmadabbas.filetracking.backend.auth;
 
-import com.ahmadabbas.filetracking.backend.auth.payload.AuthenticationRequest;
-import com.ahmadabbas.filetracking.backend.auth.payload.AuthenticationResponse;
+import com.ahmadabbas.filetracking.backend.auth.payload.*;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "Authentication")
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
@@ -33,6 +36,43 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> login(@RequestBody @Valid AuthenticationRequest authenticationRequest) {
         AuthenticationResponse authResponse = authenticationService.login(authenticationRequest);
         return ResponseEntity.ok(authResponse);
+    }
+
+    @Operation(
+            summary = "Request activation email",
+            description = """
+                    Sends to the user's email an otp that can be used to activate and set password for account.
+                    """,
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successfully sent email"),
+                    @ApiResponse(responseCode = "400", description = "Account is already activated"),
+            }
+    )
+    @PostMapping("/activation-email")
+    public ResponseEntity<ActivationEmailResponse> requestActivation(
+            @RequestBody @Valid SendActivationEmailRequest activationEmailRequest) throws MessagingException {
+        ActivationEmailResponse response = authenticationService.requestActivation(activationEmailRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Activate account",
+            description = """
+                    Activate an account with the otp received in email.
+                    """,
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Account successfully activated"),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Could not find a valid otp related to account or account related to email"
+                    ),
+            }
+    )
+    @PostMapping("/activate")
+    public ResponseEntity<ActivationEmailResponse> activate(
+            @RequestBody @Valid AccountActivationRequest activationRequest) {
+        ActivationEmailResponse response = authenticationService.activateAccount(activationRequest);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(

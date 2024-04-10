@@ -75,7 +75,7 @@ public class JwtService {
                         Date.from(Instant.now().plus(expiration, ChronoUnit.DAYS))
                 )
                 .issuer(issuer)
-                .signWith(getSignInKey())
+                .signWith(getSecretKey())
                 .compact();
     }
 
@@ -120,13 +120,13 @@ public class JwtService {
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parser()
-                .verifyWith(getSignInKey())
+                .verifyWith(getSecretKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
 
-    private SecretKey getSignInKey() {
+    private SecretKey getSecretKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Account Activation</title>
+    <style>
+        :root {
+            --black-pearl: rgba(11, 21, 34, 1);
+
+            --blue-regal: rgba(4, 60, 116, 1);
+            --blue-teal: rgba(0, 85, 177, 1);
+            --blue-muted: rgba(69, 110, 164, 1);
+            --blue-gray: rgba(114, 144, 168, 1);
+            --blue-light: rgba(148, 172, 206, 1);
+            --blue-rhino: rgba(40, 64, 97, 1);
+
+            --white-silk: rgba(241, 246, 249, 1);
+
+            --ebony-clay: rgba(29, 43, 65, 1);
+            --ebony-light: rgb(37 56 86);
+        }
+
+        * {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--white-silk);
+        }
+
+        .header {
+            color: var(--white-silk);
+            background-color: var(--blue-teal);
+            padding: 0;
+        }
+
+        h2 {
+            padding: 10px 15px;
+        }
+
+        .container {
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: auto;
+        }
+
+        .box {
+            background-color: var(--white-silk);
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .box-content {
+            margin: 5px;
+            padding: 10px;
+        }
+
+        .activation-code {
+            font-size: 36px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .activation-code span {
+            padding: 5px;
+            background-color: var(--blue-light);
+            border-radius: 5px;
+        }
+
+        .activation-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .activation-link a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--blue-teal);
+            color: var(--white-silk);
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="box">
+        <div class="header">
+            <h2>Account Activation</h2>
+        </div>
+        <div class="box-content">
+            <p th:text="'Hello ' + ${user_full_name} + ','"></p>
+            <p>Please use the following One Time Password OTP to activate your account.</p>
+            <div class="activation-code">
+                <span th:text="${otp}"></span>
+            </div>
+            <p>The code is valid for 15 minutes only.</p>
+            <div class="activation-link">
+                <a th:href="${activation_url}" target="_blank">Activate your account</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -48,7 +48,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StudentService {
     private final StudentMapper studentMapper;
-    private final StudentDao studentDao;
     private final UserRepository userRepository;
     private final AdvisorRepository advisorRepository;
     private final AdvisorService advisorService;
@@ -56,25 +55,35 @@ public class StudentService {
     private final PasswordEncoder passwordEncoder;
     private final StudentRepository studentRepository;
 
-    public Student getStudent(String id, User loggedInUser) {
+    public Student getStudent(String studentId, User loggedInUser) {
         if (loggedInUser.getRoles().contains(Role.STUDENT)) {
             Student student = getStudentByUserId(loggedInUser.getId());
-            if (!id.equals(student.getId())) {
+            if (!studentId.equals(student.getId())) {
                 throw new AccessDeniedException("not authorized, you can only get details about your own profile");
             }
+            return student;
         } else if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
-            Student student = studentDao.getStudent(id);
+            Student student = studentRepository.findById(studentId)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "student with id `%s` not found".formatted(studentId)
+                    ));
             if (student.getAdvisor().getUser().getId().equals(loggedInUser.getId())) {
                 return student;
             } else {
                 throw new AccessDeniedException("not authorized, you can only get details about your own students");
             }
         }
-        return studentDao.getStudent(id);
+        return studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "student with id `%s` not found".formatted(studentId)
+                ));
     }
 
     public Student getStudentByUserId(Long userId) {
-        return studentDao.getStudentByUserId(userId);
+        return studentRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "student with user id `%s` not found".formatted(userId)
+                ));
     }
 
     public PaginatedResponse<StudentDto> getAllStudents(User loggedInUser,
@@ -132,7 +141,7 @@ public class StudentService {
         if (!roles.contains(Role.ADVISOR)) {
             throw new RuntimeException("Unexpected error! report");
         }
-        return studentDao.getAllStudentIdsByAdvisorUserId(loggedInUser.getId());
+        return studentRepository.findAllByAdvisorUserId(loggedInUser.getId());
     }
 
     @Transactional
@@ -149,7 +158,7 @@ public class StudentService {
                 .firstName(studentRegistrationRequest.name())
                 .lastName(studentRegistrationRequest.surname())
                 .email(studentRegistrationRequest.email())
-                .password(passwordEncoder.encode(studentRegistrationRequest.password()))
+//                .password(passwordEncoder.encode(studentRegistrationRequest.password()))
                 .phoneNumber(studentRegistrationRequest.phoneNumber())
                 .picture(studentRegistrationRequest.picture())
                 .role(Role.STUDENT)
@@ -162,7 +171,7 @@ public class StudentService {
                 .year(studentRegistrationRequest.year())
                 .user(savedUser)
                 .build();
-        return studentDao.save(student);
+        return studentRepository.save(student);
     }
 
     @Transactional
@@ -239,7 +248,7 @@ public class StudentService {
         }
 
         Instant startSaveStudents = Instant.now();
-        List<Student> savedStudents = studentDao.saveAll(students);
+        List<Student> savedStudents = studentRepository.saveAll(students);
         Instant endSaveStudents = Instant.now();
 
         log.debug("Time taken to parse csv: {}", Duration.between(startParseCsv, endParseCsv).toMillis());

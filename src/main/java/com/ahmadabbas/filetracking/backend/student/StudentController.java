@@ -9,6 +9,7 @@ import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/students")
+@Tag(name = "Student")
 public class StudentController {
     private final StudentService studentService;
     private final StudentMapper studentMapper;

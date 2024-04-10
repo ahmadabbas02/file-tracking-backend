@@ -15,6 +15,7 @@ import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -30,6 +31,7 @@ import java.util.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/documents")
+@Tag(name = "Document")
 public class DocumentController {
 
     private final DocumentService documentService;

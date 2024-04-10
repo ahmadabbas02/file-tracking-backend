@@ -36,6 +36,13 @@ public class UserService {
                 ));
     }
 
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "user with email `%s` not found".formatted(email)
+                ));
+    }
+
     public Set<Role> getRoles(User user) {
         return user.getAuthorities().stream()
                 .map(s -> {
@@ -94,4 +101,5 @@ public class UserService {
         }
         return userRepository.save(user);
     }
+
 }
