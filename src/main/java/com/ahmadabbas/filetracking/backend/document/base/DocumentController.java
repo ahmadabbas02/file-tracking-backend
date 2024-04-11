@@ -81,11 +81,11 @@ public class DocumentController {
                     """
     )
     @PatchMapping("/{documentId}/approve")
-    public ResponseEntity<PetitionDocumentDto> approveDocument(
+    public ResponseEntity<DocumentDto> approveDocument(
             @AuthenticationPrincipal User loggedInUser,
             @PathVariable UUID documentId
     ) {
-        PetitionDocument document = petitionDocumentService.approvePetitionDocument(documentId, loggedInUser);
+        Document document = documentService.approveDocument(documentId, loggedInUser);
         return ResponseEntity.ok(document.toDto());
     }
 

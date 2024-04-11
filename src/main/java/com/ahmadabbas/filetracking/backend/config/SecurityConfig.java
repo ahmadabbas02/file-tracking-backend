@@ -106,9 +106,10 @@ public class SecurityConfig {
                 // only admin and secretary can update students
                 .requestMatchers(PATCH, "api/v1/students/{studentId}")
                 .hasAnyRole(ADMINISTRATOR.name(), SECRETARY.name())
-                // only advisors can approve documents
+                // only secretary can approve documents TODO: check later?
                 .requestMatchers("api/v1/documents/*/approve")
-                .hasRole(ADVISOR.name())
+                .hasRole(SECRETARY.name())
+
                 .anyRequest().authenticated();
     }
 

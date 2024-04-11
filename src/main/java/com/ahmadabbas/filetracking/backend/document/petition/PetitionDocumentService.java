@@ -81,16 +81,6 @@ public class PetitionDocumentService {
         }
     }
 
-    @Transactional
-    public PetitionDocument approvePetitionDocument(UUID uuid, User loggedInUser) {
-        Document doc = documentService.getDocument(uuid, loggedInUser);
-        if (!(doc instanceof PetitionDocument petitionDocument)) {
-            throw new APIException(HttpStatus.BAD_REQUEST, "Only petition documents can be approved");
-        }
-        petitionDocument.setApproved(true);
-        return petitionDocumentRepository.save(petitionDocument);
-    }
-
     private File generatedFilledPetition(PetitionDocumentAddRequest addRequest,
                                          String studentId,
                                          String firstName,

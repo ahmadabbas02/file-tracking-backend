@@ -7,6 +7,11 @@ import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentModifyCategoryRequest;
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentPreview;
 import com.ahmadabbas.filetracking.backend.document.base.repository.DocumentRepository;
+import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocument;
+import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocumentRepository;
+import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocument;
+import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocumentRepository;
+import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
@@ -23,6 +28,7 @@ import org.hibernate.Filter;
 import org.hibernate.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +46,8 @@ import java.util.zip.ZipOutputStream;
 @Slf4j
 @RequiredArgsConstructor
 public class DocumentService {
+    private final MedicalReportDocumentRepository medicalReportDocumentRepository;
+    private final PetitionDocumentRepository petitionDocumentRepository;
     private final DocumentRepository documentRepository;
     private final CategoryService categoryService;
     private final StudentService studentService;
@@ -240,5 +248,23 @@ public class DocumentService {
         Document document = getDocument(documentId, loggedInUser);
         documentRepository.delete(document);
         return document;
+    }
+
+    @Transactional
+    public Document approveDocument(UUID documentId, User loggedInUser) {
+        Document doc = getDocument(documentId, loggedInUser);
+        if (doc instanceof PetitionDocument petitionDocument) {
+            boolean oldIsApproved = petitionDocument.isApproved();
+            petitionDocument.setApproved(!oldIsApproved);
+            return petitionDocumentRepository.save(petitionDocument);
+        } else if (doc instanceof MedicalReportDocument medicalReportDocument) {
+            boolean oldIsApproved = medicalReportDocument.isApproved();
+            medicalReportDocument.setApproved(!oldIsApproved);
+            return medicalReportDocumentRepository.save(medicalReportDocument);
+        }
+        throw new APIException(
+                HttpStatus.BAD_REQUEST,
+                "Only petition documents and medical report documents can be approved"
+        );
     }
 }
