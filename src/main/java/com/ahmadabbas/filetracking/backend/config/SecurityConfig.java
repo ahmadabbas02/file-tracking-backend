@@ -2,7 +2,6 @@ package com.ahmadabbas.filetracking.backend.config;
 
 import com.ahmadabbas.filetracking.backend.auth.JwtAuthenticationFilter;
 import com.ahmadabbas.filetracking.backend.exception.AuthEntryPoint;
-import com.ahmadabbas.filetracking.backend.user.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,12 +11,14 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
+import static com.ahmadabbas.filetracking.backend.user.Role.*;
 import static org.springframework.http.HttpMethod.*;
 
 
@@ -53,47 +54,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .httpBasic(e -> e.authenticationEntryPoint(authEntryPoint))
-                .authorizeHttpRequests(req ->
-                        req.requestMatchers(WHITE_LIST_URL).permitAll()
-                                // Adding new students or advisor
-                                .requestMatchers(POST, "api/v1/students", "api/v1/students/upload", "api/v1/advisors")
-                                .hasRole(Role.ADMINISTRATOR.name())
-                                // Modifying/changing category of a document
-                                .requestMatchers("api/v1/documents/modify-category")
-                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.SECRETARY.name())
-                                // Getting all advisors
-                                .requestMatchers(GET, "api/v1/advisors")
-                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.SECRETARY.name())
-                                // Getting all students
-                                .requestMatchers(GET, "api/v1/students")
-                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.SECRETARY.name(),
-                                        Role.ADVISOR.name())
-                                // Only students can add contact document
-                                .requestMatchers(POST, "api/v1/documents/upload/contact", "api/v1/documents/upload/petition", "api/v1/documents/upload/medical-report")
-                                .hasRole(Role.STUDENT.name())
-                                // category creation
-                                .requestMatchers(POST, "api/v1/categories")
-                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.CHAIR.name(), Role.SECRETARY.name())
-                                // only secretary and admin can upload
-                                .requestMatchers(POST, "api/v1/documents/upload", "api/v1/documents/upload/internship")
-                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.SECRETARY.name())
-                                // only admin can get access to all category perms and changing them
-                                .requestMatchers("api/v1/categories/permissions/**")
-                                .hasRole(Role.ADMINISTRATOR.name())
-                                // only admin can delete document
-                                .requestMatchers("api/v1/documents/*/delete")
-                                .hasRole(Role.ADMINISTRATOR.name())
-                                // only admin can access users
-                                .requestMatchers("api/v1/users/**")
-                                .hasRole(Role.ADMINISTRATOR.name())
-                                // only admin and secretary can update students
-                                .requestMatchers(PATCH, "api/v1/students/{studentId}")
-                                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.SECRETARY.name())
-                                // only advisors can approve documents
-                                .requestMatchers("api/v1/documents/*/approve")
-                                .hasRole(Role.ADVISOR.name())
-                                .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(this::configureAuthorization)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -103,6 +64,49 @@ public class SecurityConfig {
                                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
                 );
         return http.build();
+    }
+
+    private void configureAuthorization(
+            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry req
+    ) {
+        req.requestMatchers(WHITE_LIST_URL).permitAll()
+                // Adding new students or advisor
+                .requestMatchers(POST, "api/v1/students", "api/v1/students/upload", "api/v1/advisors")
+                .hasRole(ADMINISTRATOR.name())
+                // Modifying/changing category of a document
+                .requestMatchers("api/v1/documents/modify-category")
+                .hasAnyRole(ADMINISTRATOR.name(), SECRETARY.name())
+                // Getting all advisors
+                .requestMatchers(GET, "api/v1/advisors")
+                .hasAnyRole(ADMINISTRATOR.name(), CHAIR.name(), SECRETARY.name())
+                // Getting all students
+                .requestMatchers(GET, "api/v1/students")
+                .hasAnyRole(ADMINISTRATOR.name(), CHAIR.name(), SECRETARY.name(), ADVISOR.name())
+                // Only students can add contact document
+                .requestMatchers(POST, "api/v1/documents/upload/contact", "api/v1/documents/upload/petition", "api/v1/documents/upload/medical-report")
+                .hasRole(STUDENT.name())
+                // category creation
+                .requestMatchers(POST, "api/v1/categories")
+                .hasAnyRole(ADMINISTRATOR.name(), CHAIR.name(), SECRETARY.name())
+                // only secretary and admin can upload
+                .requestMatchers(POST, "api/v1/documents/upload", "api/v1/documents/upload/internship")
+                .hasAnyRole(ADMINISTRATOR.name(), SECRETARY.name())
+                // only admin can get access to all category perms and changing them
+                .requestMatchers("api/v1/categories/permissions/**")
+                .hasRole(ADMINISTRATOR.name())
+                // only admin can delete document
+                .requestMatchers("api/v1/documents/*/delete")
+                .hasRole(ADMINISTRATOR.name())
+                // only admin can access users
+                .requestMatchers("api/v1/users/**")
+                .hasRole(ADMINISTRATOR.name())
+                // only admin and secretary can update students
+                .requestMatchers(PATCH, "api/v1/students/{studentId}")
+                .hasAnyRole(ADMINISTRATOR.name(), SECRETARY.name())
+                // only advisors can approve documents
+                .requestMatchers("api/v1/documents/*/approve")
+                .hasRole(ADVISOR.name())
+                .anyRequest().authenticated();
     }
 
 }

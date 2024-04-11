@@ -222,6 +222,7 @@ public class StudentService {
                             .role(Role.STUDENT)
                             .picture(s.getPicture())
                             .isEnabled(s.isEnabled())
+                            .isCredentialsNonExpired(true)
                             .build();
                     if (!s.getAdvisorId().isBlank()) {
                         advisor = advisorService.getAdvisorByAdvisorId(s.getAdvisorId(), loggedInUser);
