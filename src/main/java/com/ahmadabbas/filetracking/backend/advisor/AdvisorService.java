@@ -2,7 +2,6 @@ package com.ahmadabbas.filetracking.backend.advisor;
 
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorDto;
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorMapper;
-import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorRepository;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
@@ -10,6 +9,7 @@ import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.repository.StudentRepository;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
+import com.ahmadabbas.filetracking.backend.user.payload.UserRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
 import com.ahmadabbas.filetracking.backend.util.PagingUtils;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
@@ -64,14 +64,14 @@ public class AdvisorService {
     }
 
     @Transactional
-    public Advisor addAdvisor(AdvisorRegistrationRequest advisorRegistrationRequest) {
-        if (userRepository.existsByEmail(advisorRegistrationRequest.email())) {
+    public Advisor addAdvisor(UserRegistrationRequest userRegistrationRequest) {
+        if (userRepository.existsByEmail(userRegistrationRequest.email())) {
             throw new DuplicateResourceException(
                     "email already taken"
             );
         }
 
-        if (userRepository.existsByName(advisorRegistrationRequest.name(), advisorRegistrationRequest.surname())) {
+        if (userRepository.existsByName(userRegistrationRequest.name(), userRegistrationRequest.surname())) {
             throw new DuplicateResourceException(
                     "name already taken"
             );
@@ -79,12 +79,12 @@ public class AdvisorService {
 
         User savedUser = userRepository.save(
                 User.builder()
-                        .firstName(advisorRegistrationRequest.name())
-                        .lastName(advisorRegistrationRequest.surname())
-                        .email(advisorRegistrationRequest.email())
-//                        .password(passwordEncoder.encode(advisorRegistrationRequest.password()))
-                        .picture(advisorRegistrationRequest.picture())
-                        .phoneNumber(advisorRegistrationRequest.phoneNumber())
+                        .firstName(userRegistrationRequest.name())
+                        .lastName(userRegistrationRequest.surname())
+                        .email(userRegistrationRequest.email())
+//                        .password(passwordEncoder.encode(userRegistrationRequest.password()))
+                        .picture(userRegistrationRequest.picture())
+                        .phoneNumber(userRegistrationRequest.phoneNumber())
                         .role(Role.ADVISOR)
                         .build()
         );

@@ -29,13 +29,6 @@ public class AdvisorController {
         return ResponseEntity.ok(advisorMapper.toDto(advisor));
     }
 
-    @Operation(summary = "Add advisor")
-    @PostMapping("")
-    public ResponseEntity<AdvisorDto> registerAdvisor(@RequestBody AdvisorRegistrationRequest advisorRegistrationRequest) {
-        Advisor addedAdvisor = advisorService.addAdvisor(advisorRegistrationRequest);
-        return new ResponseEntity<>(advisorMapper.toDto(addedAdvisor), HttpStatus.CREATED);
-    }
-
     @Operation(
             summary = "Get all advisors",
             description = "Returns a pagination result of all advisors in the database sorted by default on id and ascending order."

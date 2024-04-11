@@ -1,5 +1,6 @@
 package com.ahmadabbas.filetracking.backend.user;
 
+import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
@@ -30,11 +31,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
 
-    public static final Role[] ALLOWED_REGISTRATION_ROLES = {Role.SECRETARY, Role.ADMINISTRATOR, Role.CHAIR};
+    public static final Role[] ALLOWED_REGISTRATION_ROLES = {Role.SECRETARY, Role.ADMINISTRATOR, Role.CHAIR, Role.ADVISOR};
 
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AdvisorService advisorService;
 
     public User getUserById(Long userId) {
         return userRepository.findUserById(userId)
@@ -97,6 +99,10 @@ public class UserService {
 
     @Transactional
     public User addUser(UserRegistrationRequest registrationRequest) {
+        if (registrationRequest.role() == Role.ADVISOR) {
+            return advisorService.addAdvisor(registrationRequest).getUser();
+        }
+
         if (userRepository.existsByEmail(registrationRequest.email())) {
             throw new DuplicateResourceException(
                     "email already taken"

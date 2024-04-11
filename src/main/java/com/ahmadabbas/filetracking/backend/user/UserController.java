@@ -25,7 +25,7 @@ public class UserController {
 
     @Operation(
             summary = "Add user",
-            description = "Only to be used for adding a CHAIR, SECRETARY and ADMINISTRATOR roles."
+            description = "Only to be used for adding a ADMINISTRATOR, ADVISOR, CHAIR and SECRETARY roles."
     )
     @PostMapping("")
     public ResponseEntity<UserDto> registerUser(@RequestBody @Valid UserRegistrationRequest registrationRequest) {
