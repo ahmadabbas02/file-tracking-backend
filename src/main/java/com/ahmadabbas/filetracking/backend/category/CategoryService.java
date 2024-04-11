@@ -106,7 +106,25 @@ public class CategoryService {
                 }
             });
         }
-        // to remove duplicates
+        return new ArrayList<>(new HashSet<>(categories));
+    }
+
+    public List<Category> getAllowedParentCategories(Set<Role> roles) {
+        List<Category> categories = new ArrayList<>();
+        if (roles.stream().anyMatch(role -> role.equals(Role.ADMINISTRATOR))) {
+            return categoryRepository.findAllParentCategories();
+        }
+        for (var role : roles) {
+            Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findAllByRole(role);
+            categoryPermissions.forEach(permission -> {
+                Category category = permission.getCategory();
+                if (category != null) {
+                    if (category.getParentCategoryId() == -1) {
+                        categories.add(category);
+                    }
+                }
+            });
+        }
         return new ArrayList<>(new HashSet<>(categories));
     }
 
@@ -179,9 +197,9 @@ public class CategoryService {
         return getCategoryPermissions(request.categoryId(), loggedInUser);
     }
 
-    public List<FullCategoryPermissionResponse> getAllCategoryPermissions() {
+    public List<FullCategoryPermissionResponse> getAllCategoryPermissions(User loggedInUser) {
         Map<Long, FullCategoryPermissionResponse> categoryMap = new HashMap<>();
-        List<Category> allParentCategories = categoryRepository.findAllParentCategories();
+        List<Category> allParentCategories = getAllowedParentCategories(loggedInUser.getRoles());
         for (var cat : allParentCategories) {
             long categoryId = cat.getCategoryId();
             String name = cat.getName();

@@ -91,9 +91,12 @@ public class SecurityConfig {
                 // only secretary and admin can upload
                 .requestMatchers(POST, "api/v1/documents/upload", "api/v1/documents/upload/internship")
                 .hasAnyRole(ADMINISTRATOR.name(), SECRETARY.name())
-                // only admin can get access to all category perms and changing them
-                .requestMatchers("api/v1/categories/permissions/**")
+                // only admin can change category permissions them
+                .requestMatchers(POST, "api/v1/categories/permissions/**")
                 .hasRole(ADMINISTRATOR.name())
+                // only admin or secretary can GET to all category perms
+                .requestMatchers(GET, "api/v1/categories/permissions")
+                .hasAnyRole(SECRETARY.name(), ADMINISTRATOR.name())
                 // only admin can delete document
                 .requestMatchers("api/v1/documents/*/delete")
                 .hasRole(ADMINISTRATOR.name())

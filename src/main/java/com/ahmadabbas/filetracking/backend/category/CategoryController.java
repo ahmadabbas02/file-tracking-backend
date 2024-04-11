@@ -1,12 +1,16 @@
 package com.ahmadabbas.filetracking.backend.category;
 
-import com.ahmadabbas.filetracking.backend.category.payload.*;
+import com.ahmadabbas.filetracking.backend.category.payload.AddCategoryRequest;
+import com.ahmadabbas.filetracking.backend.category.payload.CategoryPermissionRequestDto;
+import com.ahmadabbas.filetracking.backend.category.payload.FullCategoryPermissionResponse;
+import com.ahmadabbas.filetracking.backend.category.payload.FullCategoryResponse;
 import com.ahmadabbas.filetracking.backend.user.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,8 +63,10 @@ public class CategoryController {
             description = "Returns all the category visibility permissions."
     )
     @GetMapping("/permissions")
-    public ResponseEntity<List<FullCategoryPermissionResponse>> getAllCategoryPermissions() {
-        return ResponseEntity.ok(categoryService.getAllCategoryPermissions());
+    public ResponseEntity<List<FullCategoryPermissionResponse>> getAllCategoryPermissions(
+            @AuthenticationPrincipal User loggedInUser
+    ) {
+        return ResponseEntity.ok(categoryService.getAllCategoryPermissions(loggedInUser));
     }
 
     @Operation(
@@ -68,8 +74,10 @@ public class CategoryController {
             description = "Add/delete role view permissions for specific categories."
     )
     @PostMapping("/permissions/update")
-    public ResponseEntity<FullCategoryPermissionResponse> updateCategoryPerms(@Valid @RequestBody CategoryPermissionRequestDto requestDto,
-                                                        @AuthenticationPrincipal User loggedInUser) {
+    public ResponseEntity<FullCategoryPermissionResponse> updateCategoryPerms(
+            @Valid @RequestBody CategoryPermissionRequestDto requestDto,
+            @AuthenticationPrincipal User loggedInUser
+    ) {
         return ResponseEntity.ok(categoryService.updateCategoryPermission(requestDto, loggedInUser));
     }
 }
