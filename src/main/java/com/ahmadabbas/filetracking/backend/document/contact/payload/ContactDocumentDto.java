@@ -13,8 +13,9 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ContactDocumentDto extends DocumentDto implements Serializable {
-    String email;
-    String phoneNumber;
-    String emergencyName;
-    String emergencyPhoneNumber;
+    private String email;
+    private String phoneNumber;
+    private String homeNumber;
+    private String emergencyName;
+    private String emergencyPhoneNumber;
 }
