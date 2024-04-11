@@ -6,30 +6,44 @@ import com.ahmadabbas.filetracking.backend.document.comment.CommentService;
 import com.ahmadabbas.filetracking.backend.document.comment.payload.CommentAddRequest;
 import com.ahmadabbas.filetracking.backend.document.comment.payload.CommentDto;
 import com.ahmadabbas.filetracking.backend.document.comment.payload.CommentMapper;
-import com.ahmadabbas.filetracking.backend.document.contact.*;
-import com.ahmadabbas.filetracking.backend.document.contact.payload.*;
-import com.ahmadabbas.filetracking.backend.document.internship.*;
-import com.ahmadabbas.filetracking.backend.document.internship.payload.*;
-import com.ahmadabbas.filetracking.backend.document.medical.*;
-import com.ahmadabbas.filetracking.backend.document.medical.payload.*;
-import com.ahmadabbas.filetracking.backend.document.petition.*;
-import com.ahmadabbas.filetracking.backend.document.petition.payload.*;
+import com.ahmadabbas.filetracking.backend.document.contact.ContactDocument;
+import com.ahmadabbas.filetracking.backend.document.contact.ContactDocumentService;
+import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentAddRequest;
+import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentDto;
+import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocument;
+import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumentService;
+import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipAddRequest;
+import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentDto;
+import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocument;
+import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocumentService;
+import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportAddRequest;
+import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportDto;
+import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocument;
+import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocumentService;
+import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentAddRequest;
+import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentDto;
 import com.ahmadabbas.filetracking.backend.user.User;
-import com.ahmadabbas.filetracking.backend.util.payload.*;
+import com.ahmadabbas.filetracking.backend.util.payload.PaginatedMapResponse;
+import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -192,60 +206,6 @@ public class DocumentController {
     }
 
     @Operation(
-            summary = "Upload a document",
-            description = """
-                    Uploads a document to the cloud which can be
-                    later previewed/downloaded using the UUID returned. \n
-                    `type` can accept 'contact', 'petition', 'internship', 'medical' and 'normal' \n
-                    Example input for `data`: `{
-                                           "title":"Test File",
-                                           "description":"",
-                                           "studentId":"23000002",
-                                           "parentCategoryId":1,
-                                           "categoryId":2
-                                       }`
-                    """
-    )
-    @PostMapping(value = "/uploadd", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<DocumentDto> uploadTest(
-            @RequestPart(value = "file", required = false) MultipartFile file,
-            @RequestPart("data") String data,
-            @RequestParam(defaultValue = "normal") String documentType,
-            @AuthenticationPrincipal User loggedInUser
-    ) throws IOException {
-        switch (documentType) {
-            case "contact":
-                ContactDocumentAddRequest contactAddRequest = new ObjectMapper().readValue(data,
-                        ContactDocumentAddRequest.class);
-                ContactDocument contactDocument = contactDocumentService.addContactDocument(contactAddRequest,
-                        loggedInUser);
-                return new ResponseEntity<>(contactDocument.toDto(), HttpStatus.CREATED);
-            case "petition":
-                PetitionDocumentAddRequest petitionDocumentAddRequest = new ObjectMapper().readValue(data,
-                        PetitionDocumentAddRequest.class);
-                PetitionDocument petitionDocument =
-                        petitionDocumentService.addPetitionDocument(petitionDocumentAddRequest, loggedInUser);
-                return new ResponseEntity<>(petitionDocument.toDto(), HttpStatus.CREATED);
-            case "internship":
-                InternshipAddRequest internshipAddRequest = new ObjectMapper().readValue(data,
-                        InternshipAddRequest.class);
-                InternshipDocument internshipDocument = internshipDocumentService.addInternship(file,
-                        internshipAddRequest, loggedInUser);
-                return new ResponseEntity<>(internshipDocument.toDto(), HttpStatus.CREATED);
-            case "medical":
-                MedicalReportAddRequest medicalReportAddRequest = new ObjectMapper().readValue(data,
-                        MedicalReportAddRequest.class);
-                MedicalReportDocument medicalReportDocument = medicalReportDocumentService.addMedicalReport(file,
-                        medicalReportAddRequest, loggedInUser);
-                return new ResponseEntity<>(medicalReportDocument.toDto(), HttpStatus.CREATED);
-            default:
-                DocumentAddRequest normalAddRequest = new ObjectMapper().readValue(data, DocumentAddRequest.class);
-                Document uploadedDocument = documentService.addDocument(file, normalAddRequest, loggedInUser);
-                return new ResponseEntity<>(uploadedDocument.toDto(), HttpStatus.CREATED);
-        }
-    }
-
-    @Operation(
             summary = "Upload contact document",
             description = """
                     Generates and uploads contact form document.
@@ -343,13 +303,16 @@ public class DocumentController {
     @GetMapping("/preview")
     public ResponseEntity<byte[]> getFilePreview(@AuthenticationPrincipal User user,
                                                  @RequestParam UUID uuid) throws IOException {
-        byte[] data = documentService.getDocumentPreview(user, uuid);
-        if (data != null) {
+        DocumentPreview documentPreview = documentService.getDocumentPreview(user, uuid);
+        if (documentPreview != null) {
+            String fileName = documentPreview.fileName();
+            byte[] blob = documentPreview.blob();
+
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentLength(data.length);
-            headers.set("Content-Disposition", "inline; filename=" + uuid);
+            headers.setContentLength(blob.length);
+            headers.set("Content-Disposition", "inline; filename=" + fileName);
             headers.setContentType(MediaType.APPLICATION_PDF);
-            return new ResponseEntity<>(data, headers, HttpStatus.OK);
+            return new ResponseEntity<>(blob, headers, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

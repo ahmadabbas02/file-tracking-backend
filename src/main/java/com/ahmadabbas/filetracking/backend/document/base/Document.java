@@ -73,4 +73,8 @@ public class Document {
     public DocumentDto toDto() {
         return DocumentMapper.INSTANCE.toDto(this);
     }
+
+    public String getFileName() {
+        return path.substring(path.lastIndexOf('/') + 1);
+    }
 }

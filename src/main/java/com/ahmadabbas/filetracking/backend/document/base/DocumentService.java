@@ -5,6 +5,7 @@ import com.ahmadabbas.filetracking.backend.category.CategoryService;
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentAddRequest;
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
 import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentModifyCategoryRequest;
+import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentPreview;
 import com.ahmadabbas.filetracking.backend.document.base.repository.DocumentRepository;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.student.Student;
@@ -91,10 +92,10 @@ public class DocumentService {
         return document;
     }
 
-    public byte[] getDocumentPreview(User loggedInUser, UUID uuid) throws IOException {
+    public DocumentPreview getDocumentPreview(User loggedInUser, UUID uuid) throws IOException {
         Document document = getDocument(uuid, loggedInUser);
         try (InputStream inputStream = azureBlobService.getInputStream(document.getPath(), uuid)) {
-            return inputStream.readAllBytes();
+            return new DocumentPreview(document.getFileName(), inputStream.readAllBytes());
         }
     }
 
@@ -104,11 +105,8 @@ public class DocumentService {
 
         for (UUID uuid : uuids) {
             Document document = getDocument(uuid, loggedInUser);
-            String path = document.getPath();
-
-            InputStream blobInputStream = azureBlobService.getInputStream(path, uuid);
-            int slashIndex = path.lastIndexOf("/");
-            String originalFileName = path.substring(slashIndex + 1);
+            InputStream blobInputStream = azureBlobService.getInputStream(document.getPath(), uuid);
+            String originalFileName = document.getFileName();
 
             outputStream.putNextEntry(new ZipEntry(originalFileName));
             byte[] buffer = new byte[1024];
@@ -209,9 +207,9 @@ public class DocumentService {
         Map<String, byte[]> blobs = new HashMap<>();
 
         for (var document : documents.results()) {
-            var id = document.getId();
-            var blob = getDocumentPreview(loggedInUser, UUID.fromString(id));
-            blobs.put(id, blob);
+            String id = document.getId();
+            DocumentPreview preview = getDocumentPreview(loggedInUser, UUID.fromString(id));
+            blobs.put(id, preview.blob());
         }
 
         return new PaginatedMapResponse<>(
