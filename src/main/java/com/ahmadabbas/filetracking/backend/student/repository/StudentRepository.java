@@ -146,4 +146,7 @@ public interface StudentRepository extends JpaRepository<Student, String>, Custo
                                                     String advisorId,
                                                     Pageable pageable);
 
+    @Query("select (count(s) > 0) from Student s where upper(s.id) = upper(?1)")
+    boolean existsById(@NonNull String studentId);
+
 }

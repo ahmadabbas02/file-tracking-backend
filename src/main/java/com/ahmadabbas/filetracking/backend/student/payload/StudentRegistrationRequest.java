@@ -21,6 +21,8 @@ public final class StudentRegistrationRequest extends UserRegistrationRequest im
     public static final String[] ALLOWED_PROGRAM_VALUES = {"CMSE", "CMPE", "BLGM"};
 
     @JsonProperty
+    private final String id;
+    @JsonProperty
     @NotEmpty(message = "student's program should not be empty")
     private final String program;
     @JsonProperty
@@ -32,15 +34,22 @@ public final class StudentRegistrationRequest extends UserRegistrationRequest im
     @NotEmpty(message = "student's advisor id should not be empty")
     private final String advisorId;
 
-    public StudentRegistrationRequest(String name, String surname, String email, String picture, String phoneNumber, String program, Short year, String advisorId) {
+    public StudentRegistrationRequest(String name,
+                                      String surname,
+                                      String email,
+                                      String picture,
+                                      String phoneNumber,
+                                      String id,
+                                      String program,
+                                      Short year,
+                                      String advisorId) {
         super(name, surname, email, picture, phoneNumber, Role.STUDENT);
-
+        this.id = id;
         List<String> allowedProgramValues = Arrays.asList(ALLOWED_PROGRAM_VALUES);
         if (!allowedProgramValues.contains(program)) {
             throw new APIException(HttpStatus.BAD_REQUEST,
                     "Only %s are accepted values for student programs".formatted(allowedProgramValues));
         }
-
         this.program = program;
         this.year = year;
         this.advisorId = advisorId;
@@ -56,5 +65,9 @@ public final class StudentRegistrationRequest extends UserRegistrationRequest im
 
     public String advisorId() {
         return advisorId;
+    }
+
+    public String id() {
+        return id;
     }
 }

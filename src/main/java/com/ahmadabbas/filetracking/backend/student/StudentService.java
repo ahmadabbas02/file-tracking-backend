@@ -152,6 +152,14 @@ public class StudentService {
             );
         }
 
+        if (studentRegistrationRequest.id() != null) {
+            if (studentRepository.existsById(studentRegistrationRequest.id())) {
+                throw new DuplicateResourceException(
+                        "student id already taken"
+                );
+            }
+        }
+
         Advisor advisor = advisorService.getAdvisorByAdvisorId(studentRegistrationRequest.advisorId(), loggedInUser);
 
         User user = User.builder()
@@ -166,6 +174,7 @@ public class StudentService {
         User savedUser = userRepository.save(user);
 
         Student student = Student.builder()
+                .id(studentRegistrationRequest.id())
                 .advisor(advisor)
                 .program(studentRegistrationRequest.program())
                 .year(studentRegistrationRequest.year())
@@ -187,6 +196,9 @@ public class StudentService {
                         Collectors.partitioningBy(
                                 s -> {
                                     if (userRepository.existsByEmail(s.getEmail())) {
+                                        return false;
+                                    }
+                                    if (studentRepository.existsById(s.getStudentId())) {
                                         return false;
                                     }
                                     return s.getAdvisorId() == null || s.getAdvisorId().isBlank()
