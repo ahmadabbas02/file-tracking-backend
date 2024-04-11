@@ -1,17 +1,19 @@
 package com.ahmadabbas.filetracking.backend.advisor.payload;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
+import com.ahmadabbas.filetracking.backend.user.Role;
+import com.ahmadabbas.filetracking.backend.user.payload.UserRegistrationRequest;
+import lombok.EqualsAndHashCode;
 
-public record AdvisorRegistrationRequest(
-        @NotEmpty(message = "Advisor name should not be empty") String name,
-        @NotEmpty(message = "Advisor surname should not be empty") String surname,
-        @Email(message = "Advisor email should be valid") String email,
-//        @NotEmpty(message = "Advisor password should not be empty") String password,
-        @NotEmpty(message = "Advisor picture should not be empty") String picture,
-        @NotEmpty(message = "Advisor phoneNumber should not be empty") String phoneNumber
-) {
-    public AdvisorRegistrationRequest {
-        email = email.toLowerCase();
+@EqualsAndHashCode(callSuper = true)
+public final class AdvisorRegistrationRequest extends UserRegistrationRequest {
+
+    public AdvisorRegistrationRequest(String name, String surname, String email, String picture, String phoneNumber) {
+        super(name, surname, email, picture, phoneNumber, Role.ADVISOR);
     }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
 }
