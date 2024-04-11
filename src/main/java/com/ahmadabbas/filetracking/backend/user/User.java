@@ -63,9 +63,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean isEnabled = true;
 
-    @Builder.Default
     @Column(nullable = false)
-    private boolean isCredentialsNonExpired = false;
+    private boolean isCredentialsNonExpired;
 
     @OneToMany(mappedBy = "user")
     private Set<Token> tokens;

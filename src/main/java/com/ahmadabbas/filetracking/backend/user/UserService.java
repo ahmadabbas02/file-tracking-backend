@@ -1,8 +1,11 @@
 package com.ahmadabbas.filetracking.backend.user;
 
+import com.ahmadabbas.filetracking.backend.exception.APIException;
+import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.user.payload.UserDto;
 import com.ahmadabbas.filetracking.backend.user.payload.UserMapper;
+import com.ahmadabbas.filetracking.backend.user.payload.UserRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.user.payload.UserUpdateDto;
 import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
 import com.ahmadabbas.filetracking.backend.util.PagingUtils;
@@ -11,10 +14,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,6 +29,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class UserService {
+
+    public static final Role[] ALLOWED_REGISTRATION_ROLES = {Role.SECRETARY, Role.ADMINISTRATOR, Role.CHAIR};
 
     private final UserMapper userMapper;
     private final UserRepository userRepository;
@@ -88,6 +95,31 @@ public class UserService {
         );
     }
 
+    @Transactional
+    public User addUser(UserRegistrationRequest registrationRequest) {
+        if (userRepository.existsByEmail(registrationRequest.email())) {
+            throw new DuplicateResourceException(
+                    "email already taken"
+            );
+        }
+        List<Role> allowedRoles = Arrays.asList(ALLOWED_REGISTRATION_ROLES);
+        if (!allowedRoles.contains(registrationRequest.role())) {
+            throw new APIException(
+                    HttpStatus.BAD_REQUEST,
+                    "Only %s values for role are allowed!".formatted(allowedRoles)
+            );
+        }
+        return userRepository.save(
+                User.builder()
+                        .firstName(registrationRequest.name())
+                        .lastName(registrationRequest.surname())
+                        .email(registrationRequest.email())
+                        .picture(registrationRequest.picture())
+                        .phoneNumber(registrationRequest.phoneNumber())
+                        .role(registrationRequest.role())
+                        .build()
+        );
+    }
 
     @Transactional
     public User updateUser(Long userId, UserUpdateDto updateDto) {

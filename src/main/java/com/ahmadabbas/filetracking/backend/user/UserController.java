@@ -2,10 +2,12 @@ package com.ahmadabbas.filetracking.backend.user;
 
 import com.ahmadabbas.filetracking.backend.user.payload.UserDto;
 import com.ahmadabbas.filetracking.backend.user.payload.UserMapper;
+import com.ahmadabbas.filetracking.backend.user.payload.UserRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.user.payload.UserUpdateDto;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,16 @@ public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
+
+    @Operation(
+            summary = "Add user",
+            description = "Only to be used for adding a CHAIR, SECRETARY and ADMINISTRATOR roles."
+    )
+    @PostMapping("")
+    public ResponseEntity<UserDto> registerUser(@RequestBody @Valid UserRegistrationRequest registrationRequest) {
+        User user = userService.addUser(registrationRequest);
+        return ResponseEntity.ok(userMapper.toDto(user));
+    }
 
     @Operation(
             summary = "Get all users",
