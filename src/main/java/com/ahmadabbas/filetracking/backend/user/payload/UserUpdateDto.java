@@ -8,6 +8,7 @@ public record UserUpdateDto(
         String email,
         String password,
         String picture,
-        String phoneNumber
-) implements Serializable {
+        String phoneNumber,
+        boolean enabled,
+        boolean credentialsExpired) implements Serializable {
 }

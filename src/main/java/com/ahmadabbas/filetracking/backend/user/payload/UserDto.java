@@ -15,6 +15,8 @@ public record UserDto(
         String fullName,
         String email,
         String phoneNumber,
+        boolean enabled,
+        boolean credentialsExpired,
         Map<String, Object> roles
 ) implements Serializable {
 }

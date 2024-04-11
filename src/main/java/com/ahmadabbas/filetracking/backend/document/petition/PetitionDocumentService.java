@@ -2,10 +2,8 @@ package com.ahmadabbas.filetracking.backend.document.petition;
 
 import com.ahmadabbas.filetracking.backend.category.Category;
 import com.ahmadabbas.filetracking.backend.category.CategoryService;
-import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.document.base.DocumentService;
 import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentAddRequest;
-import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
 import com.ahmadabbas.filetracking.backend.user.Role;
@@ -19,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +27,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)

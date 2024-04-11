@@ -27,9 +27,11 @@ public interface UserMapper {
             expression = "java(getAdditionalInformation(user))",
             target = "roles"
     )
+    @Mapping(source = "credentialsNonExpired", target = "credentialsExpired", qualifiedByName = "reverseCredentialsExpired")
     UserDto toDto(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(source = "credentialsExpired", target = "credentialsNonExpired", qualifiedByName = "reverseCredentialsExpired")
     User partialUpdate(UserUpdateDto userUpdateDto, @MappingTarget User user);
 
     default Map<String, Object> getAdditionalInformation(User user) {
@@ -54,5 +56,10 @@ public interface UserMapper {
 
     default Set<Role> getRoles(UserDto userDto) {
         return userDto.roles().keySet().stream().map(k -> Role.valueOf(k.toUpperCase())).collect(Collectors.toSet());
+    }
+
+    @Named("reverseCredentialsExpired")
+    default boolean reverseCredentialsExpired(boolean isCredentialsExpired) {
+        return !isCredentialsExpired;
     }
 }
