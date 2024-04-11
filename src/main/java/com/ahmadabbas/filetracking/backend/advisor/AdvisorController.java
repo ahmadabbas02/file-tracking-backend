@@ -2,13 +2,11 @@ package com.ahmadabbas.filetracking.backend.advisor;
 
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorDto;
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorMapper;
-import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
