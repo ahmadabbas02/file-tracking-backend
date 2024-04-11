@@ -15,6 +15,7 @@ public record UserDto(
         String fullName,
         String email,
         String phoneNumber,
+        String picture,
         boolean enabled,
         boolean credentialsExpired,
         Map<String, Object> roles
