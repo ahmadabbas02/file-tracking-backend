@@ -69,6 +69,7 @@ public class ContactDocumentService {
                     .description(addRequest.description())
                     .email(addRequest.email())
                     .phoneNumber(addRequest.phoneNumber())
+                    .homeNumber(addRequest.homeNumber())
                     .emergencyName(addRequest.emergencyName())
                     .emergencyPhoneNumber(addRequest.emergencyPhoneNumber())
                     .title(addRequest.title())
@@ -95,7 +96,7 @@ public class ContactDocumentService {
             form.setField("studentNumber", student.getId());
             form.setField("studentName", fullName);
             form.setField("studentEmail", addRequest.email());
-            form.setField("homeTeleNumber", addRequest.phoneNumber());
+            form.setField("homeTeleNumber", addRequest.homeNumber());
             form.setField("mobileTeleNumber", addRequest.phoneNumber());
             form.setField("emergencyName", addRequest.emergencyName());
             form.setField("emergencyPhoneNumber", addRequest.emergencyPhoneNumber());
