@@ -1,31 +1,26 @@
 package com.ahmadabbas.filetracking.backend.category.permission;
 
 import com.ahmadabbas.filetracking.backend.user.Role;
-import org.springframework.data.jpa.repository.*;
-import org.springframework.lang.NonNull;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public interface CategoryPermissionRepository extends JpaRepository<CategoryPermission, Long> {
-    @Override
-    @Query("""
-            select c_perm from CategoryPermission c_perm
-            order by c_perm.role
-            """)
-    @EntityGraph(value = "CategoryPermission.eagerlyFetchCategory")
-    @NonNull
-    List<CategoryPermission> findAll();
 
-    @Query("select c from CategoryPermission c where c.category.categoryId = :categoryId")
+    @Query("select c from CategoryPermission c where c.category.categoryId = :categoryId order by c.category.name")
     @EntityGraph(value = "CategoryPermission.eagerlyFetchCategory")
     List<CategoryPermission> findAllByCategoryId(Long categoryId);
 
     @EntityGraph(value = "CategoryPermission.eagerlyFetchCategory")
-    @Query("select c from CategoryPermission c where c.role = :role")
+    @Query("select c from CategoryPermission c where c.role = :role order by c.category.name")
     Set<CategoryPermission> findAllByRole(Role role);
 
     @EntityGraph(value = "CategoryPermission.eagerlyFetchCategory")
-    @Query("select c from CategoryPermission c where c.category.categoryId = :categoryId and c.role = :role")
+    @Query("select c from CategoryPermission c where c.category.categoryId = :categoryId and c.role = :role order by c.category.name")
     Optional<CategoryPermission> findAllByCategoryIdAndRole(Long categoryId, Role role);
 
 }

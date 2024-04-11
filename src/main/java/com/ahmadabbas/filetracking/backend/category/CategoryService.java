@@ -89,8 +89,8 @@ public class CategoryService {
     }
 
     public List<Category> getAllowedCategories(Set<Role> roles) {
-        List<Category> categories = new ArrayList<>();
-        if (roles.stream().anyMatch(role -> role.equals(Role.ADMINISTRATOR))) {
+        List<Category> categories = new LinkedList<>();
+        if (roles.contains(Role.ADMINISTRATOR)) {
             return categoryRepository.findAll();
         }
         for (var role : roles) {
@@ -106,11 +106,11 @@ public class CategoryService {
                 }
             });
         }
-        return new ArrayList<>(new HashSet<>(categories));
+        return categories;
     }
 
     public List<Category> getAllowedParentCategories(Set<Role> roles) {
-        List<Category> categories = new ArrayList<>();
+        List<Category> categories = new LinkedList<>();
         if (roles.stream().anyMatch(role -> role.equals(Role.ADMINISTRATOR))) {
             return categoryRepository.findAllParentCategories();
         }
@@ -125,11 +125,11 @@ public class CategoryService {
                 }
             });
         }
-        return new ArrayList<>(new HashSet<>(categories));
+        return categories;
     }
 
     public List<Long> getAllowedCategoriesIds(Set<Role> roles) {
-        var allCategories = getAllowedCategories(roles);
+        List<Category> allCategories = getAllowedCategories(roles);
         return allCategories.stream()
                 .map(Category::getCategoryId).toList();
     }
@@ -151,22 +151,22 @@ public class CategoryService {
         List<FullCategoryResponse> result = new LinkedList<>();
         for (var parent : parentCategories) {
             List<Category> childrenCategories = getAllChildrenCategories(parent.getCategoryId());
+            FullCategoryResponse response;
             if (!childrenCategories.isEmpty()) {
-                FullCategoryResponse response = new FullCategoryResponse(
+                response = new FullCategoryResponse(
                         parent.getCategoryId(),
                         parent.getParentCategoryId(),
                         parent.getName(),
                         childrenCategories
                 );
-                result.add(response);
-                continue;
+            } else {
+                response = new FullCategoryResponse(
+                        parent.getCategoryId(),
+                        parent.getParentCategoryId(),
+                        parent.getName(),
+                        Collections.emptyList()
+                );
             }
-            FullCategoryResponse response = new FullCategoryResponse(
-                    parent.getCategoryId(),
-                    parent.getParentCategoryId(),
-                    parent.getName(),
-                    Collections.emptyList()
-            );
             result.add(response);
         }
         return result;
@@ -198,7 +198,7 @@ public class CategoryService {
     }
 
     public List<FullCategoryPermissionResponse> getAllCategoryPermissions(User loggedInUser) {
-        Map<Long, FullCategoryPermissionResponse> categoryMap = new HashMap<>();
+        Map<Long, FullCategoryPermissionResponse> categoryMap = new LinkedHashMap<>();
         List<Category> allParentCategories = getAllowedParentCategories(loggedInUser.getRoles());
         for (var cat : allParentCategories) {
             long categoryId = cat.getCategoryId();
