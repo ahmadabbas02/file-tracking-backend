@@ -1,8 +1,8 @@
-package com.ahmadabbas.filetracking.backend.document.petition.comment;
+package com.ahmadabbas.filetracking.backend.document.comment;
 
 import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.document.base.DocumentService;
-import com.ahmadabbas.filetracking.backend.document.petition.comment.payload.CommentAddRequest;
+import com.ahmadabbas.filetracking.backend.document.comment.payload.CommentAddRequest;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import lombok.RequiredArgsConstructor;

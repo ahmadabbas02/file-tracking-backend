@@ -1,6 +1,11 @@
 package com.ahmadabbas.filetracking.backend.document.base;
 
 import com.ahmadabbas.filetracking.backend.document.base.payload.*;
+import com.ahmadabbas.filetracking.backend.document.comment.Comment;
+import com.ahmadabbas.filetracking.backend.document.comment.CommentService;
+import com.ahmadabbas.filetracking.backend.document.comment.payload.CommentAddRequest;
+import com.ahmadabbas.filetracking.backend.document.comment.payload.CommentDto;
+import com.ahmadabbas.filetracking.backend.document.comment.payload.CommentMapper;
 import com.ahmadabbas.filetracking.backend.document.contact.*;
 import com.ahmadabbas.filetracking.backend.document.contact.payload.*;
 import com.ahmadabbas.filetracking.backend.document.internship.*;
@@ -8,8 +13,6 @@ import com.ahmadabbas.filetracking.backend.document.internship.payload.*;
 import com.ahmadabbas.filetracking.backend.document.medical.*;
 import com.ahmadabbas.filetracking.backend.document.medical.payload.*;
 import com.ahmadabbas.filetracking.backend.document.petition.*;
-import com.ahmadabbas.filetracking.backend.document.petition.comment.*;
-import com.ahmadabbas.filetracking.backend.document.petition.comment.payload.*;
 import com.ahmadabbas.filetracking.backend.document.petition.payload.*;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.*;

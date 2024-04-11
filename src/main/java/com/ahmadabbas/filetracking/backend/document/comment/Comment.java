@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.document.petition.comment;
+package com.ahmadabbas.filetracking.backend.document.comment;
 
 import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.user.User;

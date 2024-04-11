@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.document.petition.comment;
+package com.ahmadabbas.filetracking.backend.document.comment;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

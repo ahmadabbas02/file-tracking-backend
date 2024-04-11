@@ -1,6 +1,6 @@
-package com.ahmadabbas.filetracking.backend.document.petition.comment.payload;
+package com.ahmadabbas.filetracking.backend.document.comment.payload;
 
-import com.ahmadabbas.filetracking.backend.document.petition.comment.Comment;
+import com.ahmadabbas.filetracking.backend.document.comment.Comment;
 import org.mapstruct.*;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
