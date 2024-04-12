@@ -78,7 +78,7 @@ public class DocumentService {
         if (loggedInUser.getRoles().contains(Role.STUDENT)) {
             throw new AccessDeniedException("not authorized..");
         }
-        Category category = categoryService.getCategory(addRequest.categoryId(), addRequest.parentCategoryId(), loggedInUser);
+        Category category = categoryService.getCategory(addRequest.categoryId(), loggedInUser);
         Student student = studentService.getStudent(addRequest.studentId(), loggedInUser);
         String cloudPath = azureBlobService.upload(file, addRequest.studentId(), category.getName(), addRequest.title());
         log.debug("cloudPath received from uploading file: %s".formatted(cloudPath));
@@ -95,7 +95,7 @@ public class DocumentService {
 
     public Document modifyDocumentCategory(DocumentModifyCategoryRequest request, User loggedInUser) {
         Document document = getDocument(request.uuid(), loggedInUser);
-        Category newCategory = categoryService.getCategory(request.categoryId(), request.parentCategoryId(), loggedInUser);
+        Category newCategory = categoryService.getCategory(request.categoryId(), loggedInUser);
         document.setCategory(newCategory);
         return document;
     }
