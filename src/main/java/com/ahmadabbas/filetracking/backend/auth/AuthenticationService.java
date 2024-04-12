@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -134,10 +133,11 @@ public class AuthenticationService {
 
     private String generateCode(int length) {
         char[] characters = IntStream.concat(
-                IntStream.rangeClosed('0', '9'),
-                IntStream.rangeClosed('A', 'Z')
-        ).mapToObj(c -> (char) c + "").collect(Collectors.joining()).toCharArray();
-        System.out.println("characters = " + Arrays.toString(characters));
+                        IntStream.rangeClosed('0', '9'),
+                        IntStream.rangeClosed('A', 'Z')
+                ).mapToObj(c -> (char) c + "")
+                .collect(Collectors.joining())
+                .toCharArray();
         SecureRandom random = new SecureRandom();
         StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {

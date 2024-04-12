@@ -1,7 +1,6 @@
 package com.ahmadabbas.filetracking.backend.advisor;
 
-import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorDto;
-import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorMapper;
+import com.ahmadabbas.filetracking.backend.advisor.views.AdvisorView;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,14 +16,13 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Advisor")
 public class AdvisorController {
     private final AdvisorService advisorService;
-    private final AdvisorMapper advisorMapper;
 
     @Operation(summary = "Get advisor")
     @GetMapping("/{advisorId}")
-    public ResponseEntity<AdvisorDto> getAdvisor(@PathVariable String advisorId,
-                                                 @AuthenticationPrincipal User loggedInUser) {
-        Advisor advisor = advisorService.getAdvisorByAdvisorId(advisorId, loggedInUser);
-        return ResponseEntity.ok(advisorMapper.toDto(advisor));
+    public ResponseEntity<AdvisorView> getAdvisor(@PathVariable String advisorId,
+                                                  @AuthenticationPrincipal User loggedInUser) {
+        AdvisorView advisor = advisorService.getAdvisorViewByAdvisorId(advisorId, loggedInUser);
+        return ResponseEntity.ok(advisor);
     }
 
     @Operation(
@@ -32,7 +30,7 @@ public class AdvisorController {
             description = "Returns a pagination result of all advisors in the database sorted by default on id and ascending order."
     )
     @GetMapping("")
-    public ResponseEntity<PaginatedResponse<AdvisorDto>> getAllStudents(
+    public ResponseEntity<PaginatedResponse<AdvisorView>> getAllStudents(
             @RequestParam(defaultValue = "1", required = false) int pageNo,
             @RequestParam(defaultValue = "10", required = false) int pageSize,
             @RequestParam(defaultValue = "id", required = false) String sortBy,

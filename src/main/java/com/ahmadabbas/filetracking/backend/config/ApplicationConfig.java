@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.config;
 
 import com.blazebit.persistence.CriteriaBuilderFactory;
+import com.blazebit.persistence.integration.view.spring.EnableEntityViews;
 import com.blazebit.persistence.spi.CriteriaBuilderConfiguration;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
+@EnableEntityViews("com.ahmadabbas.filetracking.backend")
 @RequiredArgsConstructor
 public class ApplicationConfig {
     private final EntityManagerFactory entityManagerFactory;

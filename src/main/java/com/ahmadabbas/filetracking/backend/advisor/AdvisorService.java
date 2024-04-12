@@ -1,8 +1,7 @@
 package com.ahmadabbas.filetracking.backend.advisor;
 
-import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorDto;
-import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorMapper;
 import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorRepository;
+import com.ahmadabbas.filetracking.backend.advisor.views.AdvisorView;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.student.Student;
@@ -33,9 +32,7 @@ public class AdvisorService {
     private final AdvisorRepository advisorRepository;
     private final UserRepository userRepository;
 
-    private final AdvisorMapper advisorMapper;
-
-    public Advisor getAdvisorByUserId(Long userId) {
+    public AdvisorView getAdvisorByUserId(Long userId) {
         return advisorRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "advisor with user id `%s` not found".formatted(userId)
@@ -43,21 +40,16 @@ public class AdvisorService {
     }
 
     public Advisor getAdvisorByAdvisorId(String advisorId, User loggedInUser) {
-        if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
-            Advisor advisor = getAdvisorByUserId(loggedInUser.getId());
-            if (!advisorId.equals(advisor.getId())) {
-                throw new AccessDeniedException("not authorized, you can only get details about your own profile");
-            }
-        } else if (loggedInUser.getRoles().contains(Role.STUDENT)) {
-            Student student = studentRepository.findByUserId(loggedInUser.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "student related with user id %s not found".formatted(loggedInUser.getId())
-                    ));
-            if (!student.getAdvisor().getId().equals(advisorId)) {
-                throw new AccessDeniedException("not authorized, you can only get details for your own advisor profile");
-            }
-        }
+        checkPermissions(advisorId, loggedInUser);
         return advisorRepository.findById(advisorId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "advisor with id `%s` not found".formatted(advisorId)
+                ));
+    }
+
+    public AdvisorView getAdvisorViewByAdvisorId(String advisorId, User loggedInUser) {
+        checkPermissions(advisorId, loggedInUser);
+        return advisorRepository.findByAdvisorId(advisorId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "advisor with id `%s` not found".formatted(advisorId)
                 ));
@@ -96,19 +88,16 @@ public class AdvisorService {
         );
     }
 
-    public PaginatedResponse<AdvisorDto> getAllAdvisors(int pageNo,
-                                                        int pageSize,
-                                                        String sortBy,
-                                                        String order,
-                                                        String searchQuery) {
+    public PaginatedResponse<AdvisorView> getAllAdvisors(int pageNo,
+                                                         int pageSize,
+                                                         String sortBy,
+                                                         String order,
+                                                         String searchQuery) {
         Pageable pageable = PagingUtils.getPageable(pageNo, pageSize, sortBy, order);
         log.debug("Provided search query: '%s', getting all advisors..".formatted(searchQuery));
         searchQuery = searchQuery.trim();
-        Page<Advisor> advisorPage = advisorRepository.findAllAdvisors(searchQuery, pageable);
-        List<AdvisorDto> content = advisorPage.getContent()
-                .stream()
-                .map(advisorMapper::toDto)
-                .toList();
+        Page<AdvisorView> advisorPage = advisorRepository.findAllAdvisorsProjection(searchQuery, pageable);
+        List<AdvisorView> content = advisorPage.getContent();
         return new PaginatedResponse<>(
                 content,
                 pageNo,
@@ -117,5 +106,22 @@ public class AdvisorService {
                 advisorPage.getTotalPages(),
                 advisorPage.isLast()
         );
+    }
+
+    private void checkPermissions(String advisorId, User loggedInUser) {
+        if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
+            AdvisorView advisor = getAdvisorByUserId(loggedInUser.getId());
+            if (!advisorId.equals(advisor.getId())) {
+                throw new AccessDeniedException("not authorized, you can only get details about your own profile");
+            }
+        } else if (loggedInUser.getRoles().contains(Role.STUDENT)) {
+            Student student = studentRepository.findByUserId(loggedInUser.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "student related with user id %s not found".formatted(loggedInUser.getId())
+                    ));
+            if (!student.getAdvisor().getId().equals(advisorId)) {
+                throw new AccessDeniedException("not authorized, you can only get details for your own advisor profile");
+            }
+        }
     }
 }

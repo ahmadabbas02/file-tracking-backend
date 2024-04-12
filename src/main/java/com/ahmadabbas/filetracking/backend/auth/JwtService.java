@@ -1,7 +1,7 @@
 package com.ahmadabbas.filetracking.backend.auth;
 
-import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
+import com.ahmadabbas.filetracking.backend.advisor.views.AdvisorView;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
 import com.ahmadabbas.filetracking.backend.user.Role;
@@ -85,7 +85,7 @@ public class JwtService {
             Student student = studentService.getStudentByUserId(user.getId());
             return student.getId();
         } else if (user.getRoles().contains(Role.ADVISOR)) {
-            Advisor advisor = advisorService.getAdvisorByUserId(user.getId());
+            AdvisorView advisor = advisorService.getAdvisorByUserId(user.getId());
             return advisor.getId();
         } else {
             return String.valueOf(user.getId());
@@ -102,7 +102,7 @@ public class JwtService {
             Student student = studentService.getStudentByUserId(user.getId());
             return loginId.equals(student.getId());
         } else if (user.getRoles().contains(Role.ADVISOR)) {
-            Advisor advisor = advisorService.getAdvisorByUserId(user.getId());
+            AdvisorView advisor = advisorService.getAdvisorByUserId(user.getId());
             return loginId.equals(advisor.getId());
         } else {
             return loginId.equals(String.valueOf(user.getId()));
