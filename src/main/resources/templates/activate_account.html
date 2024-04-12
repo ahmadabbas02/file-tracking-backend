@@ -99,9 +99,9 @@
         </div>
         <div class="box-content">
             <p th:text="'Hello ' + ${user_full_name} + ','"></p>
-            <p>Please use the following One Time Password OTP to activate your account.</p>
+            <p>Please use the following code to activate your account.</p>
             <div class="activation-code">
-                <span th:text="${otp}"></span>
+                <span th:text="${code}"></span>
             </div>
             <p>The code is valid for 15 minutes only.</p>
             <div class="activation-link">

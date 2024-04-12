@@ -41,7 +41,7 @@ public class AuthenticationController {
     @Operation(
             summary = "Request activation email",
             description = """
-                    Sends to the user's email an otp that can be used to activate and set password for account.
+                    Sends to the user's email a code that can be used to activate and set password for account.
                     """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successfully sent email"),
@@ -58,13 +58,13 @@ public class AuthenticationController {
     @Operation(
             summary = "Activate account",
             description = """
-                    Activate an account with the otp received in email.
+                    Activate an account with the activation code received in email.
                     """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "Account successfully activated"),
                     @ApiResponse(
                             responseCode = "404",
-                            description = "Could not find a valid otp related to account or account related to email"
+                            description = "Could not find a valid activationCode related to account or account related to email"
                     ),
             }
     )

@@ -32,7 +32,7 @@ public class EmailService {
     public void sendEmail(String to,
                           String userFullName,
                           @NonNull EmailTemplate emailTemplate,
-                          String otp,
+                          String code,
                           String activationUrl,
                           String subject) throws MessagingException {
         String templateName = emailTemplate.toString();
@@ -44,7 +44,7 @@ public class EmailService {
 
         Map<String, Object> props = new HashMap<>();
         props.put("user_full_name", userFullName);
-        props.put("otp", otp);
+        props.put("code", code);
         props.put("activation_url", activationUrl);
 
         Context context = new Context();

@@ -61,6 +61,7 @@ CREATE TABLE contact_document
     id                     UUID NOT NULL,
     email                  VARCHAR(255),
     phone_number           VARCHAR(255),
+    home_number            VARCHAR(255),
     emergency_name         VARCHAR(255),
     emergency_phone_number VARCHAR(255),
     CONSTRAINT pk_contactdocument PRIMARY KEY (id)

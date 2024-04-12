@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.auth.otp;
+package com.ahmadabbas.filetracking.backend.auth.activation;
 
 import com.ahmadabbas.filetracking.backend.user.User;
 import jakarta.persistence.*;
@@ -13,13 +13,14 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-public class Otp {
+@Table(name = "activation_code")
+public class ActivationCode {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "otp_generator")
-    @SequenceGenerator(name = "otp_generator", sequenceName = "otp_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "activation_code_generator")
+    @SequenceGenerator(name = "activation_code_generator", sequenceName = "activation_code_id_seq", allocationSize = 1)
     private Integer id;
     @Column(length = 12) // future proofing
-    private String otp;
+    private String code;
     @CreationTimestamp
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;

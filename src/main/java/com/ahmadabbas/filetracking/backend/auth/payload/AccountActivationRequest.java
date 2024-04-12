@@ -5,12 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 
 public record AccountActivationRequest(
         @Email @NotBlank String email,
-        @NotBlank String otp,
+        @NotBlank String code,
         @NotBlank String password
 ) {
     public AccountActivationRequest {
-        if (otp == null) {
-            otp = "";
+        if (code == null) {
+            code = "";
         }
     }
 }
