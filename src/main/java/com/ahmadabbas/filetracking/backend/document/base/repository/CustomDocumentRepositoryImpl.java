@@ -4,6 +4,7 @@ import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaBuilderFactory;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,7 +27,11 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
         CriteriaBuilder<Document> criteriaBuilder = criteriaBuilderFactory
                 .create(entityManager, Document.class)
                 .where("id").eq().value(id);
-        return Optional.ofNullable(criteriaBuilder.getSingleResult());
+        try {
+            return Optional.ofNullable(criteriaBuilder.getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     @Override

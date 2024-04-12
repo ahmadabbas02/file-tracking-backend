@@ -33,6 +33,7 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
                 .fetch("advisor", "student", "roles")
                 .where("id").eq(id)
                 .getSingleResult();
+
         return Optional.ofNullable(user);
     }
 

@@ -1,6 +1,6 @@
 package com.ahmadabbas.filetracking.backend.student;
 
-import com.ahmadabbas.filetracking.backend.document.internship.InternshipStatus;
+import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentDto;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
@@ -50,7 +50,7 @@ public class StudentController {
             @RequestParam(defaultValue = "", required = false) String searchQuery,
             @RequestParam(defaultValue = "", required = false) String advisorId,
             @RequestParam(defaultValue = "", required = false) List<String> programs,
-            @RequestParam(defaultValue = "", required = false) List<InternshipStatus.CompletionStatus> completionStatuses,
+            @RequestParam(defaultValue = "", required = false) List<DocumentStatus.InternshipCompletionStatus> completionStatuses,
             @AuthenticationPrincipal User user
     ) {
         return ResponseEntity.ok(

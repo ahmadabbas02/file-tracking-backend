@@ -17,13 +17,14 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Entity
 public class InternshipDocument extends Document {
+
     @Builder.Default
     @Column(columnDefinition = "integer default 0")
     private int numberOfWorkingDays = 0;
-
 
     @Override
     public InternshipDocumentDto toDto() {
         return InternshipDocumentMapper.INSTANCE.toDto(this);
     }
+
 }

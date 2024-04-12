@@ -1,6 +1,6 @@
 package com.ahmadabbas.filetracking.backend.student.repository;
 
-import com.ahmadabbas.filetracking.backend.document.internship.InternshipStatus;
+import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.util.SearchCriteriaUtils;
 import com.blazebit.persistence.CriteriaBuilder;
@@ -26,7 +26,7 @@ public class CustomStudentRepositoryImpl implements CustomStudentRepository {
     public Page<Student> getAllStudents(String searchQuery,
                                         String advisorId,
                                         List<String> programs,
-                                        List<InternshipStatus.CompletionStatus> completionStatuses,
+                                        List<DocumentStatus.InternshipCompletionStatus> completionStatuses,
                                         Pageable pageable) {
         CriteriaBuilder<Student> criteriaBuilder = criteriaBuilderFactory
                 .create(entityManager, Student.class)

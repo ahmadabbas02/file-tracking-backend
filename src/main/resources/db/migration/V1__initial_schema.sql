@@ -91,16 +91,16 @@ CREATE TABLE medical_report_document
 (
     id              UUID NOT NULL,
     date_of_absence date,
-    is_approved     BOOLEAN DEFAULT FALSE,
+    approval_status VARCHAR(255),
     CONSTRAINT pk_medicalreportdocument PRIMARY KEY (id)
 );
 
 CREATE TABLE petition_document
 (
-    id          UUID NOT NULL,
-    subject     VARCHAR(255),
-    email       VARCHAR(255),
-    is_approved BOOLEAN DEFAULT FALSE,
+    id              UUID NOT NULL,
+    subject         VARCHAR(255),
+    email           VARCHAR(255),
+    approval_status VARCHAR(255),
     CONSTRAINT pk_petitiondocument PRIMARY KEY (id)
 );
 

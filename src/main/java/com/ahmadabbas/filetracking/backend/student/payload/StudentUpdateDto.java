@@ -1,6 +1,6 @@
 package com.ahmadabbas.filetracking.backend.student.payload;
 
-import com.ahmadabbas.filetracking.backend.document.internship.InternshipStatus;
+import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,10 +17,14 @@ public class StudentUpdateDto implements Serializable {
     private final Short year;
     @Setter
     private String advisorId;
-    private final InternshipStatus.CompletionStatus internshipCompletionStatus;
-    private final InternshipStatus.PaymentStatus paymentStatus;
+    private final DocumentStatus.InternshipCompletionStatus internshipCompletionStatus;
+    private final DocumentStatus.InternshipPaymentStatus paymentStatus;
 
-    public StudentUpdateDto(String program, Short year, String advisorId, InternshipStatus.CompletionStatus internshipCompletionStatus, InternshipStatus.PaymentStatus paymentStatus) {
+    public StudentUpdateDto(String program,
+                            Short year,
+                            String advisorId,
+                            DocumentStatus.InternshipCompletionStatus internshipCompletionStatus,
+                            DocumentStatus.InternshipPaymentStatus paymentStatus) {
         List<String> allowedProgramValues = Arrays.asList("CMSE", "CMPE", "BLGM");
         if (program != null && !allowedProgramValues.contains(program)) {
             throw new APIException(HttpStatus.BAD_REQUEST,

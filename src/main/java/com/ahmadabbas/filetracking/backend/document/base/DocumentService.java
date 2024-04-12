@@ -2,10 +2,7 @@ package com.ahmadabbas.filetracking.backend.document.base;
 
 import com.ahmadabbas.filetracking.backend.category.Category;
 import com.ahmadabbas.filetracking.backend.category.CategoryService;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentAddRequest;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentDto;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentModifyCategoryRequest;
-import com.ahmadabbas.filetracking.backend.document.base.payload.DocumentPreview;
+import com.ahmadabbas.filetracking.backend.document.base.payload.*;
 import com.ahmadabbas.filetracking.backend.document.base.repository.DocumentRepository;
 import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocument;
 import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocumentRepository;
@@ -251,15 +248,14 @@ public class DocumentService {
     }
 
     @Transactional
-    public Document approveDocument(UUID documentId, User loggedInUser) {
+    public Document approveDocument(UUID documentId, User loggedInUser, DocumentApproveRequest approveRequest) {
+        DocumentStatus.ApprovalStatus newStatus = approveRequest.approvalStatus();
         Document doc = getDocument(documentId, loggedInUser);
         if (doc instanceof PetitionDocument petitionDocument) {
-            boolean oldIsApproved = petitionDocument.isApproved();
-            petitionDocument.setApproved(!oldIsApproved);
+            petitionDocument.setApprovalStatus(newStatus);
             return petitionDocumentRepository.save(petitionDocument);
         } else if (doc instanceof MedicalReportDocument medicalReportDocument) {
-            boolean oldIsApproved = medicalReportDocument.isApproved();
-            medicalReportDocument.setApproved(!oldIsApproved);
+            medicalReportDocument.setApprovalStatus(newStatus);
             return medicalReportDocumentRepository.save(medicalReportDocument);
         }
         throw new APIException(

@@ -3,7 +3,7 @@ package com.ahmadabbas.filetracking.backend.student;
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
 import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorRepository;
-import com.ahmadabbas.filetracking.backend.document.internship.InternshipStatus;
+import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
@@ -94,7 +94,7 @@ public class StudentService {
                                                         String searchQuery,
                                                         String advisorId,
                                                         List<String> programs,
-                                                        List<InternshipStatus.CompletionStatus> completionStatuses) {
+                                                        List<DocumentStatus.InternshipCompletionStatus> completionStatuses) {
         Pageable pageable = PagingUtils.getPageable(pageNo, pageSize, sortBy, order);
         Page<Student> studentPage;
         log.debug("Logged in user = %s".formatted(loggedInUser));

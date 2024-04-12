@@ -1,7 +1,7 @@
 package com.ahmadabbas.filetracking.backend.student;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
-import com.ahmadabbas.filetracking.backend.document.internship.InternshipStatus;
+import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.generator.StudentIdGenerator;
 import jakarta.persistence.*;
@@ -46,12 +46,12 @@ public class Student {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private InternshipStatus.CompletionStatus internshipCompletionStatus = InternshipStatus.CompletionStatus.INCOMPLETE;
+    private DocumentStatus.InternshipCompletionStatus internshipCompletionStatus = DocumentStatus.InternshipCompletionStatus.INCOMPLETE;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private InternshipStatus.PaymentStatus paymentStatus = InternshipStatus.PaymentStatus.NOT_PAID;
+    private DocumentStatus.InternshipPaymentStatus paymentStatus = DocumentStatus.InternshipPaymentStatus.NOT_PAID;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
