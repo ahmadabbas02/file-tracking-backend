@@ -71,7 +71,7 @@ public class AdvisorService {
             );
         }
 
-        if (userRepository.existsByName(userRegistrationRequest.name(), userRegistrationRequest.surname())) {
+        if (userRepository.existsByName(userRegistrationRequest.firstName(), userRegistrationRequest.lastName())) {
             throw new DuplicateResourceException(
                     "name already taken"
             );
@@ -79,8 +79,8 @@ public class AdvisorService {
 
         User savedUser = userRepository.save(
                 User.builder()
-                        .firstName(userRegistrationRequest.name())
-                        .lastName(userRegistrationRequest.surname())
+                        .firstName(userRegistrationRequest.firstName())
+                        .lastName(userRegistrationRequest.lastName())
                         .email(userRegistrationRequest.email())
 //                        .password(passwordEncoder.encode(userRegistrationRequest.password()))
                         .picture(userRegistrationRequest.picture())

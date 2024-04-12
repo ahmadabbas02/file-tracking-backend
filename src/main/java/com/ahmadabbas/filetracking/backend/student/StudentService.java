@@ -163,8 +163,8 @@ public class StudentService {
         Advisor advisor = advisorService.getAdvisorByAdvisorId(studentRegistrationRequest.advisorId(), loggedInUser);
 
         User user = User.builder()
-                .firstName(studentRegistrationRequest.name())
-                .lastName(studentRegistrationRequest.surname())
+                .firstName(studentRegistrationRequest.firstName())
+                .lastName(studentRegistrationRequest.lastName())
                 .email(studentRegistrationRequest.email())
 //                .password(passwordEncoder.encode(studentRegistrationRequest.password()))
                 .phoneNumber(studentRegistrationRequest.phoneNumber())

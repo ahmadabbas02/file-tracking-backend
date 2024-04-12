@@ -117,8 +117,8 @@ public class UserService {
         }
         return userRepository.save(
                 User.builder()
-                        .firstName(registrationRequest.name())
-                        .lastName(registrationRequest.surname())
+                        .firstName(registrationRequest.firstName())
+                        .lastName(registrationRequest.lastName())
                         .email(registrationRequest.email())
                         .picture(registrationRequest.picture())
                         .phoneNumber(registrationRequest.phoneNumber())

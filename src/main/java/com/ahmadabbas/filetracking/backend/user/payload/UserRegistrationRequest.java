@@ -10,11 +10,11 @@ import java.util.Objects;
 
 public class UserRegistrationRequest {
     @JsonProperty
-    @NotEmpty(message = "user's name should not be empty")
-    private final String name;
+    @NotEmpty(message = "user's firstName should not be empty")
+    private final String firstName;
     @JsonProperty
-    @NotEmpty(message = "user's surname should not be empty")
-    private final String surname;
+    @NotEmpty(message = "user's lastName should not be empty")
+    private final String lastName;
     @JsonProperty
     @Email(message = "user's email should be valid")
     @NotEmpty
@@ -29,21 +29,26 @@ public class UserRegistrationRequest {
     @NotNull
     private final Role role;
 
-    public UserRegistrationRequest(String name, String surname, String email, String picture, String phoneNumber, Role role) {
-        this.name = name;
-        this.surname = surname;
+    public UserRegistrationRequest(String firstName,
+                                   String lastName,
+                                   String email,
+                                   String picture,
+                                   String phoneNumber,
+                                   Role role) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
         this.picture = picture;
         this.phoneNumber = phoneNumber;
         this.role = role;
     }
 
-    public String name() {
-        return name.trim();
+    public String firstName() {
+        return firstName.trim();
     }
 
-    public String surname() {
-        return surname.trim();
+    public String lastName() {
+        return lastName.trim();
     }
 
     public String email() {
@@ -63,32 +68,19 @@ public class UserRegistrationRequest {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (UserRegistrationRequest) obj;
-        return Objects.equals(this.name, that.name) &&
-               Objects.equals(this.surname, that.surname) &&
-               Objects.equals(this.email, that.email) &&
-               Objects.equals(this.picture, that.picture) &&
-               Objects.equals(this.phoneNumber, that.phoneNumber) &&
-               Objects.equals(this.role, that.role);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserRegistrationRequest that)) return false;
+        return Objects.equals(firstName(), that.firstName())
+               && Objects.equals(lastName(), that.lastName())
+               && Objects.equals(email(), that.email())
+               && Objects.equals(picture(), that.picture())
+               && Objects.equals(phoneNumber(), that.phoneNumber())
+               && role() == that.role();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, surname, email, picture, phoneNumber, role);
+        return Objects.hash(firstName(), lastName(), email(), picture(), phoneNumber(), role());
     }
-
-    @Override
-    public String toString() {
-        return "UserRegistrationRequest[" +
-               "name=" + name + ", " +
-               "surname=" + surname + ", " +
-               "email=" + email + ", " +
-               "picture=" + picture + ", " +
-               "phoneNumber=" + phoneNumber + ", " +
-               "role=" + role + ']';
-    }
-
 }

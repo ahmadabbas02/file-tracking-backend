@@ -7,8 +7,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public final class AdvisorRegistrationRequest extends UserRegistrationRequest {
 
-    public AdvisorRegistrationRequest(String name, String surname, String email, String picture, String phoneNumber) {
-        super(name, surname, email, picture, phoneNumber, Role.ADVISOR);
+    public AdvisorRegistrationRequest(String firstName, String lastName, String email, String picture, String phoneNumber, Role role) {
+        super(firstName, lastName, email, picture, phoneNumber, Role.ADVISOR);
     }
 
     @Override

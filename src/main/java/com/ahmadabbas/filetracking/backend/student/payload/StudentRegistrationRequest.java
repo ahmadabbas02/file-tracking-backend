@@ -34,8 +34,8 @@ public final class StudentRegistrationRequest extends UserRegistrationRequest im
     @NotEmpty(message = "student's advisor id should not be empty")
     private final String advisorId;
 
-    public StudentRegistrationRequest(String name,
-                                      String surname,
+    public StudentRegistrationRequest(String firstName,
+                                      String lastName,
                                       String email,
                                       String picture,
                                       String phoneNumber,
@@ -43,7 +43,7 @@ public final class StudentRegistrationRequest extends UserRegistrationRequest im
                                       String program,
                                       Short year,
                                       String advisorId) {
-        super(name, surname, email, picture, phoneNumber, Role.STUDENT);
+        super(firstName, lastName, email, picture, phoneNumber, Role.STUDENT);
         this.id = id;
         List<String> allowedProgramValues = Arrays.asList(ALLOWED_PROGRAM_VALUES);
         if (!allowedProgramValues.contains(program)) {
