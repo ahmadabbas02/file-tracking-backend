@@ -194,42 +194,43 @@ public class CategoryService {
                     category
             ));
         }
-        return getCategoryPermissions(request.categoryId(), loggedInUser);
+        return getCategoryPermissionResponse(request.categoryId(), category.getName(), loggedInUser);
     }
 
     public List<FullCategoryPermissionResponse> getAllCategoryPermissions(User loggedInUser) {
         Map<Long, FullCategoryPermissionResponse> categoryMap = new LinkedHashMap<>();
         List<Category> allParentCategories = getAllowedParentCategories(loggedInUser.getRoles());
-        for (var cat : allParentCategories) {
-            long categoryId = cat.getCategoryId();
-            String name = cat.getName();
-            var categoryResponse = categoryMap.getOrDefault(categoryId,
-                    new FullCategoryPermissionResponse(categoryId, name, new ArrayList<>()));
-            List<CategoryPermission> allPermsByCategoryId = categoryPermissionRepository.findAllByCategoryId(categoryId);
-            var roles = allPermsByCategoryId.stream().map(CategoryPermission::getRole).toList();
-            categoryResponse.permittedRoles().addAll(roles);
+        for (var category : allParentCategories) {
+            long categoryId = category.getCategoryId();
+            String categoryName = category.getName();
+            FullCategoryPermissionResponse categoryResponse = categoryMap.getOrDefault(
+                    categoryId,
+                    getCategoryPermissionResponse(categoryId, categoryName, loggedInUser)
+            );
             categoryMap.put(categoryId, categoryResponse);
         }
         return categoryMap.values().stream().toList();
     }
 
-    private FullCategoryPermissionResponse getCategoryPermissions(Long categoryId, User loggedInUser) {
-        Map<Long, FullCategoryPermissionResponse> categoryMap = new HashMap<>();
+    private FullCategoryPermissionResponse getCategoryPermissionResponse(Long categoryId, String categoryName, User loggedInUser) {
         List<CategoryPermission> allPerms = categoryPermissionRepository.findAllByCategoryId(categoryId);
-        for (var perm : allPerms) {
-            String name = perm.getCategory().getName();
-
-            FullCategoryPermissionResponse categoryResponse = categoryMap.getOrDefault(categoryId,
-                    new FullCategoryPermissionResponse(categoryId, name, new ArrayList<>()));
-
-            categoryResponse.permittedRoles().add(perm.getRole());
-            categoryMap.put(categoryId, categoryResponse);
+        List<Category> subcategories = getAllChildrenCategories(categoryId, loggedInUser);
+        if (allPerms.isEmpty()) {
+            FullCategoryPermissionResponse result = new FullCategoryPermissionResponse(categoryId, categoryName, new ArrayList<>(), new ArrayList<>());
+            if (!subcategories.isEmpty() && result.subCategories().isEmpty()) {
+                result.subCategories().addAll(subcategories);
+            }
+            return result;
+        } else {
+            FullCategoryPermissionResponse result = new FullCategoryPermissionResponse(categoryId, categoryName, new ArrayList<>(), new ArrayList<>());
+            allPerms.forEach(perm -> {
+                if (!subcategories.isEmpty() && result.subCategories().isEmpty()) {
+                    result.subCategories().addAll(subcategories);
+                }
+                result.permittedRoles().add(perm.getRole());
+            });
+            return result;
         }
-        if (categoryMap.isEmpty()) {
-            var category = getCategory(categoryId, loggedInUser);
-            return new FullCategoryPermissionResponse(categoryId, category.getName(), new ArrayList<>());
-        }
-
-        return categoryMap.get(categoryId);
     }
+
 }

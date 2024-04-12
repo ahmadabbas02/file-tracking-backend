@@ -108,7 +108,7 @@ public class DocumentService {
         ByteArrayOutputStream zipOutputStream = new ByteArrayOutputStream();
         ZipOutputStream outputStream = new ZipOutputStream(zipOutputStream);
 
-        for (UUID uuid : uuids) {
+        for (var uuid : uuids) {
             Document document = getDocument(uuid, loggedInUser);
             InputStream blobInputStream = azureBlobService.getInputStream(document.getPath(), uuid);
             String originalFileName = document.getFileName();
