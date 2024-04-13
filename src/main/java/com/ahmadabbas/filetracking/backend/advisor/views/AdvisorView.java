@@ -23,4 +23,7 @@ public interface AdvisorView {
 
     @Mapping("CONCAT(user.firstName, ' ' ,user.lastName)")
     String getFullName();
+
+    @Mapping("user.picture")
+    String getPicture();
 }
