@@ -1,7 +1,7 @@
 package com.ahmadabbas.filetracking.backend.document.base;
 
 import com.ahmadabbas.filetracking.backend.document.base.payload.*;
-import com.ahmadabbas.filetracking.backend.document.base.views.DocumentWithStudentView;
+import com.ahmadabbas.filetracking.backend.document.base.view.DocumentStudentView;
 import com.ahmadabbas.filetracking.backend.document.comment.Comment;
 import com.ahmadabbas.filetracking.backend.document.comment.CommentService;
 import com.ahmadabbas.filetracking.backend.document.comment.payload.CommentAddRequest;
@@ -67,11 +67,11 @@ public class DocumentController {
                     """
     )
     @GetMapping("/{documentId}")
-    public ResponseEntity<DocumentWithStudentView> getDocument(
+    public ResponseEntity<DocumentStudentView> getDocument(
             @AuthenticationPrincipal User loggedInUser,
             @PathVariable UUID documentId
     ) {
-        DocumentWithStudentView document = documentService.getDocumentView(documentId, loggedInUser);
+        DocumentStudentView document = documentService.getDocumentStudentView(documentId, loggedInUser);
         return ResponseEntity.ok(document);
     }
 
@@ -82,12 +82,12 @@ public class DocumentController {
                     """
     )
     @PatchMapping("/{documentId}/approve")
-    public ResponseEntity<DocumentWithStudentView> approveDocument(
+    public ResponseEntity<DocumentStudentView> approveDocument(
             @AuthenticationPrincipal User loggedInUser,
             @PathVariable UUID documentId,
             @RequestBody @Valid DocumentApproveRequest approveRequest
     ) {
-        DocumentWithStudentView document = documentService.approveDocument(documentId, loggedInUser, approveRequest);
+        DocumentStudentView document = documentService.approveDocument(documentId, loggedInUser, approveRequest);
         return ResponseEntity.ok(document);
     }
 
@@ -145,7 +145,7 @@ public class DocumentController {
                     """
     )
     @GetMapping("")
-    public ResponseEntity<PaginatedResponse<DocumentWithStudentView>> getAllDocuments(
+    public ResponseEntity<PaginatedResponse<DocumentStudentView>> getAllDocuments(
             @AuthenticationPrincipal User user,
             @RequestParam(defaultValue = "1", required = false) int pageNo,
             @RequestParam(defaultValue = "10", required = false) int pageSize,

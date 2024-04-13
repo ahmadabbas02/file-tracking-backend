@@ -1,9 +1,9 @@
 package com.ahmadabbas.filetracking.backend.auth;
 
 import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
-import com.ahmadabbas.filetracking.backend.advisor.views.AdvisorView;
-import com.ahmadabbas.filetracking.backend.student.Student;
+import com.ahmadabbas.filetracking.backend.advisor.view.AdvisorUserView;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
+import com.ahmadabbas.filetracking.backend.student.view.StudentView;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import io.jsonwebtoken.Claims;
@@ -82,10 +82,10 @@ public class JwtService {
     private String getSubjectFromAuthentication(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         if (user.getRoles().contains(Role.STUDENT)) {
-            Student student = studentService.getStudentByUserId(user.getId());
+            StudentView student = studentService.getStudentViewByUserId(user.getId());
             return student.getId();
         } else if (user.getRoles().contains(Role.ADVISOR)) {
-            AdvisorView advisor = advisorService.getAdvisorByUserId(user.getId());
+            AdvisorUserView advisor = advisorService.getAdvisorByUserId(user.getId());
             return advisor.getId();
         } else {
             return String.valueOf(user.getId());
@@ -99,10 +99,10 @@ public class JwtService {
             return false;
         }
         if (user.getRoles().contains(Role.STUDENT)) {
-            Student student = studentService.getStudentByUserId(user.getId());
+            StudentView student = studentService.getStudentViewByUserId(user.getId());
             return loginId.equals(student.getId());
         } else if (user.getRoles().contains(Role.ADVISOR)) {
-            AdvisorView advisor = advisorService.getAdvisorByUserId(user.getId());
+            AdvisorUserView advisor = advisorService.getAdvisorByUserId(user.getId());
             return loginId.equals(advisor.getId());
         } else {
             return loginId.equals(String.valueOf(user.getId()));

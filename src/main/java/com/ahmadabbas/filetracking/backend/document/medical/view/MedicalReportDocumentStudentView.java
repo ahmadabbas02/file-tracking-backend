@@ -1,7 +1,7 @@
-package com.ahmadabbas.filetracking.backend.document.medical.views;
+package com.ahmadabbas.filetracking.backend.document.medical.view;
 
 import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
-import com.ahmadabbas.filetracking.backend.document.base.views.DocumentWithStudentView;
+import com.ahmadabbas.filetracking.backend.document.base.view.DocumentStudentView;
 import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocument;
 import com.blazebit.persistence.view.EntityView;
 import com.blazebit.persistence.view.FlushMode;
@@ -10,7 +10,7 @@ import com.blazebit.persistence.view.UpdatableEntityView;
 
 @EntityView(MedicalReportDocument.class)
 @UpdatableEntityView(mode = FlushMode.PARTIAL)
-public interface MedicalReportDocumentWithStudentView extends DocumentWithStudentView {
+public interface MedicalReportDocumentStudentView extends DocumentStudentView {
     @Mapping("medicalReportApprovalStatus")
     DocumentStatus.ApprovalStatus getApprovalStatus();
 

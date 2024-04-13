@@ -1,6 +1,6 @@
-package com.ahmadabbas.filetracking.backend.student.views;
+package com.ahmadabbas.filetracking.backend.student.view;
 
-import com.ahmadabbas.filetracking.backend.advisor.views.AdvisorView;
+import com.ahmadabbas.filetracking.backend.advisor.view.AdvisorUserView;
 import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.blazebit.persistence.view.EntityView;
@@ -8,7 +8,7 @@ import com.blazebit.persistence.view.IdMapping;
 import com.blazebit.persistence.view.Mapping;
 
 @EntityView(Student.class)
-public interface StudentWithAdvisorView {
+public interface StudentAdvisorView {
     @IdMapping
     String getId();
 
@@ -34,7 +34,7 @@ public interface StudentWithAdvisorView {
     @Mapping("user.picture")
     String getPicture();
 
-    AdvisorView getAdvisor();
+    AdvisorUserView getAdvisor();
 
     DocumentStatus.InternshipCompletionStatus getInternshipCompletionStatus();
 

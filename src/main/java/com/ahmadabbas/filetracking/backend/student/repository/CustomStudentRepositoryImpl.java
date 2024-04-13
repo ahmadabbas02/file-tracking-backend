@@ -2,7 +2,7 @@ package com.ahmadabbas.filetracking.backend.student.repository;
 
 import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
 import com.ahmadabbas.filetracking.backend.student.Student;
-import com.ahmadabbas.filetracking.backend.student.views.StudentWithAdvisorView;
+import com.ahmadabbas.filetracking.backend.student.view.StudentAdvisorView;
 import com.ahmadabbas.filetracking.backend.util.SearchCriteriaUtils;
 import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaBuilderFactory;
@@ -29,11 +29,11 @@ public class CustomStudentRepositoryImpl implements CustomStudentRepository {
     private final CriteriaBuilderFactory criteriaBuilderFactory;
 
     @Override
-    public Optional<StudentWithAdvisorView> getStudentViewById(String studentId){
+    public Optional<StudentAdvisorView> getStudentViewById(String studentId){
         CriteriaBuilder<Student> criteriaBuilder = criteriaBuilderFactory
                 .create(entityManager, Student.class);
-        CriteriaBuilder<StudentWithAdvisorView> studentViewCriteriaBuilder
-                = evm.applySetting(EntityViewSetting.create(StudentWithAdvisorView.class), criteriaBuilder);
+        CriteriaBuilder<StudentAdvisorView> studentViewCriteriaBuilder
+                = evm.applySetting(EntityViewSetting.create(StudentAdvisorView.class), criteriaBuilder);
         studentViewCriteriaBuilder.where("id").eq(studentId);
         try {
             return Optional.ofNullable(studentViewCriteriaBuilder.getSingleResult());
@@ -44,11 +44,11 @@ public class CustomStudentRepositoryImpl implements CustomStudentRepository {
     }
 
     @Override
-    public Optional<StudentWithAdvisorView> getStudentViewByUserId(Long userId) {
+    public Optional<StudentAdvisorView> getStudentViewByUserId(Long userId) {
         CriteriaBuilder<Student> criteriaBuilder = criteriaBuilderFactory
                 .create(entityManager, Student.class);
-        CriteriaBuilder<StudentWithAdvisorView> studentViewCriteriaBuilder
-                = evm.applySetting(EntityViewSetting.create(StudentWithAdvisorView.class), criteriaBuilder);
+        CriteriaBuilder<StudentAdvisorView> studentViewCriteriaBuilder
+                = evm.applySetting(EntityViewSetting.create(StudentAdvisorView.class), criteriaBuilder);
         studentViewCriteriaBuilder.where("user.id").eq(userId);
         try {
             return Optional.ofNullable(studentViewCriteriaBuilder.getSingleResult());
@@ -58,15 +58,15 @@ public class CustomStudentRepositoryImpl implements CustomStudentRepository {
     }
 
     @Override
-    public Page<StudentWithAdvisorView> getAllStudents(String searchQuery,
-                                                       String advisorId,
-                                                       List<String> programs,
-                                                       List<DocumentStatus.InternshipCompletionStatus> completionStatuses,
-                                                       Pageable pageable) {
+    public Page<StudentAdvisorView> getAllStudents(String searchQuery,
+                                                   String advisorId,
+                                                   List<String> programs,
+                                                   List<DocumentStatus.InternshipCompletionStatus> completionStatuses,
+                                                   Pageable pageable) {
         CriteriaBuilder<Student> criteriaBuilder = criteriaBuilderFactory
                 .create(entityManager, Student.class);
-        CriteriaBuilder<StudentWithAdvisorView> studentViewCriteriaBuilder
-                = evm.applySetting(EntityViewSetting.create(StudentWithAdvisorView.class), criteriaBuilder);
+        CriteriaBuilder<StudentAdvisorView> studentViewCriteriaBuilder
+                = evm.applySetting(EntityViewSetting.create(StudentAdvisorView.class), criteriaBuilder);
         if (!advisorId.isEmpty()) {
             studentViewCriteriaBuilder.where("advisor.id").eq(advisorId);
         }

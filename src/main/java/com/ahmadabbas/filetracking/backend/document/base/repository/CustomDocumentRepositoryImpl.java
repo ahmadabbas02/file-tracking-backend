@@ -1,8 +1,7 @@
 package com.ahmadabbas.filetracking.backend.document.base.repository;
 
 import com.ahmadabbas.filetracking.backend.document.base.Document;
-import com.ahmadabbas.filetracking.backend.document.base.views.DocumentWithStudentIdView;
-import com.ahmadabbas.filetracking.backend.document.base.views.DocumentWithStudentView;
+import com.ahmadabbas.filetracking.backend.document.base.view.DocumentStudentView;
 import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaBuilderFactory;
 import com.blazebit.persistence.view.EntityViewManager;
@@ -40,43 +39,15 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
     }
 
     @Override
-    public Optional<DocumentWithStudentView> getDocumentWithStudentViewById(UUID id) {
-        CriteriaBuilder<Document> criteriaBuilder = criteriaBuilderFactory
-                .create(entityManager, Document.class)
-                .where("id").eq().value(id);
-        CriteriaBuilder<DocumentWithStudentView> baseDocumentViewCriteriaBuilder =
-                evm.applySetting(EntityViewSetting.create(DocumentWithStudentView.class), criteriaBuilder);
-        try {
-            return Optional.ofNullable(baseDocumentViewCriteriaBuilder.getSingleResult());
-        } catch (NoResultException e) {
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public Optional<DocumentWithStudentIdView> getDocumentWithStudentIdView(UUID uuid) {
-        CriteriaBuilder<Document> criteriaBuilder = criteriaBuilderFactory
-                .create(entityManager, Document.class)
-                .where("id").eq().value(uuid);
-        CriteriaBuilder<DocumentWithStudentIdView> baseDocumentViewCriteriaBuilder =
-                evm.applySetting(EntityViewSetting.create(DocumentWithStudentIdView.class), criteriaBuilder);
-        try {
-            return Optional.ofNullable(baseDocumentViewCriteriaBuilder.getSingleResult());
-        } catch (NoResultException e) {
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public Page<DocumentWithStudentView> findAllDocuments(String studentId,
-                                                          List<String> studentIds,
-                                                          List<Long> categoryIds,
-                                                          String searchQuery,
-                                                          Pageable pageable) {
+    public Page<DocumentStudentView> findAllDocuments(String studentId,
+                                                      List<String> studentIds,
+                                                      List<Long> categoryIds,
+                                                      String searchQuery,
+                                                      Pageable pageable) {
         CriteriaBuilder<Document> criteriaBuilder = criteriaBuilderFactory
                 .create(entityManager, Document.class);
-        CriteriaBuilder<DocumentWithStudentView> documentViewCriteriaBuilder
-                = evm.applySetting(EntityViewSetting.create(DocumentWithStudentView.class), criteriaBuilder);
+        CriteriaBuilder<DocumentStudentView> documentViewCriteriaBuilder
+                = evm.applySetting(EntityViewSetting.create(DocumentStudentView.class), criteriaBuilder);
         if (!studentId.equals("-1")) {
             studentId = studentId + "%";
             documentViewCriteriaBuilder.where("student.id").like().value(studentId).noEscape();

@@ -1,6 +1,6 @@
 package com.ahmadabbas.filetracking.backend.advisor;
 
-import com.ahmadabbas.filetracking.backend.advisor.views.AdvisorView;
+import com.ahmadabbas.filetracking.backend.advisor.view.AdvisorUserView;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,9 +19,9 @@ public class AdvisorController {
 
     @Operation(summary = "Get advisor")
     @GetMapping("/{advisorId}")
-    public ResponseEntity<AdvisorView> getAdvisor(@PathVariable String advisorId,
-                                                  @AuthenticationPrincipal User loggedInUser) {
-        AdvisorView advisor = advisorService.getAdvisorViewByAdvisorId(advisorId, loggedInUser);
+    public ResponseEntity<AdvisorUserView> getAdvisor(@PathVariable String advisorId,
+                                                      @AuthenticationPrincipal User loggedInUser) {
+        AdvisorUserView advisor = advisorService.getAdvisorViewByAdvisorId(advisorId, loggedInUser);
         return ResponseEntity.ok(advisor);
     }
 
@@ -30,7 +30,7 @@ public class AdvisorController {
             description = "Returns a pagination result of all advisors in the database sorted by default on id and ascending order."
     )
     @GetMapping("")
-    public ResponseEntity<PaginatedResponse<AdvisorView>> getAllStudents(
+    public ResponseEntity<PaginatedResponse<AdvisorUserView>> getAllStudents(
             @RequestParam(defaultValue = "1", required = false) int pageNo,
             @RequestParam(defaultValue = "10", required = false) int pageSize,
             @RequestParam(defaultValue = "id", required = false) String sortBy,

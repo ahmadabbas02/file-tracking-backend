@@ -1,4 +1,4 @@
-package com.ahmadabbas.filetracking.backend.advisor.views;
+package com.ahmadabbas.filetracking.backend.advisor.view;
 
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.blazebit.persistence.view.EntityView;
@@ -7,7 +7,7 @@ import com.blazebit.persistence.view.Mapping;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @EntityView(Advisor.class)
-public interface AdvisorView {
+public interface AdvisorUserView {
     @IdMapping
     String getId();
 

@@ -43,7 +43,7 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "category with id %s not found".formatted(categoryId)
                 ));
-        if (!getAllowedCategories(loggedInUser.getRoles()).contains(category)) {
+        if (!getAllowedCategoriesIds(loggedInUser.getRoles()).contains(category.getCategoryId())) {
             throw new AccessDeniedException("not authorized");
         }
         return category;
@@ -54,7 +54,7 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "category with id %s and parent_id %s not found".formatted(categoryId, parentCategoryId)
                 ));
-        if (!getAllowedCategories(loggedInUser.getRoles()).contains(category)) {
+        if (!getAllowedCategoriesIds(loggedInUser.getRoles()).contains(category.getCategoryId())) {
             throw new AccessDeniedException("not authorized");
         }
         return category;
@@ -83,7 +83,7 @@ public class CategoryService {
         if (roles.contains(Role.ADMINISTRATOR)) {
             return categoryRepository.findAllByParentCategoryId(-1L);
         } else {
-            categories = getAllowedCategories(roles);
+            categories = getAllowedParentCategories(roles);
         }
         return categories;
     }

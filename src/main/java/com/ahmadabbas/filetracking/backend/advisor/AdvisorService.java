@@ -1,7 +1,8 @@
 package com.ahmadabbas.filetracking.backend.advisor;
 
 import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorRepository;
-import com.ahmadabbas.filetracking.backend.advisor.views.AdvisorView;
+import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorUserViewRepository;
+import com.ahmadabbas.filetracking.backend.advisor.view.AdvisorUserView;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.student.Student;
@@ -30,14 +31,8 @@ import java.util.List;
 public class AdvisorService {
     private final StudentRepository studentRepository;
     private final AdvisorRepository advisorRepository;
+    private final AdvisorUserViewRepository advisorUserViewRepository;
     private final UserRepository userRepository;
-
-    public AdvisorView getAdvisorByUserId(Long userId) {
-        return advisorRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "advisor with user id `%s` not found".formatted(userId)
-                ));
-    }
 
     public Advisor getAdvisorByAdvisorId(String advisorId, User loggedInUser) {
         checkPermissions(advisorId, loggedInUser);
@@ -47,9 +42,16 @@ public class AdvisorService {
                 ));
     }
 
-    public AdvisorView getAdvisorViewByAdvisorId(String advisorId, User loggedInUser) {
+    public AdvisorUserView getAdvisorByUserId(Long userId) {
+        return advisorUserViewRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "advisor with user id `%s` not found".formatted(userId)
+                ));
+    }
+
+    public AdvisorUserView getAdvisorViewByAdvisorId(String advisorId, User loggedInUser) {
         checkPermissions(advisorId, loggedInUser);
-        return advisorRepository.findByAdvisorId(advisorId)
+        return advisorUserViewRepository.findById(advisorId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "advisor with id `%s` not found".formatted(advisorId)
                 ));
@@ -88,16 +90,16 @@ public class AdvisorService {
         );
     }
 
-    public PaginatedResponse<AdvisorView> getAllAdvisors(int pageNo,
-                                                         int pageSize,
-                                                         String sortBy,
-                                                         String order,
-                                                         String searchQuery) {
+    public PaginatedResponse<AdvisorUserView> getAllAdvisors(int pageNo,
+                                                             int pageSize,
+                                                             String sortBy,
+                                                             String order,
+                                                             String searchQuery) {
         Pageable pageable = PagingUtils.getPageable(pageNo, pageSize, sortBy, order);
         log.debug("Provided search query: '%s', getting all advisors..".formatted(searchQuery));
         searchQuery = searchQuery.trim();
-        Page<AdvisorView> advisorPage = advisorRepository.findAllAdvisorsProjection(searchQuery, pageable);
-        List<AdvisorView> content = advisorPage.getContent();
+        Page<AdvisorUserView> advisorPage = advisorRepository.findAllAdvisorsProjection(searchQuery, pageable);
+        List<AdvisorUserView> content = advisorPage.getContent();
         return new PaginatedResponse<>(
                 content,
                 pageNo,
@@ -110,7 +112,7 @@ public class AdvisorService {
 
     private void checkPermissions(String advisorId, User loggedInUser) {
         if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
-            AdvisorView advisor = getAdvisorByUserId(loggedInUser.getId());
+            AdvisorUserView advisor = getAdvisorByUserId(loggedInUser.getId());
             if (!advisorId.equals(advisor.getId())) {
                 throw new AccessDeniedException("not authorized, you can only get details about your own profile");
             }
