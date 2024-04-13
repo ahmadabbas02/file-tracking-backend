@@ -31,6 +31,9 @@ public interface StudentWithAdvisorView {
     @Mapping("user.phoneNumber")
     String getPhoneNumber();
 
+    @Mapping("user.picture")
+    String getPicture();
+
     AdvisorView getAdvisor();
 
     DocumentStatus.InternshipCompletionStatus getInternshipCompletionStatus();
