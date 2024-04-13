@@ -65,6 +65,19 @@ public class Document {
                 getUploadedAt());
     }
 
+    @Override
+    public String toString() {
+        return "Document{" +
+               "category=" + category +
+               ", path='" + path + '\'' +
+               ", description='" + description + '\'' +
+               ", title='" + title + '\'' +
+               ", id=" + id +
+               ", uploadedAt=" + uploadedAt +
+               ", deleted=" + deleted +
+               '}';
+    }
+
     @JsonManagedReference
     public Student getStudent() {
         return student;

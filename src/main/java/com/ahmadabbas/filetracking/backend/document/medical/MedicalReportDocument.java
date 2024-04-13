@@ -4,6 +4,7 @@ import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
 import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportDocumentMapper;
 import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportDto;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -25,7 +26,8 @@ public class MedicalReportDocument extends Document {
 
     @Builder.Default
     @Enumerated(value = EnumType.STRING)
-    private DocumentStatus.ApprovalStatus approvalStatus = DocumentStatus.ApprovalStatus.PENDING;
+    @Column(name = "approval_status")
+    private DocumentStatus.ApprovalStatus medicalReportApprovalStatus = DocumentStatus.ApprovalStatus.PENDING;
 
     @Override
     public boolean equals(Object o) {
@@ -33,19 +35,19 @@ public class MedicalReportDocument extends Document {
         if (!(o instanceof MedicalReportDocument that)) return false;
         if (!super.equals(o)) return false;
         return Objects.equals(getDateOfAbsence(), that.getDateOfAbsence())
-               && getApprovalStatus() == that.getApprovalStatus();
+               && getMedicalReportApprovalStatus() == that.getMedicalReportApprovalStatus();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getDateOfAbsence(), getApprovalStatus());
+        return Objects.hash(super.hashCode(), getDateOfAbsence(), getMedicalReportApprovalStatus());
     }
 
     @Override
     public String toString() {
         return "MedicalReportDocument{" +
                "dateOfAbsence=" + dateOfAbsence +
-               ", approvalStatus=" + approvalStatus +
+               ", approvalStatus=" + medicalReportApprovalStatus +
                '}';
     }
 

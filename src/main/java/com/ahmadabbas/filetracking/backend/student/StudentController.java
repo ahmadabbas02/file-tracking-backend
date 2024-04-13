@@ -5,6 +5,7 @@ import com.ahmadabbas.filetracking.backend.student.payload.StudentDto;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentUpdateDto;
+import com.ahmadabbas.filetracking.backend.student.views.StudentWithAdvisorView;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
@@ -31,10 +32,10 @@ public class StudentController {
 
     @Operation(summary = "Student information", description = "Returns the student's personal information.")
     @GetMapping("/{studentId}")
-    public ResponseEntity<StudentDto> getStudent(@PathVariable String studentId,
-                                                 @AuthenticationPrincipal User loggedInUser) {
-        Student student = studentService.getStudent(studentId, loggedInUser);
-        return ResponseEntity.ok(studentMapper.toDto(student));
+    public ResponseEntity<StudentWithAdvisorView> getStudent(@PathVariable String studentId,
+                                                             @AuthenticationPrincipal User loggedInUser) {
+        StudentWithAdvisorView student = studentService.getStudentView(studentId, loggedInUser);
+        return ResponseEntity.ok(student);
     }
 
     @Operation(
@@ -42,7 +43,7 @@ public class StudentController {
             description = "Returns a pagination result of all students in the database sorted by default on id and ascending order."
     )
     @GetMapping("")
-    public ResponseEntity<PaginatedResponse<StudentDto>> getAllStudents(
+    public ResponseEntity<PaginatedResponse<StudentWithAdvisorView>> getAllStudents(
             @RequestParam(defaultValue = "1", required = false) int pageNo,
             @RequestParam(defaultValue = "10", required = false) int pageSize,
             @RequestParam(defaultValue = "id", required = false) String sortBy,
@@ -68,11 +69,10 @@ public class StudentController {
 
     @Operation(summary = "Add new student", description = "Adds a new student to the database with the specified information.")
     @PostMapping("")
-    public ResponseEntity<StudentDto> registerStudent(@RequestBody @Valid StudentRegistrationRequest studentRegistrationRequest,
-                                                      @AuthenticationPrincipal User loggedInUser) {
-        Student createdStudent = studentService.addStudent(studentRegistrationRequest, loggedInUser);
-        StudentDto dto = studentMapper.toDto(createdStudent);
-        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+    public ResponseEntity<StudentWithAdvisorView> registerStudent(@RequestBody @Valid StudentRegistrationRequest studentRegistrationRequest,
+                                                                  @AuthenticationPrincipal User loggedInUser) {
+        StudentWithAdvisorView createdStudent = studentService.addStudent(studentRegistrationRequest, loggedInUser);
+        return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
     }
 
     @Operation(

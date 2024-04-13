@@ -25,7 +25,6 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final UserService userService;
 
-
     @Operation(
             summary = "Login to the system",
             description = """

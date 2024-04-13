@@ -12,5 +12,5 @@ import java.time.LocalDate;
 @Data
 public class MedicalReportDto extends DocumentDto implements Serializable {
     LocalDate dateOfAbsence;
-    DocumentStatus.ApprovalStatus approvalStatus;
+    DocumentStatus.ApprovalStatus medicalReportApprovalStatus;
 }

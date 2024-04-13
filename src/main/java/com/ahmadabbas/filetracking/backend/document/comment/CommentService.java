@@ -2,6 +2,7 @@ package com.ahmadabbas.filetracking.backend.document.comment;
 
 import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.document.base.DocumentService;
+import com.ahmadabbas.filetracking.backend.document.base.views.DocumentWithStudentIdView;
 import com.ahmadabbas.filetracking.backend.document.comment.payload.CommentAddRequest;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
@@ -24,7 +25,7 @@ public class CommentService {
     private final DocumentService documentService;
 
     public List<Comment> getAllComments(UUID documentId, User loggedInUser) {
-        Document doc = documentService.getDocument(documentId, loggedInUser);
+        DocumentWithStudentIdView doc = documentService.getDocumentWithStudentIdView(documentId, loggedInUser);
         return commentRepository.findAllByDocumentId(doc.getId());
     }
 

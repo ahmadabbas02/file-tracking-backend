@@ -9,6 +9,7 @@ import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaBuilderFactory;
 import com.blazebit.persistence.PaginatedCriteriaBuilder;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,13 +29,15 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 
     @Override
     public Optional<User> findUserById(Long id) {
-        User user = criteriaBuilderFactory
+        CriteriaBuilder<User> cb = criteriaBuilderFactory
                 .create(entityManager, User.class)
                 .fetch("advisor", "student", "roles")
-                .where("id").eq(id)
-                .getSingleResult();
-
-        return Optional.ofNullable(user);
+                .where("id").eq(id);
+        try {
+            return Optional.ofNullable(cb.getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     @Override

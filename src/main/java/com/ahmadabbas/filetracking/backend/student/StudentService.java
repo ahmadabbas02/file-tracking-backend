@@ -3,12 +3,17 @@ package com.ahmadabbas.filetracking.backend.student;
 import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.ahmadabbas.filetracking.backend.advisor.AdvisorService;
 import com.ahmadabbas.filetracking.backend.advisor.repository.AdvisorRepository;
+import com.ahmadabbas.filetracking.backend.advisor.views.AdvisorView;
 import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
-import com.ahmadabbas.filetracking.backend.student.payload.*;
+import com.ahmadabbas.filetracking.backend.student.payload.StudentCsvRepresentation;
+import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
+import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
+import com.ahmadabbas.filetracking.backend.student.payload.StudentUpdateDto;
 import com.ahmadabbas.filetracking.backend.student.repository.StudentRepository;
+import com.ahmadabbas.filetracking.backend.student.views.StudentWithAdvisorView;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserService;
@@ -16,6 +21,7 @@ import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
 import com.ahmadabbas.filetracking.backend.util.PagingUtils;
 import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
+import com.blazebit.persistence.view.EntityViewManager;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
@@ -54,6 +60,25 @@ public class StudentService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final StudentRepository studentRepository;
+    private final EntityViewManager entityViewManager;
+
+    public StudentWithAdvisorView getStudentView(String studentId, User loggedInUser) {
+        if (loggedInUser.getRoles().contains(Role.STUDENT)) {
+            StudentWithAdvisorView student = getStudentViewByUserId(loggedInUser.getId());
+            if (!studentId.equals(student.getId())) {
+                throw new AccessDeniedException("not authorized, you can only get details about your own profile");
+            }
+            return student;
+        } else if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
+            StudentWithAdvisorView student = getStudentViewByStudentId(studentId);
+            if (student.getAdvisor().getUserId().equals(loggedInUser.getId())) {
+                return student;
+            } else {
+                throw new AccessDeniedException("not authorized, you can only get details about your own students");
+            }
+        }
+        return getStudentViewByStudentId(studentId);
+    }
 
     public Student getStudent(String studentId, User loggedInUser) {
         if (loggedInUser.getRoles().contains(Role.STUDENT)) {
@@ -63,19 +88,27 @@ public class StudentService {
             }
             return student;
         } else if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
-            Student student = studentRepository.findById(studentId)
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "student with id `%s` not found".formatted(studentId)
-                    ));
+            Student student = getStudentByStudentId(studentId);
             if (student.getAdvisor().getUser().getId().equals(loggedInUser.getId())) {
                 return student;
             } else {
                 throw new AccessDeniedException("not authorized, you can only get details about your own students");
             }
         }
-        return studentRepository.findById(studentId)
+        return getStudentByStudentId(studentId);
+    }
+
+    public StudentWithAdvisorView getStudentViewByStudentId(String studentId) {
+        return studentRepository.getStudentViewById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "student with id `%s` not found".formatted(studentId)
+                ));
+    }
+
+    public StudentWithAdvisorView getStudentViewByUserId(Long userId) {
+        return studentRepository.getStudentViewByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "student with user id `%s` not found".formatted(userId)
                 ));
     }
 
@@ -86,23 +119,30 @@ public class StudentService {
                 ));
     }
 
-    public PaginatedResponse<StudentDto> getAllStudents(User loggedInUser,
-                                                        int pageNo,
-                                                        int pageSize,
-                                                        String sortBy,
-                                                        String order,
-                                                        String searchQuery,
-                                                        String advisorId,
-                                                        List<String> programs,
-                                                        List<DocumentStatus.InternshipCompletionStatus> completionStatuses) {
+    public Student getStudentByStudentId(String studentId) {
+        return studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "student with id `%s` not found".formatted(studentId)
+                ));
+    }
+
+    public PaginatedResponse<StudentWithAdvisorView> getAllStudents(User loggedInUser,
+                                                                    int pageNo,
+                                                                    int pageSize,
+                                                                    String sortBy,
+                                                                    String order,
+                                                                    String searchQuery,
+                                                                    String advisorId,
+                                                                    List<String> programs,
+                                                                    List<DocumentStatus.InternshipCompletionStatus> completionStatuses) {
         Pageable pageable = PagingUtils.getPageable(pageNo, pageSize, sortBy, order);
-        Page<Student> studentPage;
+        Page<StudentWithAdvisorView> studentPage;
         log.debug("Logged in user = %s".formatted(loggedInUser));
         Set<Role> roles = userService.getRoles(loggedInUser);
         log.debug("Roles = %s".formatted(roles));
         searchQuery = searchQuery.trim();
         if (roles.contains(Role.ADVISOR)) {
-            Advisor advisor = advisorService.getAdvisorByUserId(loggedInUser.getId());
+            AdvisorView advisor = advisorService.getAdvisorByUserId(loggedInUser.getId());
             studentPage = studentRepository.getAllStudents(searchQuery,
                     advisor.getId(),
                     programs,
@@ -120,10 +160,7 @@ public class StudentService {
             studentPage = Page.empty();
         }
 
-        List<StudentDto> content = studentPage.getContent()
-                .stream()
-                .map(studentMapper::toDto)
-                .toList();
+        List<StudentWithAdvisorView> content = studentPage.getContent();
         return new PaginatedResponse<>(
                 content,
                 pageNo,
@@ -145,7 +182,7 @@ public class StudentService {
     }
 
     @Transactional
-    public Student addStudent(StudentRegistrationRequest studentRegistrationRequest, User loggedInUser) {
+    public StudentWithAdvisorView addStudent(StudentRegistrationRequest studentRegistrationRequest, User loggedInUser) {
         if (userRepository.existsByEmail(studentRegistrationRequest.email())) {
             throw new DuplicateResourceException(
                     "email already taken"
@@ -180,8 +217,11 @@ public class StudentService {
                 .year(studentRegistrationRequest.year())
                 .user(savedUser)
                 .build();
-        return studentRepository.save(student);
+        studentRepository.save(student);
+
+        return entityViewManager.convert(student, StudentWithAdvisorView.class);
     }
+
 
     @Transactional
     public CsvUploadResponse uploadStudents(MultipartFile file, User loggedInUser) throws IOException {
@@ -310,6 +350,7 @@ public class StudentService {
             Advisor advisor = advisorService.getAdvisorByAdvisorId(updateDto.getAdvisorId(), loggedInUser);
             student.setAdvisor(advisor);
         }
-        return studentRepository.save(student);
+        studentRepository.save(student);
+        return student;
     }
 }
