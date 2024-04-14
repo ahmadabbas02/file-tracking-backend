@@ -4,10 +4,7 @@ import com.ahmadabbas.filetracking.backend.document.base.Document;
 import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
 import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportDocumentMapper;
 import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportDto;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -20,6 +17,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @SuperBuilder
 @Entity
+@Table(name = "medical_report_document")
 public class MedicalReportDocument extends Document {
 
     private LocalDate dateOfAbsence;

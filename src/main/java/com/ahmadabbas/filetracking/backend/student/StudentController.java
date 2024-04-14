@@ -69,10 +69,10 @@ public class StudentController {
 
     @Operation(summary = "Add new student", description = "Adds a new student to the database with the specified information.")
     @PostMapping("")
-    public ResponseEntity<StudentAdvisorView> registerStudent(@RequestBody @Valid StudentRegistrationRequest studentRegistrationRequest,
+    public ResponseEntity<StudentDto> registerStudent(@RequestBody @Valid StudentRegistrationRequest studentRegistrationRequest,
                                                               @AuthenticationPrincipal User loggedInUser) {
-        StudentAdvisorView createdStudent = studentService.addStudent(studentRegistrationRequest, loggedInUser);
-        return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
+        Student createdStudent = studentService.addStudent(studentRegistrationRequest, loggedInUser);
+        return new ResponseEntity<>(studentMapper.toDto(createdStudent), HttpStatus.CREATED);
     }
 
     @Operation(

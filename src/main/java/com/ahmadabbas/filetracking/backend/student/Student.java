@@ -63,12 +63,15 @@ public class Student {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", Student.class.getSimpleName() + "[", "]")
-                .add("id='" + id + "'")
-                .add("department='" + program + "'")
-                .add("year=" + year)
-                .add("createdAt=" + createdAt)
-                .toString();
+        return "Student{" +
+               "id='" + id + '\'' +
+               ", program='" + program + '\'' +
+               ", year=" + year +
+               ", user=" + user +
+               ", advisor=" + advisor +
+               ", internshipCompletionStatus=" + internshipCompletionStatus +
+               ", paymentStatus=" + paymentStatus +
+               '}';
     }
 
     @Override

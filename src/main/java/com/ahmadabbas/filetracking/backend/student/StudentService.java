@@ -192,7 +192,7 @@ public class StudentService {
     }
 
     @Transactional
-    public StudentAdvisorView addStudent(StudentRegistrationRequest studentRegistrationRequest, User loggedInUser) {
+    public Student addStudent(StudentRegistrationRequest studentRegistrationRequest, User loggedInUser) {
         if (userRepository.existsByEmail(studentRegistrationRequest.email())) {
             throw new DuplicateResourceException(
                     "email already taken"
@@ -220,16 +220,16 @@ public class StudentService {
                 .build();
         User savedUser = userRepository.save(user);
 
-        Student student = Student.builder()
-                .id(studentRegistrationRequest.id())
-                .advisor(advisor)
-                .program(studentRegistrationRequest.program())
-                .year(studentRegistrationRequest.year())
-                .user(savedUser)
-                .build();
-        studentRepository.save(student);
-
-        return entityViewManager.convert(student, StudentAdvisorView.class);
+        Student student = studentRepository.save(
+                Student.builder()
+                        .id(studentRegistrationRequest.id())
+                        .advisor(advisor)
+                        .program(studentRegistrationRequest.program())
+                        .year(studentRegistrationRequest.year())
+                        .user(savedUser)
+                        .build()
+        );
+        return student;
     }
 
 
