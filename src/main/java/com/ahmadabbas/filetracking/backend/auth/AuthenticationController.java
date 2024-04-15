@@ -2,7 +2,7 @@ package com.ahmadabbas.filetracking.backend.auth;
 
 import com.ahmadabbas.filetracking.backend.auth.payload.*;
 import com.ahmadabbas.filetracking.backend.user.Role;
-import com.ahmadabbas.filetracking.backend.user.User;
+import com.ahmadabbas.filetracking.backend.user.UserPrincipal;
 import com.ahmadabbas.filetracking.backend.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -81,8 +81,8 @@ public class AuthenticationController {
                     """
     )
     @GetMapping("/roles")
-    public ResponseEntity<Set<Role>> roles(@AuthenticationPrincipal User user) {
-        Set<Role> roles = userService.getRoles(user);
+    public ResponseEntity<Set<Role>> roles(@AuthenticationPrincipal UserPrincipal user) {
+        Set<Role> roles = userService.getRoles(user.getUserEntity());
         return ResponseEntity.ok(roles);
     }
 }

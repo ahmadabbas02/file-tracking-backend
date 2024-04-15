@@ -6,12 +6,7 @@ import com.ahmadabbas.filetracking.backend.student.Student;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,7 +22,7 @@ import java.util.stream.Stream;
         name = "User.eagerlyFetchRoles",
         attributeNodes = @NamedAttributeNode("roles")
 )
-public class User implements UserDetails {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_generator")
@@ -83,41 +78,6 @@ public class User implements UserDetails {
         this.roles = Stream.of(roles).collect(Collectors.toSet());
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        Stream<List<SimpleGrantedAuthority>> stream = roles.stream().map(Role::getAuthorities);
-        return stream.flatMap(List::stream).toList();
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return isCredentialsNonExpired;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return isEnabled;
-    }
 
     @Override
     public String toString() {

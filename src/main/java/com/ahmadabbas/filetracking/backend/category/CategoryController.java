@@ -4,7 +4,7 @@ import com.ahmadabbas.filetracking.backend.category.payload.AddCategoryRequest;
 import com.ahmadabbas.filetracking.backend.category.payload.CategoryPermissionRequestDto;
 import com.ahmadabbas.filetracking.backend.category.payload.FullCategoryPermissionResponse;
 import com.ahmadabbas.filetracking.backend.category.payload.FullCategoryResponse;
-import com.ahmadabbas.filetracking.backend.user.User;
+import com.ahmadabbas.filetracking.backend.user.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,8 +28,8 @@ public class CategoryController {
             summary = "Add category"
     )
     @PostMapping("")
-    public ResponseEntity<Category> addCategory(@RequestBody AddCategoryRequest category, @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(categoryService.createCategory(category, user), HttpStatus.CREATED);
+    public ResponseEntity<Category> addCategory(@RequestBody AddCategoryRequest category, @AuthenticationPrincipal UserPrincipal user) {
+        return new ResponseEntity<>(categoryService.createCategory(category, user.getUserEntity()), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -39,13 +39,13 @@ public class CategoryController {
     @GetMapping("")
     public ResponseEntity<List<?>> getAllCategories(
             @RequestParam(value = "parents_only", required = false, defaultValue = "false") boolean parentsOnly,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserPrincipal user
     ) {
         if (parentsOnly) {
-            List<Category> allParentCategories = categoryService.getAllParentCategories(user);
+            List<Category> allParentCategories = categoryService.getAllParentCategories(user.getUserEntity());
             return ResponseEntity.ok(allParentCategories);
         }
-        List<FullCategoryResponse> allCategories = categoryService.getAllCategories(user);
+        List<FullCategoryResponse> allCategories = categoryService.getAllCategories(user.getUserEntity());
         return ResponseEntity.ok(allCategories);
     }
 
@@ -54,8 +54,8 @@ public class CategoryController {
             description = "Returns a list of all categories with `parentId` as their parent category."
     )
     @GetMapping("/{parentId}")
-    public ResponseEntity<List<Category>> getAllChildrenCategories(@PathVariable Long parentId, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(categoryService.getAllChildrenCategories(parentId, user));
+    public ResponseEntity<List<Category>> getAllChildrenCategories(@PathVariable Long parentId, @AuthenticationPrincipal UserPrincipal user) {
+        return ResponseEntity.ok(categoryService.getAllChildrenCategories(parentId, user.getUserEntity()));
     }
 
     @Operation(
@@ -64,9 +64,9 @@ public class CategoryController {
     )
     @GetMapping("/permissions")
     public ResponseEntity<List<FullCategoryPermissionResponse>> getAllCategoryPermissions(
-            @AuthenticationPrincipal User loggedInUser
+            @AuthenticationPrincipal UserPrincipal loggedInUser
     ) {
-        return ResponseEntity.ok(categoryService.getAllCategoryPermissions(loggedInUser));
+        return ResponseEntity.ok(categoryService.getAllCategoryPermissions(loggedInUser.getUserEntity()));
     }
 
     @Operation(
@@ -76,8 +76,8 @@ public class CategoryController {
     @PostMapping("/permissions/update")
     public ResponseEntity<FullCategoryPermissionResponse> updateCategoryPerms(
             @Valid @RequestBody CategoryPermissionRequestDto requestDto,
-            @AuthenticationPrincipal User loggedInUser
+            @AuthenticationPrincipal UserPrincipal loggedInUser
     ) {
-        return ResponseEntity.ok(categoryService.updateCategoryPermission(requestDto, loggedInUser));
+        return ResponseEntity.ok(categoryService.updateCategoryPermission(requestDto, loggedInUser.getUserEntity()));
     }
 }

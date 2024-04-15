@@ -6,7 +6,7 @@ import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentUpdateDto;
 import com.ahmadabbas.filetracking.backend.student.view.StudentAdvisorView;
-import com.ahmadabbas.filetracking.backend.user.User;
+import com.ahmadabbas.filetracking.backend.user.UserPrincipal;
 import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,8 +33,8 @@ public class StudentController {
     @Operation(summary = "Student information", description = "Returns the student's personal information.")
     @GetMapping("/{studentId}")
     public ResponseEntity<StudentAdvisorView> getStudent(@PathVariable String studentId,
-                                                         @AuthenticationPrincipal User loggedInUser) {
-        StudentAdvisorView student = studentService.getStudentView(studentId, loggedInUser);
+                                                         @AuthenticationPrincipal UserPrincipal loggedInUser) {
+        StudentAdvisorView student = studentService.getStudentView(studentId, loggedInUser.getUserEntity());
         return ResponseEntity.ok(student);
     }
 
@@ -52,10 +52,10 @@ public class StudentController {
             @RequestParam(defaultValue = "", required = false) String advisorId,
             @RequestParam(defaultValue = "", required = false) List<String> programs,
             @RequestParam(defaultValue = "", required = false) List<DocumentStatus.InternshipCompletionStatus> completionStatuses,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserPrincipal user
     ) {
         return ResponseEntity.ok(
-                studentService.getAllStudents(user,
+                studentService.getAllStudents(user.getUserEntity(),
                         pageNo,
                         pageSize,
                         sortBy,
@@ -70,8 +70,8 @@ public class StudentController {
     @Operation(summary = "Add new student", description = "Adds a new student to the database with the specified information.")
     @PostMapping("")
     public ResponseEntity<StudentDto> registerStudent(@RequestBody @Valid StudentRegistrationRequest studentRegistrationRequest,
-                                                              @AuthenticationPrincipal User loggedInUser) {
-        Student createdStudent = studentService.addStudent(studentRegistrationRequest, loggedInUser);
+                                                      @AuthenticationPrincipal UserPrincipal loggedInUser) {
+        Student createdStudent = studentService.addStudent(studentRegistrationRequest, loggedInUser.getUserEntity());
         return new ResponseEntity<>(studentMapper.toDto(createdStudent), HttpStatus.CREATED);
     }
 
@@ -83,8 +83,8 @@ public class StudentController {
     )
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
     public ResponseEntity<CsvUploadResponse> uploadStudents(@RequestPart("file") MultipartFile file,
-                                                            @AuthenticationPrincipal User loggedInUser) throws IOException {
-        return new ResponseEntity<>(studentService.uploadStudents(file, loggedInUser), HttpStatus.CREATED);
+                                                            @AuthenticationPrincipal UserPrincipal loggedInUser) throws IOException {
+        return new ResponseEntity<>(studentService.uploadStudents(file, loggedInUser.getUserEntity()), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -95,9 +95,9 @@ public class StudentController {
     public ResponseEntity<StudentDto> updateStudent(
             @PathVariable String studentId,
             @RequestBody @Valid StudentUpdateDto updateDto,
-            @AuthenticationPrincipal User loggedInUser
+            @AuthenticationPrincipal UserPrincipal loggedInUser
     ) {
-        Student student = studentService.updateStudent(studentId, updateDto, loggedInUser);
+        Student student = studentService.updateStudent(studentId, updateDto, loggedInUser.getUserEntity());
         return ResponseEntity.ok(studentMapper.toDto(student));
     }
 }

@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -53,12 +52,7 @@ public class UserService {
     }
 
     public Set<Role> getRoles(User user) {
-        return user.getAuthorities().stream()
-                .map(s -> {
-                    String replaced = s.toString().replace("ROLE_", "");
-                    return Role.valueOf(replaced);
-                })
-                .collect(Collectors.toSet());
+        return user.getRoles();
     }
 
     public PaginatedResponse<UserDto> getAllUsers(int pageNo,

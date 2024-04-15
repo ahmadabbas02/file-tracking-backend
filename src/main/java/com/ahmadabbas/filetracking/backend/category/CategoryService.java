@@ -13,7 +13,6 @@ import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +37,7 @@ public class CategoryService {
                 ));
     }
 
-    public Category getCategory(Long categoryId, @AuthenticationPrincipal User loggedInUser) {
+    public Category getCategory(Long categoryId, User loggedInUser) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "category with id %s not found".formatted(categoryId)
@@ -49,7 +48,7 @@ public class CategoryService {
         return category;
     }
 
-    public Category getCategory(Long categoryId, Long parentCategoryId, @AuthenticationPrincipal User loggedInUser) {
+    public Category getCategory(Long categoryId, Long parentCategoryId, User loggedInUser) {
         Category category = categoryRepository.findByCategoryIdAndParentCategoryId(categoryId, parentCategoryId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "category with id %s and parent_id %s not found".formatted(categoryId, parentCategoryId)

@@ -23,7 +23,7 @@ import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocument;
 import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocumentService;
 import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentAddRequest;
 import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentDto;
-import com.ahmadabbas.filetracking.backend.user.User;
+import com.ahmadabbas.filetracking.backend.user.UserPrincipal;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedMapResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,10 +68,10 @@ public class DocumentController {
     )
     @GetMapping("/{documentId}")
     public ResponseEntity<DocumentStudentView> getDocument(
-            @AuthenticationPrincipal User loggedInUser,
+            @AuthenticationPrincipal UserPrincipal loggedInUser,
             @PathVariable UUID documentId
     ) {
-        DocumentStudentView document = documentService.getDocumentStudentView(documentId, loggedInUser);
+        DocumentStudentView document = documentService.getDocumentStudentView(documentId, loggedInUser.getUserEntity());
         return ResponseEntity.ok(document);
     }
 
@@ -83,11 +83,11 @@ public class DocumentController {
     )
     @PatchMapping("/{documentId}/approve")
     public ResponseEntity<DocumentStudentView> approveDocument(
-            @AuthenticationPrincipal User loggedInUser,
+            @AuthenticationPrincipal UserPrincipal loggedInUser,
             @PathVariable UUID documentId,
             @RequestBody @Valid DocumentApproveRequest approveRequest
     ) {
-        DocumentStudentView document = documentService.approveDocument(documentId, loggedInUser, approveRequest);
+        DocumentStudentView document = documentService.approveDocument(documentId, loggedInUser.getUserEntity(), approveRequest);
         return ResponseEntity.ok(document);
     }
 
@@ -99,10 +99,10 @@ public class DocumentController {
     )
     @DeleteMapping("/{documentId}/delete")
     public ResponseEntity<DocumentDto> deleteDocument(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal UserPrincipal user,
             @PathVariable UUID documentId
     ) {
-        Document document = documentService.deleteDocument(documentId, user);
+        Document document = documentService.deleteDocument(documentId, user.getUserEntity());
         return ResponseEntity.ok(document.toDto());
     }
 
@@ -114,10 +114,10 @@ public class DocumentController {
     )
     @GetMapping("/{documentId}/comments")
     public ResponseEntity<List<CommentDto>> getAllComments(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal UserPrincipal user,
             @PathVariable UUID documentId
     ) {
-        List<Comment> comments = commentService.getAllComments(documentId, user);
+        List<Comment> comments = commentService.getAllComments(documentId, user.getUserEntity());
         return ResponseEntity.ok(comments.stream().map(commentMapper::toDto).toList());
     }
 
@@ -129,11 +129,11 @@ public class DocumentController {
     )
     @PostMapping("/{documentId}/comments")
     public ResponseEntity<CommentDto> addComment(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal UserPrincipal user,
             @PathVariable UUID documentId,
             @Valid @RequestBody CommentAddRequest addRequest
     ) {
-        Comment comment = commentService.addComment(addRequest, documentId, user);
+        Comment comment = commentService.addComment(addRequest, documentId, user.getUserEntity());
         return ResponseEntity.ok(commentMapper.toDto(comment));
     }
 
@@ -146,7 +146,7 @@ public class DocumentController {
     )
     @GetMapping("")
     public ResponseEntity<PaginatedResponse<DocumentStudentView>> getAllDocuments(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal UserPrincipal user,
             @RequestParam(defaultValue = "1", required = false) int pageNo,
             @RequestParam(defaultValue = "10", required = false) int pageSize,
             @RequestParam(defaultValue = "uploadedAt", required = false) String sortBy,
@@ -156,7 +156,7 @@ public class DocumentController {
             @RequestParam(defaultValue = "", required = false) List<Long> categoryIds
     ) {
         return ResponseEntity.ok(
-                documentService.getAllDocuments(user, pageNo, pageSize, sortBy, order, searchQuery, studentId, categoryIds)
+                documentService.getAllDocuments(user.getUserEntity(), pageNo, pageSize, sortBy, order, searchQuery, studentId, categoryIds)
         );
     }
 
@@ -169,7 +169,7 @@ public class DocumentController {
     )
     @GetMapping("/blobs")
     public ResponseEntity<PaginatedMapResponse<String, byte[]>> getAllDocumentBlobs(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal UserPrincipal user,
             @RequestParam(defaultValue = "1", required = false) int pageNo,
             @RequestParam(defaultValue = "10", required = false) int pageSize,
             @RequestParam(defaultValue = "uploadedAt", required = false) String sortBy,
@@ -178,7 +178,7 @@ public class DocumentController {
             @RequestParam(defaultValue = "", required = false) List<Long> categoryIds
     ) throws IOException {
         return ResponseEntity.ok(
-                documentService.getAllDocumentBlobs(user, pageNo, pageSize, sortBy, order, studentId, categoryIds)
+                documentService.getAllDocumentBlobs(user.getUserEntity(), pageNo, pageSize, sortBy, order, studentId, categoryIds)
         );
     }
 
@@ -200,10 +200,10 @@ public class DocumentController {
     public ResponseEntity<DocumentDto> upload(
             @RequestPart("file") MultipartFile file,
             @RequestPart("data") String data,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserPrincipal user
     ) throws IOException {
         DocumentAddRequest addRequest = new ObjectMapper().readValue(data, DocumentAddRequest.class);
-        Document uploadedDocument = documentService.addDocument(file, addRequest, user);
+        Document uploadedDocument = documentService.addDocument(file, addRequest, user.getUserEntity());
         return new ResponseEntity<>(uploadedDocument.toDto(), HttpStatus.CREATED);
     }
 
@@ -216,9 +216,9 @@ public class DocumentController {
     @PostMapping("/upload/contact")
     public ResponseEntity<ContactDocumentDto> postContactDocument(
             @Valid @RequestBody ContactDocumentAddRequest addRequest,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserPrincipal user
     ) {
-        ContactDocument contactDocument = contactDocumentService.addContactDocument(addRequest, user);
+        ContactDocument contactDocument = contactDocumentService.addContactDocument(addRequest, user.getUserEntity());
         return new ResponseEntity<>(contactDocument.toDto(), HttpStatus.CREATED);
     }
 
@@ -231,9 +231,9 @@ public class DocumentController {
     @PostMapping("/upload/petition")
     public ResponseEntity<PetitionDocumentDto> postPetitionDocument(
             @Valid @RequestBody PetitionDocumentAddRequest addRequest,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserPrincipal user
     ) {
-        PetitionDocument petitionDocument = petitionDocumentService.addPetitionDocument(addRequest, user);
+        PetitionDocument petitionDocument = petitionDocumentService.addPetitionDocument(addRequest, user.getUserEntity());
         return new ResponseEntity<>(petitionDocument.toDto(), HttpStatus.CREATED);
     }
 
@@ -254,10 +254,10 @@ public class DocumentController {
     public ResponseEntity<InternshipDocumentDto> uploadInternshipDocument(
             @RequestPart("file") MultipartFile file,
             @RequestPart("data") String data,
-            @AuthenticationPrincipal User loggedInUser
+            @AuthenticationPrincipal UserPrincipal loggedInUser
     ) throws IOException {
         InternshipAddRequest addRequest = new ObjectMapper().readValue(data, InternshipAddRequest.class);
-        InternshipDocument internshipDocument = internshipDocumentService.addInternship(file, addRequest, loggedInUser);
+        InternshipDocument internshipDocument = internshipDocumentService.addInternship(file, addRequest, loggedInUser.getUserEntity());
         return new ResponseEntity<>(internshipDocument.toDto(), HttpStatus.CREATED);
     }
 
@@ -277,11 +277,12 @@ public class DocumentController {
     public ResponseEntity<MedicalReportDto> uploadMedicalReportDocument(
             @RequestPart("file") MultipartFile file,
             @RequestPart("data") String data,
-            @AuthenticationPrincipal User loggedInUser
+            @AuthenticationPrincipal UserPrincipal loggedInUser
     ) throws IOException {
         MedicalReportAddRequest addRequest = new ObjectMapper().readValue(data, MedicalReportAddRequest.class);
-        MedicalReportDocument medicalReportDocument = medicalReportDocumentService.addMedicalReport(file, addRequest,
-                loggedInUser);
+        MedicalReportDocument medicalReportDocument = medicalReportDocumentService.addMedicalReport(file,
+                addRequest,
+                loggedInUser.getUserEntity());
         return new ResponseEntity<>(medicalReportDocument.toDto(), HttpStatus.CREATED);
     }
 
@@ -291,8 +292,8 @@ public class DocumentController {
     )
     @PatchMapping("/modify-category")
     public ResponseEntity<DocumentDto> modifyCategory(@Valid @RequestBody DocumentModifyCategoryRequest body,
-                                                      @AuthenticationPrincipal User loggedInUser) {
-        Document modifiedDocument = documentService.modifyDocumentCategory(body, loggedInUser);
+                                                      @AuthenticationPrincipal UserPrincipal loggedInUser) {
+        Document modifiedDocument = documentService.modifyDocumentCategory(body, loggedInUser.getUserEntity());
         return ResponseEntity.ok(modifiedDocument.toDto());
     }
 
@@ -303,9 +304,9 @@ public class DocumentController {
                     """
     )
     @GetMapping("/preview")
-    public ResponseEntity<byte[]> getFilePreview(@AuthenticationPrincipal User user,
+    public ResponseEntity<byte[]> getFilePreview(@AuthenticationPrincipal UserPrincipal user,
                                                  @RequestParam UUID uuid) throws IOException {
-        DocumentPreview documentPreview = documentService.getDocumentPreview(user, uuid);
+        DocumentPreview documentPreview = documentService.getDocumentPreview(user.getUserEntity(), uuid);
         if (documentPreview != null) {
             String fileName = documentPreview.fileName();
             byte[] blob = documentPreview.blob();
@@ -327,9 +328,9 @@ public class DocumentController {
                     """
     )
     @PostMapping("/download")
-    public ResponseEntity<byte[]> downloadFiles(@AuthenticationPrincipal User user,
+    public ResponseEntity<byte[]> downloadFiles(@AuthenticationPrincipal UserPrincipal user,
                                                 @Valid @RequestBody DocumentDownloadRequest request) throws IOException {
-        byte[] zipData = documentService.getDocumentsZip(user, request.uuids());
+        byte[] zipData = documentService.getDocumentsZip(user.getUserEntity(), request.uuids());
         if (zipData != null) {
             LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Athens"));
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");

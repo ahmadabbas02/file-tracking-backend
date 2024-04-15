@@ -5,6 +5,7 @@ import com.ahmadabbas.filetracking.backend.advisor.view.AdvisorUserView;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
 import com.ahmadabbas.filetracking.backend.student.view.StudentView;
 import com.ahmadabbas.filetracking.backend.user.Role;
+import com.ahmadabbas.filetracking.backend.user.UserPrincipal;
 import com.ahmadabbas.filetracking.backend.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -80,7 +81,8 @@ public class JwtService {
     }
 
     private String getSubjectFromAuthentication(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        User user = userPrincipal.getUserEntity();
         if (user.getRoles().contains(Role.STUDENT)) {
             StudentView student = studentService.getStudentViewByUserId(user.getId());
             return student.getId();
@@ -94,7 +96,8 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String loginId = extractUserLoginId(token);
-        User user = (User) userDetails;
+        UserPrincipal userPrincipal = (UserPrincipal) userDetails;
+        User user = userPrincipal.getUserEntity();
         if (isTokenExpired(token)) {
             return false;
         }

@@ -31,18 +31,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 // handle cases of login for admin, chair, secretary etc
                 Optional<User> user = userRepository.findById(Long.valueOf(username));
                 if (user.isPresent()) {
-                    return user.get();
+                    return new UserPrincipal(user.get());
                 }
             } else {
                 User user = getUser(username);
                 if (user != null) {
-                    return user;
+                    return new UserPrincipal(user);
                 }
             }
         } else {
             User user = getUser(username);
             if (user != null) {
-                return user;
+                return new UserPrincipal(user);
             }
         }
         throw new UsernameNotFoundException("Email/ID %s not found!".formatted(username));

@@ -9,6 +9,7 @@ import com.ahmadabbas.filetracking.backend.email.EmailService;
 import com.ahmadabbas.filetracking.backend.email.EmailTemplate;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
+import com.ahmadabbas.filetracking.backend.user.UserPrincipal;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserService;
 import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
@@ -52,7 +53,8 @@ public class AuthenticationService {
                 )
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        User user = (User) authentication.getPrincipal();
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        User user = userPrincipal.getUserEntity();
         Map<String, Object> extraClaims = Map.of(
                 "role", user.getRoles(),
                 "name", user.getFullName()
