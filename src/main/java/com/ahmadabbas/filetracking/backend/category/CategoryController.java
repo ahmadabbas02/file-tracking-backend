@@ -28,8 +28,9 @@ public class CategoryController {
             summary = "Add category"
     )
     @PostMapping("")
-    public ResponseEntity<Category> addCategory(@RequestBody AddCategoryRequest category, @AuthenticationPrincipal UserPrincipal user) {
-        return new ResponseEntity<>(categoryService.createCategory(category, user.getUserEntity()), HttpStatus.CREATED);
+    public ResponseEntity<Category> addCategory(@RequestBody AddCategoryRequest category,
+                                                @AuthenticationPrincipal UserPrincipal principal) {
+        return new ResponseEntity<>(categoryService.createCategory(category, principal.getUserEntity()), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -39,13 +40,13 @@ public class CategoryController {
     @GetMapping("")
     public ResponseEntity<List<?>> getAllCategories(
             @RequestParam(value = "parents_only", required = false, defaultValue = "false") boolean parentsOnly,
-            @AuthenticationPrincipal UserPrincipal user
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
         if (parentsOnly) {
-            List<Category> allParentCategories = categoryService.getAllParentCategories(user.getUserEntity());
+            List<Category> allParentCategories = categoryService.getAllParentCategories(principal.getUserEntity());
             return ResponseEntity.ok(allParentCategories);
         }
-        List<FullCategoryResponse> allCategories = categoryService.getAllCategories(user.getUserEntity());
+        List<FullCategoryResponse> allCategories = categoryService.getAllCategories(principal.getUserEntity());
         return ResponseEntity.ok(allCategories);
     }
 
@@ -54,8 +55,9 @@ public class CategoryController {
             description = "Returns a list of all categories with `parentId` as their parent category."
     )
     @GetMapping("/{parentId}")
-    public ResponseEntity<List<Category>> getAllChildrenCategories(@PathVariable Long parentId, @AuthenticationPrincipal UserPrincipal user) {
-        return ResponseEntity.ok(categoryService.getAllChildrenCategories(parentId, user.getUserEntity()));
+    public ResponseEntity<List<Category>> getAllChildrenCategories(@PathVariable Long parentId,
+                                                                   @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(categoryService.getAllChildrenCategories(parentId, principal.getUserEntity()));
     }
 
     @Operation(
@@ -64,9 +66,9 @@ public class CategoryController {
     )
     @GetMapping("/permissions")
     public ResponseEntity<List<FullCategoryPermissionResponse>> getAllCategoryPermissions(
-            @AuthenticationPrincipal UserPrincipal loggedInUser
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        return ResponseEntity.ok(categoryService.getAllCategoryPermissions(loggedInUser.getUserEntity()));
+        return ResponseEntity.ok(categoryService.getAllCategoryPermissions(principal.getUserEntity()));
     }
 
     @Operation(
@@ -76,8 +78,8 @@ public class CategoryController {
     @PostMapping("/permissions/update")
     public ResponseEntity<FullCategoryPermissionResponse> updateCategoryPerms(
             @Valid @RequestBody CategoryPermissionRequestDto requestDto,
-            @AuthenticationPrincipal UserPrincipal loggedInUser
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        return ResponseEntity.ok(categoryService.updateCategoryPermission(requestDto, loggedInUser.getUserEntity()));
+        return ResponseEntity.ok(categoryService.updateCategoryPermission(requestDto, principal.getUserEntity()));
     }
 }

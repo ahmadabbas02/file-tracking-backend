@@ -33,8 +33,8 @@ public class StudentController {
     @Operation(summary = "Student information", description = "Returns the student's personal information.")
     @GetMapping("/{studentId}")
     public ResponseEntity<StudentAdvisorView> getStudent(@PathVariable String studentId,
-                                                         @AuthenticationPrincipal UserPrincipal loggedInUser) {
-        StudentAdvisorView student = studentService.getStudentView(studentId, loggedInUser.getUserEntity());
+                                                         @AuthenticationPrincipal UserPrincipal principal) {
+        StudentAdvisorView student = studentService.getStudentView(studentId, principal.getUserEntity());
         return ResponseEntity.ok(student);
     }
 
@@ -52,10 +52,10 @@ public class StudentController {
             @RequestParam(defaultValue = "", required = false) String advisorId,
             @RequestParam(defaultValue = "", required = false) List<String> programs,
             @RequestParam(defaultValue = "", required = false) List<DocumentStatus.InternshipCompletionStatus> completionStatuses,
-            @AuthenticationPrincipal UserPrincipal user
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
         return ResponseEntity.ok(
-                studentService.getAllStudents(user.getUserEntity(),
+                studentService.getAllStudents(principal.getUserEntity(),
                         pageNo,
                         pageSize,
                         sortBy,
@@ -70,8 +70,8 @@ public class StudentController {
     @Operation(summary = "Add new student", description = "Adds a new student to the database with the specified information.")
     @PostMapping("")
     public ResponseEntity<StudentDto> registerStudent(@RequestBody @Valid StudentRegistrationRequest studentRegistrationRequest,
-                                                      @AuthenticationPrincipal UserPrincipal loggedInUser) {
-        Student createdStudent = studentService.addStudent(studentRegistrationRequest, loggedInUser.getUserEntity());
+                                                      @AuthenticationPrincipal UserPrincipal principal) {
+        Student createdStudent = studentService.addStudent(studentRegistrationRequest, principal.getUserEntity());
         return new ResponseEntity<>(studentMapper.toDto(createdStudent), HttpStatus.CREATED);
     }
 
@@ -83,8 +83,8 @@ public class StudentController {
     )
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
     public ResponseEntity<CsvUploadResponse> uploadStudents(@RequestPart("file") MultipartFile file,
-                                                            @AuthenticationPrincipal UserPrincipal loggedInUser) throws IOException {
-        return new ResponseEntity<>(studentService.uploadStudents(file, loggedInUser.getUserEntity()), HttpStatus.CREATED);
+                                                            @AuthenticationPrincipal UserPrincipal principal) throws IOException {
+        return new ResponseEntity<>(studentService.uploadStudents(file, principal.getUserEntity()), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -95,9 +95,9 @@ public class StudentController {
     public ResponseEntity<StudentDto> updateStudent(
             @PathVariable String studentId,
             @RequestBody @Valid StudentUpdateDto updateDto,
-            @AuthenticationPrincipal UserPrincipal loggedInUser
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Student student = studentService.updateStudent(studentId, updateDto, loggedInUser.getUserEntity());
+        Student student = studentService.updateStudent(studentId, updateDto, principal.getUserEntity());
         return ResponseEntity.ok(studentMapper.toDto(student));
     }
 }

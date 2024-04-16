@@ -20,8 +20,8 @@ public class AdvisorController {
     @Operation(summary = "Get advisor")
     @GetMapping("/{advisorId}")
     public ResponseEntity<AdvisorUserView> getAdvisor(@PathVariable String advisorId,
-                                                      @AuthenticationPrincipal UserPrincipal loggedInUser) {
-        AdvisorUserView advisor = advisorService.getAdvisorViewByAdvisorId(advisorId, loggedInUser.getUserEntity());
+                                                      @AuthenticationPrincipal UserPrincipal principal) {
+        AdvisorUserView advisor = advisorService.getAdvisorViewByAdvisorId(advisorId, principal.getUserEntity());
         return ResponseEntity.ok(advisor);
     }
 

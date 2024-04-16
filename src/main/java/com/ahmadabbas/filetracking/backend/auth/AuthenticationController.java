@@ -68,8 +68,7 @@ public class AuthenticationController {
             }
     )
     @PostMapping("/activate")
-    public ResponseEntity<ActivationEmailResponse> activate(
-            @RequestBody @Valid AccountActivationRequest activationRequest) {
+    public ResponseEntity<ActivationEmailResponse> activate(@RequestBody @Valid AccountActivationRequest activationRequest) {
         ActivationEmailResponse response = authenticationService.activateAccount(activationRequest);
         return ResponseEntity.ok(response);
     }
@@ -81,8 +80,8 @@ public class AuthenticationController {
                     """
     )
     @GetMapping("/roles")
-    public ResponseEntity<Set<Role>> roles(@AuthenticationPrincipal UserPrincipal user) {
-        Set<Role> roles = userService.getRoles(user.getUserEntity());
+    public ResponseEntity<Set<Role>> roles(@AuthenticationPrincipal UserPrincipal principal) {
+        Set<Role> roles = userService.getRoles(principal.getUserEntity());
         return ResponseEntity.ok(roles);
     }
 }

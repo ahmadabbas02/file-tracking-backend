@@ -23,7 +23,6 @@ import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
 import com.ahmadabbas.filetracking.backend.util.PagingUtils;
 import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
-import com.blazebit.persistence.view.EntityViewManager;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
@@ -62,7 +61,6 @@ public class StudentService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final StudentRepository studentRepository;
-    private final EntityViewManager entityViewManager;
     private final StudentViewRepository studentViewRepository;
 
     public StudentAdvisorView getStudentView(String studentId, User loggedInUser) {
@@ -220,7 +218,7 @@ public class StudentService {
                 .build();
         User savedUser = userRepository.save(user);
 
-        Student student = studentRepository.save(
+        return studentRepository.save(
                 Student.builder()
                         .id(studentRegistrationRequest.id())
                         .advisor(advisor)
@@ -229,7 +227,6 @@ public class StudentService {
                         .user(savedUser)
                         .build()
         );
-        return student;
     }
 
 
@@ -331,21 +328,6 @@ public class StudentService {
                 .build();
     }
 
-    private Set<StudentCsvRepresentation> parseCsv(MultipartFile file) throws IOException {
-        try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            HeaderColumnNameMappingStrategy<StudentCsvRepresentation> strategy =
-                    new HeaderColumnNameMappingStrategy<>();
-            strategy.setType(StudentCsvRepresentation.class);
-            CsvToBean<StudentCsvRepresentation> csvToBean =
-                    new CsvToBeanBuilder<StudentCsvRepresentation>(reader)
-                            .withMappingStrategy(strategy)
-                            .withIgnoreEmptyLine(true)
-                            .withIgnoreLeadingWhiteSpace(true)
-                            .build();
-            return new HashSet<>(csvToBean.parse());
-        }
-    }
-
     @Transactional
     public Student updateStudent(String studentId, StudentUpdateDto updateDto, User loggedInUser) {
         Student student = studentRepository.lockStudentById(studentId)
@@ -362,5 +344,20 @@ public class StudentService {
         }
         studentRepository.save(student);
         return student;
+    }
+
+    private Set<StudentCsvRepresentation> parseCsv(MultipartFile file) throws IOException {
+        try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            HeaderColumnNameMappingStrategy<StudentCsvRepresentation> strategy =
+                    new HeaderColumnNameMappingStrategy<>();
+            strategy.setType(StudentCsvRepresentation.class);
+            CsvToBean<StudentCsvRepresentation> csvToBean =
+                    new CsvToBeanBuilder<StudentCsvRepresentation>(reader)
+                            .withMappingStrategy(strategy)
+                            .withIgnoreEmptyLine(true)
+                            .withIgnoreLeadingWhiteSpace(true)
+                            .build();
+            return new HashSet<>(csvToBean.parse());
+        }
     }
 }
