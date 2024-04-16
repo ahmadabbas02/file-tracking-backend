@@ -1,19 +1,20 @@
 package com.ahmadabbas.filetracking.backend.document.medical.payload;
 
-
+import com.ahmadabbas.filetracking.backend.document.base.payload.BaseDocumentAddRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
 
-public record MedicalReportAddRequest(
-        @NotEmpty(message = "Medical report title should not be empty") String title,
-        String description,
-        @NotEmpty(message = "Medical report dateOfAbsence should not be empty") String dateOfAbsence
-) {
-    public MedicalReportAddRequest {
-        title = title.trim();
-        if (description == null) {
-            description = "";
-        } else {
-            description = description.trim();
-        }
+public final class MedicalReportAddRequest extends BaseDocumentAddRequest {
+    @JsonProperty
+    @NotEmpty(message = "Medical report dateOfAbsence should not be empty")
+    private final String dateOfAbsence;
+
+    public MedicalReportAddRequest(String title, String description, String dateOfAbsence) {
+        super(title, description);
+        this.dateOfAbsence = dateOfAbsence;
+    }
+
+    public String dateOfAbsence() {
+        return dateOfAbsence;
     }
 }

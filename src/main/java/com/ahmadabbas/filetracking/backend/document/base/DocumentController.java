@@ -7,26 +7,10 @@ import com.ahmadabbas.filetracking.backend.document.comment.CommentService;
 import com.ahmadabbas.filetracking.backend.document.comment.payload.CommentAddRequest;
 import com.ahmadabbas.filetracking.backend.document.comment.payload.CommentDto;
 import com.ahmadabbas.filetracking.backend.document.comment.payload.CommentMapper;
-import com.ahmadabbas.filetracking.backend.document.contact.ContactDocument;
-import com.ahmadabbas.filetracking.backend.document.contact.ContactDocumentService;
-import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentAddRequest;
-import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentDto;
-import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocument;
-import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumentService;
-import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipAddRequest;
-import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentDto;
-import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocument;
-import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocumentService;
-import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportAddRequest;
-import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportDto;
-import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocument;
-import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocumentService;
-import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentAddRequest;
-import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentDto;
 import com.ahmadabbas.filetracking.backend.user.UserPrincipal;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedMapResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -53,12 +37,8 @@ import java.util.UUID;
 public class DocumentController {
 
     private final DocumentService documentService;
-    private final ContactDocumentService contactDocumentService;
-    private final InternshipDocumentService internshipDocumentService;
-    private final PetitionDocumentService petitionDocumentService;
     private final CommentService commentService;
     private final CommentMapper commentMapper;
-    private final MedicalReportDocumentService medicalReportDocumentService;
 
     @Operation(
             summary = "Get document information",
@@ -187,104 +167,122 @@ public class DocumentController {
             description = """
                     Uploads a document to the cloud which can be
                     later previewed/downloaded using the UUID returned. \n
-                    Example input for `data`: `{
-                                           "title":"Test File",
-                                           "description":"",
-                                           "studentId":"23000002",
-                                           "parentCategoryId":1,
-                                           "categoryId":2
-                                       }`
                     """
     )
-    @PostMapping(value = "/upload", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<DocumentDto> upload(
-            @RequestPart("file") MultipartFile file,
-            @RequestPart("data") String data,
+    @PostMapping(value = "/upload-new", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
+    public ResponseEntity<DocumentDto> uploadNew(
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @RequestPart("data") @JsonView String data,
+            @RequestParam("categoryId") Long categoryId,
             @AuthenticationPrincipal UserPrincipal principal
     ) throws IOException {
-        DocumentAddRequest addRequest = new ObjectMapper().readValue(data, DocumentAddRequest.class);
-        Document uploadedDocument = documentService.addDocument(file, addRequest, principal.getUserEntity());
+        Document uploadedDocument = documentService.addDocument(file, data, categoryId, principal.getUserEntity());
         return new ResponseEntity<>(uploadedDocument.toDto(), HttpStatus.CREATED);
     }
 
-    @Operation(
-            summary = "Upload contact document",
-            description = """
-                    Generates and uploads contact form document.
-                    """
-    )
-    @PostMapping("/upload/contact")
-    public ResponseEntity<ContactDocumentDto> postContactDocument(
-            @Valid @RequestBody ContactDocumentAddRequest addRequest,
-            @AuthenticationPrincipal UserPrincipal principal
-    ) {
-        ContactDocument contactDocument = contactDocumentService.addContactDocument(addRequest, principal.getUserEntity());
-        return new ResponseEntity<>(contactDocument.toDto(), HttpStatus.CREATED);
-    }
-
-    @Operation(
-            summary = "Upload petition document",
-            description = """
-                    Generates and uploads petition document.
-                    """
-    )
-    @PostMapping("/upload/petition")
-    public ResponseEntity<PetitionDocumentDto> postPetitionDocument(
-            @Valid @RequestBody PetitionDocumentAddRequest addRequest,
-            @AuthenticationPrincipal UserPrincipal principal
-    ) {
-        PetitionDocument petitionDocument = petitionDocumentService.addPetitionDocument(addRequest, principal.getUserEntity());
-        return new ResponseEntity<>(petitionDocument.toDto(), HttpStatus.CREATED);
-    }
-
-    @Operation(
-            summary = "Upload internship document",
-            description = """
-                    Uploads an internship document to the cloud which can be
-                    later previewed/downloaded using the UUID returned. \n
-                    Example input for `data`: `{
-                                           "title":"Test File",
-                                           "description":"",
-                                           "studentId":"23000002",
-                                           "numberOfWorkingDays":20
-                                       }`
-                    """
-    )
-    @PostMapping(value = "/upload/internship", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<InternshipDocumentDto> uploadInternshipDocument(
-            @RequestPart("file") MultipartFile file,
-            @RequestPart("data") String data,
-            @AuthenticationPrincipal UserPrincipal principal
-    ) throws IOException {
-        InternshipAddRequest addRequest = new ObjectMapper().readValue(data, InternshipAddRequest.class);
-        InternshipDocument internshipDocument = internshipDocumentService.addInternship(file, addRequest, principal.getUserEntity());
-        return new ResponseEntity<>(internshipDocument.toDto(), HttpStatus.CREATED);
-    }
-
-    @Operation(
-            summary = "Upload medical document",
-            description = """
-                    Uploads an medical document to the cloud which can be
-                    later previewed/downloaded using the UUID returned. \n
-                    Example input for `data`: `{
-                                        	"title": "Medical Report 1",
-                                        	"description": "some text",
-                                        	"dateOfAbsence": "2024-03-09"
-                                        }`
-                    """
-    )
-    @PostMapping(value = "/upload/medical-report", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<MedicalReportDto> uploadMedicalReportDocument(
-            @RequestPart("file") MultipartFile file,
-            @RequestPart("data") String data,
-            @AuthenticationPrincipal UserPrincipal principal
-    ) throws IOException {
-        MedicalReportAddRequest addRequest = new ObjectMapper().readValue(data, MedicalReportAddRequest.class);
-        MedicalReportDocument medicalReportDocument = medicalReportDocumentService.addMedicalReport(file,
-                addRequest,
-                principal.getUserEntity());
-        return new ResponseEntity<>(medicalReportDocument.toDto(), HttpStatus.CREATED);
-    }
+//    @Operation(
+//            summary = "Upload a document",
+//            description = """
+//                    Uploads a document to the cloud which can be
+//                    later previewed/downloaded using the UUID returned. \n
+//                    Example input for `data`: `{
+//                                           "title":"Test File",
+//                                           "description":"",
+//                                           "studentId":"23000002",
+//                                           "parentCategoryId":1,
+//                                           "categoryId":2
+//                                       }`
+//                    """
+//    )
+//    @PostMapping(value = "/upload", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+//    public ResponseEntity<DocumentDto> upload(
+//            @RequestPart("file") MultipartFile file,
+//            @RequestPart("data") String data,
+//            @AuthenticationPrincipal UserPrincipal principal
+//    ) throws IOException {
+//        DocumentAddRequest addRequest = new ObjectMapper().readValue(data, DocumentAddRequest.class);
+//        Document uploadedDocument = documentService.addDocument(file, addRequest, principal.getUserEntity());
+//        return new ResponseEntity<>(uploadedDocument.toDto(), HttpStatus.CREATED);
+//    }
+//
+//    @Operation(
+//            summary = "Upload contact document",
+//            description = """
+//                    Generates and uploads contact form document.
+//                    """
+//    )
+//    @PostMapping("/upload/contact")
+//    public ResponseEntity<ContactDocumentDto> postContactDocument(
+//            @Valid @RequestBody ContactDocumentAddRequest addRequest,
+//            @AuthenticationPrincipal UserPrincipal principal
+//    ) {
+//        ContactDocument contactDocument = contactDocumentService.addContactDocument(addRequest, principal.getUserEntity());
+//        return new ResponseEntity<>(contactDocument.toDto(), HttpStatus.CREATED);
+//    }
+//
+//    @Operation(
+//            summary = "Upload petition document",
+//            description = """
+//                    Generates and uploads petition document.
+//                    """
+//    )
+//    @PostMapping("/upload/petition")
+//    public ResponseEntity<PetitionDocumentDto> postPetitionDocument(
+//            @Valid @RequestBody PetitionDocumentAddRequest addRequest,
+//            @AuthenticationPrincipal UserPrincipal principal
+//    ) {
+//        PetitionDocument petitionDocument = petitionDocumentService.addPetitionDocument(addRequest, principal.getUserEntity());
+//        return new ResponseEntity<>(petitionDocument.toDto(), HttpStatus.CREATED);
+//    }
+//
+//    @Operation(
+//            summary = "Upload internship document",
+//            description = """
+//                    Uploads an internship document to the cloud which can be
+//                    later previewed/downloaded using the UUID returned. \n
+//                    Example input for `data`: `{
+//                                           "title":"Test File",
+//                                           "description":"",
+//                                           "studentId":"23000002",
+//                                           "numberOfWorkingDays":20
+//                                       }`
+//                    """
+//    )
+//    @PostMapping(value = "/upload/internship", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+//    public ResponseEntity<InternshipDocumentDto> uploadInternshipDocument(
+//            @RequestPart("file") MultipartFile file,
+//            @RequestPart("data") String data,
+//            @AuthenticationPrincipal UserPrincipal principal
+//    ) throws IOException {
+//        InternshipAddRequest addRequest = new ObjectMapper().readValue(data, InternshipAddRequest.class);
+//        InternshipDocument internshipDocument = internshipDocumentService.addInternship(file, addRequest, principal.getUserEntity());
+//        return new ResponseEntity<>(internshipDocument.toDto(), HttpStatus.CREATED);
+//    }
+//
+//    @Operation(
+//            summary = "Upload medical document",
+//            description = """
+//                    Uploads an medical document to the cloud which can be
+//                    later previewed/downloaded using the UUID returned. \n
+//                    Example input for `data`: `{
+//                                        	"title": "Medical Report 1",
+//                                        	"description": "some text",
+//                                        	"dateOfAbsence": "2024-03-09"
+//                                        }`
+//                    """
+//    )
+//    @PostMapping(value = "/upload/medical-report", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+//    public ResponseEntity<MedicalReportDto> uploadMedicalReportDocument(
+//            @RequestPart("file") MultipartFile file,
+//            @RequestPart("data") String data,
+//            @AuthenticationPrincipal UserPrincipal principal
+//    ) throws IOException {
+//        MedicalReportAddRequest addRequest = new ObjectMapper().readValue(data, MedicalReportAddRequest.class);
+//        MedicalReportDocument medicalReportDocument = medicalReportDocumentService.addMedicalReport(file,
+//                addRequest,
+//                principal.getUserEntity());
+//        return new ResponseEntity<>(medicalReportDocument.toDto(), HttpStatus.CREATED);
+//    }
 
     @Operation(
             summary = "Modify document category",

@@ -120,8 +120,6 @@ public class AzureBlobService {
                                 .replace(FileNameUtils.getFileExtension(name), "")
                 )
                 .toList();
-        log.debug("blobsInParentFolder = {}", blobsInParentFolder);
-
         int count = 1;
         while (blobsInParentFolder.contains(fileNameWithoutExtension)) {
             if (count >= maxFileRenameTries) {

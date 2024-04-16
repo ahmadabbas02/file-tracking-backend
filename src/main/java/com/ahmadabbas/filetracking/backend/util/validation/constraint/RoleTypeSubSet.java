@@ -1,6 +1,7 @@
-package com.ahmadabbas.filetracking.backend.validator;
+package com.ahmadabbas.filetracking.backend.util.validation.constraint;
 
 import com.ahmadabbas.filetracking.backend.user.Role;
+import com.ahmadabbas.filetracking.backend.util.validation.validator.RoleTypeSubSetValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

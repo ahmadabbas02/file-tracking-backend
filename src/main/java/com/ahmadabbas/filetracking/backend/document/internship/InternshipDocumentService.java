@@ -2,7 +2,7 @@ package com.ahmadabbas.filetracking.backend.document.internship;
 
 import com.ahmadabbas.filetracking.backend.category.Category;
 import com.ahmadabbas.filetracking.backend.category.CategoryService;
-import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipAddRequest;
+import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentAddRequest;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
 import com.ahmadabbas.filetracking.backend.user.Role;
@@ -29,7 +29,7 @@ public class InternshipDocumentService {
 
     @Transactional
     public InternshipDocument addInternship(MultipartFile file,
-                                            InternshipAddRequest addRequest,
+                                            InternshipDocumentAddRequest addRequest,
                                             User loggedInUser) throws IOException {
         if (!loggedInUser.getRoles().contains(Role.SECRETARY)) {
             throw new AccessDeniedException("not authorized, only secretary can do this.");

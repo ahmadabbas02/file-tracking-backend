@@ -39,7 +39,6 @@ public class PetitionDocumentService {
     @Qualifier("webApplicationContext")
     private final ResourceLoader resourceLoader;
     private final AzureBlobService azureBlobService;
-    private final DocumentService documentService;
 
     @Transactional
     public PetitionDocument addPetitionDocument(PetitionDocumentAddRequest addRequest, User loggedInUser) {

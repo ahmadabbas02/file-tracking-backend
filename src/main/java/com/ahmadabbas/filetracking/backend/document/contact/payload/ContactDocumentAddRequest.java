@@ -1,27 +1,59 @@
 package com.ahmadabbas.filetracking.backend.document.contact.payload;
 
+import com.ahmadabbas.filetracking.backend.document.base.payload.BaseDocumentAddRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 
-import java.io.Serializable;
+public final class ContactDocumentAddRequest extends BaseDocumentAddRequest {
+    @JsonProperty
+    @Email(message = "Contact form email should be valid")
+    private final String email;
+    @JsonProperty
+    @NotEmpty(message = "Contact form phone number should not be empty")
+    private final String phoneNumber;
+    @JsonProperty
+    @NotEmpty(message = "Contact form home number should not be empty")
+    private final String homeNumber;
+    @JsonProperty
+    @NotEmpty(message = "Contact form emergency name should not be empty")
+    private final String emergencyName;
+    @JsonProperty
+    @NotEmpty(message = "Contact form phone number description should not be empty")
+    private final String emergencyPhoneNumber;
 
+    public ContactDocumentAddRequest(String title,
+                                     String description,
+                                     String email,
+                                     String phoneNumber,
+                                     String homeNumber,
+                                     String emergencyName,
+                                     String emergencyPhoneNumber) {
+        super(title, description);
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.homeNumber = homeNumber;
+        this.emergencyName = emergencyName;
+        this.emergencyPhoneNumber = emergencyPhoneNumber;
+    }
 
-public record ContactDocumentAddRequest(
-        @NotEmpty(message = "Contact form title should not be empty") String title,
-        String description,
-        @Email(message = "Contact form email should be valid") String email,
-        @NotEmpty(message = "Contact form phone number should not be empty") String phoneNumber,
-        @NotEmpty(message = "Contact form home number should not be empty") String homeNumber,
-        @NotEmpty(message = "Contact form emergency name should not be empty") String emergencyName,
-        @NotEmpty(message = "Contact form phone number description should not be empty") String emergencyPhoneNumber
-) implements Serializable {
-    public ContactDocumentAddRequest {
-        title = title.trim();
-        if (description == null) {
-            description = "";
-        } else {
-            description = description.trim();
-        }
-        email = email.toLowerCase();
+    public String email() {
+        return email.trim().toLowerCase();
+    }
+
+    public String phoneNumber() {
+        return phoneNumber;
+    }
+
+    public String homeNumber() {
+        return homeNumber;
+    }
+
+    public String emergencyName() {
+        return emergencyName;
+    }
+
+    public String emergencyPhoneNumber() {
+        return emergencyPhoneNumber;
     }
 }

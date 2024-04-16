@@ -13,7 +13,15 @@ import com.ahmadabbas.filetracking.backend.document.base.repository.DocumentStud
 import com.ahmadabbas.filetracking.backend.document.base.view.DocumentPreviewView;
 import com.ahmadabbas.filetracking.backend.document.base.view.DocumentStudentIdView;
 import com.ahmadabbas.filetracking.backend.document.base.view.DocumentStudentView;
+import com.ahmadabbas.filetracking.backend.document.contact.ContactDocumentService;
+import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentAddRequest;
+import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumentService;
+import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentAddRequest;
+import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocumentService;
+import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportAddRequest;
 import com.ahmadabbas.filetracking.backend.document.medical.view.MedicalReportDocumentStudentView;
+import com.ahmadabbas.filetracking.backend.document.petition.PetitionDocumentService;
+import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentAddRequest;
 import com.ahmadabbas.filetracking.backend.document.petition.view.PetitionDocumentStudentView;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
@@ -52,6 +60,8 @@ import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static com.ahmadabbas.filetracking.backend.util.ValidationUtils.getObjectMapperWithValidation;
+
 @Service
 @Transactional(readOnly = true)
 @Slf4j
@@ -66,6 +76,10 @@ public class DocumentService {
     private final DocumentStudentIdViewRepository documentStudentIdViewRepository;
     private final DocumentStudentViewRepository documentStudentViewRepository;
     private final DocumentPreviewViewRepository documentPreviewViewRepository;
+    private final MedicalReportDocumentService medicalReportDocumentService;
+    private final ContactDocumentService contactDocumentService;
+    private final InternshipDocumentService internshipDocumentService;
+    private final PetitionDocumentService petitionDocumentService;
 
     public DocumentStudentIdView getDocumentStudentIdView(UUID uuid, User loggedInUser) {
         Session session = entityManager.unwrap(Session.class);
@@ -132,13 +146,45 @@ public class DocumentService {
     }
 
     @Transactional
+    public Document addDocument(MultipartFile file, String data, Long categoryId, User loggedInUser) throws IOException {
+        Category category = categoryService.getCategory(categoryId, loggedInUser);
+        Category parentCategory = null;
+        if (category.getParentCategoryId() != -1) {
+            parentCategory = categoryService.getCategory(category.getParentCategoryId(), loggedInUser);
+        }
+
+        Map<String, Class<?>> categoryDto = new HashMap<>();
+        categoryDto.put("Medical Report", MedicalReportAddRequest.class);
+        categoryDto.put("Contact Form", ContactDocumentAddRequest.class);
+        categoryDto.put("Internship", InternshipDocumentAddRequest.class);
+        categoryDto.put("Petition", PetitionDocumentAddRequest.class);
+
+        String categoryName = parentCategory != null ? parentCategory.getName() : category.getName();
+
+        Class<?> dto = categoryDto.getOrDefault(categoryName, DocumentAddRequest.class);
+        Object addRequest = getObjectMapperWithValidation().readValue(data, dto);
+        if (addRequest instanceof MedicalReportAddRequest) {
+            return medicalReportDocumentService.addMedicalReport(file, (MedicalReportAddRequest) addRequest, loggedInUser);
+        } else if (addRequest instanceof ContactDocumentAddRequest) {
+            return contactDocumentService.addContactDocument((ContactDocumentAddRequest) addRequest, loggedInUser);
+        } else if (addRequest instanceof InternshipDocumentAddRequest) {
+            return internshipDocumentService.addInternship(file, (InternshipDocumentAddRequest) addRequest, loggedInUser);
+        } else if (addRequest instanceof PetitionDocumentAddRequest) {
+            return petitionDocumentService.addPetitionDocument((PetitionDocumentAddRequest) addRequest, loggedInUser);
+        } else {
+            return addDocument(file, (DocumentAddRequest) addRequest, categoryId, loggedInUser);
+        }
+    }
+
+    @Transactional
     public Document addDocument(MultipartFile file,
                                 DocumentAddRequest addRequest,
+                                Long categoryId,
                                 User loggedInUser) throws IOException {
         if (loggedInUser.getRoles().contains(Role.STUDENT)) {
             throw new AccessDeniedException("not authorized..");
         }
-        Category category = categoryService.getCategory(addRequest.categoryId(), loggedInUser);
+        Category category = categoryService.getCategory(categoryId, loggedInUser);
         Student student = studentService.getStudent(addRequest.studentId(), loggedInUser);
         String cloudPath = azureBlobService.upload(file, addRequest.studentId(), category.getName(), addRequest.title());
         log.debug("cloudPath received from uploading file: %s".formatted(cloudPath));

@@ -1,6 +1,9 @@
 package com.ahmadabbas.filetracking.backend.exception;
 
 import com.ahmadabbas.filetracking.backend.exception.payload.ErrorDetails;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpHeaders;
@@ -98,6 +101,38 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 webRequest.getDescription(false)
         );
         return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(JsonProcessingException.class)
+    public ResponseEntity<ErrorDetails> handleJsonProcessingException(Exception exception,
+                                                                      WebRequest webRequest) {
+        log.error("JsonProcessingException: ", exception);
+        if (exception instanceof UnrecognizedPropertyException unrecognizedException) {
+            String errorMessage = "Got unexpected property `%s`, expected properties: %s"
+                    .formatted(unrecognizedException.getPropertyName(), unrecognizedException.getKnownPropertyIds());
+            ErrorDetails errorDetails = new ErrorDetails(
+                    LocalDateTime.now(ZoneId.of("Europe/Athens")),
+                    errorMessage,
+                    webRequest.getDescription(false)
+            );
+            return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+        } else {
+            ErrorDetails errorDetails = new ErrorDetails(
+                    LocalDateTime.now(ZoneId.of("Europe/Athens")),
+                    exception.getMessage(),
+                    webRequest.getDescription(false)
+            );
+            return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException exception,
+                                                                     WebRequest webRequest) {
+        log.error("ConstraintViolationException: ", exception);
+        HashMap<String, String> errors = new HashMap<>();
+        exception.getConstraintViolations().forEach(cv -> errors.put(cv.getPropertyPath().toString(), cv.getMessage()));
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)

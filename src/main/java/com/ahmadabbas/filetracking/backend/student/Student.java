@@ -11,7 +11,6 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.StringJoiner;
 
 @Getter
 @Setter
@@ -53,6 +52,11 @@ public class Student {
     @Builder.Default
     private DocumentStatus.InternshipPaymentStatus paymentStatus = DocumentStatus.InternshipPaymentStatus.NOT_PAID;
 
+//    @Enumerated(EnumType.STRING)
+//    @Column(nullable = false)
+//    @Builder.Default
+//    private EducationStatus educationStatus = EducationStatus.UNDERGRADUATE;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
@@ -86,4 +90,7 @@ public class Student {
         return Objects.hash(getId(), getProgram(), getYear(), getUser(), getAdvisor(), getInternshipCompletionStatus(), getPaymentStatus(), getCreatedAt());
     }
 
+    enum EducationStatus {
+        UNDERGRADUATE, GRADUATE
+    }
 }
