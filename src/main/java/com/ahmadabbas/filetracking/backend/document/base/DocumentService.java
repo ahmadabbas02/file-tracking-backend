@@ -15,8 +15,6 @@ import com.ahmadabbas.filetracking.backend.document.base.view.DocumentStudentIdV
 import com.ahmadabbas.filetracking.backend.document.base.view.DocumentStudentView;
 import com.ahmadabbas.filetracking.backend.document.contact.ContactDocumentService;
 import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentAddRequest;
-import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumentService;
-import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentAddRequest;
 import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocumentService;
 import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportAddRequest;
 import com.ahmadabbas.filetracking.backend.document.medical.view.MedicalReportDocumentStudentView;
@@ -78,7 +76,6 @@ public class DocumentService {
     private final DocumentPreviewViewRepository documentPreviewViewRepository;
     private final MedicalReportDocumentService medicalReportDocumentService;
     private final ContactDocumentService contactDocumentService;
-    private final InternshipDocumentService internshipDocumentService;
     private final PetitionDocumentService petitionDocumentService;
 
     public DocumentStudentIdView getDocumentStudentIdView(UUID uuid, User loggedInUser) {
@@ -156,7 +153,6 @@ public class DocumentService {
         Map<String, Class<?>> categoryDto = new HashMap<>();
         categoryDto.put("Medical Report", MedicalReportAddRequest.class);
         categoryDto.put("Contact Form", ContactDocumentAddRequest.class);
-        categoryDto.put("Internship", InternshipDocumentAddRequest.class);
         categoryDto.put("Petition", PetitionDocumentAddRequest.class);
 
         String categoryName = parentCategory != null ? parentCategory.getName() : category.getName();
@@ -167,8 +163,6 @@ public class DocumentService {
             return medicalReportDocumentService.addMedicalReport(file, (MedicalReportAddRequest) addRequest, loggedInUser);
         } else if (addRequest instanceof ContactDocumentAddRequest) {
             return contactDocumentService.addContactDocument((ContactDocumentAddRequest) addRequest, loggedInUser);
-        } else if (addRequest instanceof InternshipDocumentAddRequest) {
-            return internshipDocumentService.addInternship(file, (InternshipDocumentAddRequest) addRequest, loggedInUser);
         } else if (addRequest instanceof PetitionDocumentAddRequest) {
             return petitionDocumentService.addPetitionDocument((PetitionDocumentAddRequest) addRequest, loggedInUser);
         } else {

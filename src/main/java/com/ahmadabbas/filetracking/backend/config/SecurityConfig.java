@@ -88,7 +88,7 @@ public class SecurityConfig {
                 .requestMatchers(POST, "api/v1/categories")
                 .hasAnyRole(ADMINISTRATOR.name(), CHAIR.name(), SECRETARY.name())
                 // only secretary and admin can upload
-                .requestMatchers(POST, "api/v1/documents/upload", "api/v1/documents/upload/internship")
+                .requestMatchers(POST, "api/v1/documents/upload")
                 .hasAnyRole(ADMINISTRATOR.name(), SECRETARY.name())
                 // only admin can change category permissions them
                 .requestMatchers(POST, "api/v1/categories/permissions/**")

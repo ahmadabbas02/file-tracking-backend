@@ -11,10 +11,6 @@ import com.ahmadabbas.filetracking.backend.document.contact.ContactDocument;
 import com.ahmadabbas.filetracking.backend.document.contact.ContactDocumentService;
 import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentAddRequest;
 import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocumentDto;
-import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocument;
-import com.ahmadabbas.filetracking.backend.document.internship.InternshipDocumentService;
-import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentAddRequest;
-import com.ahmadabbas.filetracking.backend.document.internship.payload.InternshipDocumentDto;
 import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocument;
 import com.ahmadabbas.filetracking.backend.document.medical.MedicalReportDocumentService;
 import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalReportAddRequest;
@@ -60,7 +56,6 @@ public class DocumentController {
     private final MedicalReportDocumentService medicalReportDocumentService;
     private final ContactDocumentService contactDocumentService;
     private final PetitionDocumentService petitionDocumentService;
-    private final InternshipDocumentService internshipDocumentService;
 
     @Operation(
             summary = "Get document information",
@@ -255,30 +250,6 @@ public class DocumentController {
     ) {
         PetitionDocument petitionDocument = petitionDocumentService.addPetitionDocument(addRequest, principal.getUserEntity());
         return new ResponseEntity<>(petitionDocument.toDto(), HttpStatus.CREATED);
-    }
-
-    @Operation(
-            summary = "Upload internship document",
-            description = """
-                    Uploads an internship document to the cloud which can be
-                    later previewed/downloaded using the UUID returned. \n
-                    Example input for `data`: `{
-                                           "title":"Test File",
-                                           "description":"",
-                                           "studentId":"23000002",
-                                           "numberOfWorkingDays":20
-                                       }`
-                    """
-    )
-    @PostMapping(value = "/upload/internship", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<InternshipDocumentDto> uploadInternshipDocument(
-            @RequestPart("file") MultipartFile file,
-            @RequestPart("data") String data,
-            @AuthenticationPrincipal UserPrincipal principal
-    ) throws IOException {
-        InternshipDocumentAddRequest addRequest = new ObjectMapper().readValue(data, InternshipDocumentAddRequest.class);
-        InternshipDocument internshipDocument = internshipDocumentService.addInternship(file, addRequest, principal.getUserEntity());
-        return new ResponseEntity<>(internshipDocument.toDto(), HttpStatus.CREATED);
     }
 
     @Operation(
