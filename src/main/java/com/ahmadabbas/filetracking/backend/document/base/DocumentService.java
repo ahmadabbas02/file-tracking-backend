@@ -172,19 +172,18 @@ public class DocumentService {
         } else if (addRequest instanceof PetitionDocumentAddRequest) {
             return petitionDocumentService.addPetitionDocument((PetitionDocumentAddRequest) addRequest, loggedInUser);
         } else {
-            return addDocument(file, (DocumentAddRequest) addRequest, categoryId, loggedInUser);
+            return addDocument(file, (DocumentAddRequest) addRequest, loggedInUser);
         }
     }
 
     @Transactional
     public Document addDocument(MultipartFile file,
                                 DocumentAddRequest addRequest,
-                                Long categoryId,
                                 User loggedInUser) throws IOException {
         if (loggedInUser.getRoles().contains(Role.STUDENT)) {
             throw new AccessDeniedException("not authorized..");
         }
-        Category category = categoryService.getCategory(categoryId, loggedInUser);
+        Category category = categoryService.getCategory(addRequest.categoryId(), loggedInUser);
         Student student = studentService.getStudent(addRequest.studentId(), loggedInUser);
         String cloudPath = azureBlobService.upload(file, addRequest.studentId(), category.getName(), addRequest.title());
         log.debug("cloudPath received from uploading file: %s".formatted(cloudPath));
