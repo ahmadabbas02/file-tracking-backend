@@ -10,7 +10,6 @@ import com.ahmadabbas.filetracking.backend.document.comment.payload.CommentMappe
 import com.ahmadabbas.filetracking.backend.user.UserPrincipal;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedMapResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
-import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -171,12 +170,12 @@ public class DocumentController {
     )
     @PostMapping(value = "/upload-new", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
     public ResponseEntity<DocumentDto> uploadNew(
-            @RequestPart(value = "file", required = false) MultipartFile file,
-            @RequestPart("data") @JsonView String data,
-            @RequestParam("categoryId") Long categoryId,
+            @RequestPart(required = false) MultipartFile file,
+            @RequestPart String data,
+            @RequestPart String categoryId,
             @AuthenticationPrincipal UserPrincipal principal
     ) throws IOException {
-        Document uploadedDocument = documentService.addDocument(file, data, categoryId, principal.getUserEntity());
+        Document uploadedDocument = documentService.addDocument(file, data, Long.valueOf(categoryId), principal.getUserEntity());
         return new ResponseEntity<>(uploadedDocument.toDto(), HttpStatus.CREATED);
     }
 
