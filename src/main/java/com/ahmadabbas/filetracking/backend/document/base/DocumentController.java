@@ -306,7 +306,7 @@ public class DocumentController {
     @GetMapping("/preview")
     public ResponseEntity<byte[]> getFilePreview(@AuthenticationPrincipal UserPrincipal user,
                                                  @RequestParam UUID uuid) throws IOException {
-        DocumentPreview documentPreview = documentService.getDocumentPreview(user.getUserEntity(), uuid);
+        DocumentPreview documentPreview = documentService.getDocumentPreview(uuid, user.getUserEntity());
         if (documentPreview != null) {
             String fileName = documentPreview.fileName();
             byte[] blob = documentPreview.blob();
@@ -330,7 +330,7 @@ public class DocumentController {
     @PostMapping("/download")
     public ResponseEntity<byte[]> downloadFiles(@AuthenticationPrincipal UserPrincipal user,
                                                 @Valid @RequestBody DocumentDownloadRequest request) throws IOException {
-        byte[] zipData = documentService.getDocumentsZip(user.getUserEntity(), request.uuids());
+        byte[] zipData = documentService.getDocumentsZip(request.uuids(), user.getUserEntity());
         if (zipData != null) {
             LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Athens"));
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");

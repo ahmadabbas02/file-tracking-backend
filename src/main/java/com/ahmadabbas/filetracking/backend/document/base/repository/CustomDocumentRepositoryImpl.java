@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.document.base.repository;
 
 import com.ahmadabbas.filetracking.backend.document.base.Document;
+import com.ahmadabbas.filetracking.backend.document.base.view.DocumentPreviewView;
 import com.ahmadabbas.filetracking.backend.document.base.view.DocumentStudentView;
 import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaBuilderFactory;
@@ -74,4 +75,14 @@ public class CustomDocumentRepositoryImpl implements CustomDocumentRepository {
         );
     }
 
+    @Override
+    public List<DocumentPreviewView> findDocumentPreviews(List<UUID> uuids) {
+        CriteriaBuilder<Document> criteriaBuilder = criteriaBuilderFactory
+                .create(entityManager, Document.class)
+                .where("id").in(uuids)
+                .distinct();
+        var documentCategoryViewCriteriaBuilder
+                = evm.applySetting(EntityViewSetting.create(DocumentPreviewView.class), criteriaBuilder);
+        return documentCategoryViewCriteriaBuilder.getResultList();
+    }
 }

@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.document.base.repository;
 
 import com.ahmadabbas.filetracking.backend.document.base.Document;
+import com.ahmadabbas.filetracking.backend.document.base.view.DocumentPreviewView;
 import com.ahmadabbas.filetracking.backend.document.base.view.DocumentStudentView;
 import org.springframework.data.domain.*;
 
@@ -17,4 +18,5 @@ public interface CustomDocumentRepository {
                                                String searchQuery,
                                                Pageable pageable);
 
+    List<DocumentPreviewView> findDocumentPreviews(List<UUID> uuids);
 }

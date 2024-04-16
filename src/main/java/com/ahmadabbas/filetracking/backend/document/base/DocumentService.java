@@ -31,6 +31,7 @@ import com.blazebit.persistence.view.EntityViewManager;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.hibernate.Filter;
 import org.hibernate.Session;
 import org.springframework.data.domain.Page;
@@ -45,6 +46,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -157,7 +161,7 @@ public class DocumentService {
         return document;
     }
 
-    public DocumentPreview getDocumentPreview(User loggedInUser, UUID uuid) throws IOException {
+    public DocumentPreview getDocumentPreview(UUID uuid, User loggedInUser) throws IOException {
         DocumentPreviewView document = getDocumentPreviewView(uuid, loggedInUser);
         try (InputStream inputStream = azureBlobService.getInputStream(document.getPath(), uuid)) {
             byte[] blob = inputStream.readAllBytes();
@@ -165,27 +169,38 @@ public class DocumentService {
         }
     }
 
-    public byte[] getDocumentsZip(User loggedInUser, List<UUID> uuids) throws IOException {
-        ByteArrayOutputStream zipOutputStream = new ByteArrayOutputStream();
-        ZipOutputStream outputStream = new ZipOutputStream(zipOutputStream);
+    public byte[] getDocumentsZip(List<UUID> uuids, User loggedInUser) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
 
-        for (var uuid : uuids) {
-            Document document = getDocument(uuid, loggedInUser);
-            InputStream blobInputStream = azureBlobService.getInputStream(document.getPath(), uuid);
-            String originalFileName = document.getFileName();
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-            outputStream.putNextEntry(new ZipEntry(originalFileName));
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = blobInputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, length);
-            }
-            outputStream.closeEntry();
-            blobInputStream.close();
+        List<DocumentPreviewView> documents = getDocumentPreviews(uuids, loggedInUser);
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        for (var document : documents) {
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                String originalFileName = document.getFileName();
+                try {
+                    InputStream blobInputStream = azureBlobService.getInputStream(document.getPath(), document.getId());
+                    synchronized (zipOutputStream) {
+                        zipOutputStream.putNextEntry(new ZipEntry(originalFileName));
+                        IOUtils.copy(blobInputStream, zipOutputStream);
+                        zipOutputStream.closeEntry();
+                    }
+                    blobInputStream.close();
+                } catch (IOException e) {
+                    throw new APIException(HttpStatus.INTERNAL_SERVER_ERROR, "failed to download multiple documents");
+                }
+            }, executorService);
+            futures.add(future);
         }
-        outputStream.close();
 
-        return zipOutputStream.toByteArray();
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        executorService.shutdown();
+
+        zipOutputStream.close();
+
+        return byteArrayOutputStream.toByteArray();
     }
 
     public PaginatedResponse<DocumentStudentView> getAllDocuments(User loggedInUser,
@@ -271,7 +286,7 @@ public class DocumentService {
 
         for (var document : documents.results()) {
             String id = String.valueOf(document.getId());
-            DocumentPreview preview = getDocumentPreview(loggedInUser, UUID.fromString(id));
+            DocumentPreview preview = getDocumentPreview(UUID.fromString(id), loggedInUser);
             blobs.put(id, preview.blob());
         }
 
@@ -311,14 +326,27 @@ public class DocumentService {
         );
     }
 
-    private Set<Role> getAndCheckUserRolePermissions(User loggedInUser, Document document) {
+    private List<DocumentPreviewView> getDocumentPreviews(List<UUID> uuids, User loggedInUser) {
+        Session session = entityManager.unwrap(Session.class);
+        Filter filter = session.enableFilter("deletedDocumentFilter");
+        filter.setParameter("isDeleted", false);
+        List<DocumentPreviewView> documents = documentRepository.findDocumentPreviews(uuids);
+        checkDocumentsPermissions(loggedInUser, documents);
+        session.disableFilter("deletedDocumentFilter");
+        return documents;
+    }
+
+    private void checkDocumentsPermissions(User loggedInUser, List<DocumentPreviewView> documentDownloadViews) {
         Set<Role> roles = loggedInUser.getRoles();
-        if (roles.contains(Role.STUDENT)) {
-            checkStudentDocumentPermissions(loggedInUser, document.getStudent().getId());
-        } else if (roles.contains(Role.ADVISOR)) {
-            checkAdvisorDocumentPermissions(loggedInUser);
+        List<Long> allowedCategories = categoryService.getAllowedCategoriesIds(roles);
+        List<Long> documentsCategoryIds = documentDownloadViews.parallelStream().map(DocumentPreviewView::getCategoryId).toList();
+        if (documentsCategoryIds.parallelStream().anyMatch(n -> !allowedCategories.contains(n))) {
+            throw new AccessDeniedException("not authorized to perform action");
         }
-        return roles;
+        if (documentDownloadViews.parallelStream()
+                .anyMatch(d -> !checkUserSpecificRolePerms(loggedInUser, d.getStudentId(), roles))) {
+            throw new AccessDeniedException("not authorized to perform action");
+        }
     }
 
     private void checkDocumentPermissions(User loggedInUser, String documentStudentId, Long categoryId, String categoryName) {
@@ -333,12 +361,17 @@ public class DocumentService {
 
     private Set<Role> getAndCheckUserRolePermissions(User loggedInUser, String documentStudentId) {
         Set<Role> roles = loggedInUser.getRoles();
+        checkUserSpecificRolePerms(loggedInUser, documentStudentId, roles);
+        return roles;
+    }
+
+    private boolean checkUserSpecificRolePerms(User loggedInUser, String documentStudentId, Set<Role> roles) {
         if (roles.contains(Role.STUDENT)) {
             checkStudentDocumentPermissions(loggedInUser, documentStudentId);
         } else if (roles.contains(Role.ADVISOR)) {
             checkAdvisorDocumentPermissions(loggedInUser);
         }
-        return roles;
+        return true;
     }
 
     private void checkAdvisorDocumentPermissions(User loggedInUser) {
