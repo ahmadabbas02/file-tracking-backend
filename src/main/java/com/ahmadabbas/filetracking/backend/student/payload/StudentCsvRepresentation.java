@@ -1,5 +1,6 @@
 package com.ahmadabbas.filetracking.backend.student.payload;
 
+import com.ahmadabbas.filetracking.backend.student.EducationStatus;
 import com.opencsv.bean.CsvBindByName;
 import lombok.*;
 
@@ -14,9 +15,9 @@ public class StudentCsvRepresentation {
     @CsvBindByName
     private String advisorId;
     @CsvBindByName
-    private String name;
+    private String firstName;
     @CsvBindByName
-    private String surname;
+    private String lastName;
     @CsvBindByName
     private String password;
     @CsvBindByName
@@ -27,6 +28,8 @@ public class StudentCsvRepresentation {
     private String phoneNumber;
     @CsvBindByName
     private short year;
+    @CsvBindByName
+    private EducationStatus educationStatus;
     @CsvBindByName
     private String picture;
     @CsvBindByName

@@ -178,6 +178,7 @@ public class DocumentService {
             throw new AccessDeniedException("not authorized..");
         }
         Category category = categoryService.getCategory(addRequest.categoryId(), loggedInUser);
+        checkIsDefenseCategory(category);
         Student student = studentService.getStudent(addRequest.studentId(), loggedInUser);
         String cloudPath = azureBlobService.upload(file, addRequest.studentId(), category.getName(), addRequest.title());
         log.debug("cloudPath received from uploading file: %s".formatted(cloudPath));
@@ -280,7 +281,7 @@ public class DocumentService {
                 log.debug("setting studentIds to the advisor's students: {}", studentIds);
             }
         }
-        List<Long> allowedCategoriesIds = categoryService.getAllowedCategoriesIds(loggedInUser.getRoles());
+        List<Long> allowedCategoriesIds = categoryService.getAllowedCategoriesIds(loggedInUser);
         boolean isMainCategoriesAllowed = categoryIds.isEmpty() || new HashSet<>(allowedCategoriesIds).containsAll(categoryIds);
         if (!isMainCategoriesAllowed) {
             log.debug("not allowed!");
@@ -365,6 +366,15 @@ public class DocumentService {
         );
     }
 
+    private void checkIsDefenseCategory(Category category) {
+        String name = category.getName().toLowerCase();
+        if (name.contains("defense")) {
+            if (category.getParentCategoryId() == -1) {
+                throw new APIException(HttpStatus.BAD_REQUEST, "You should select either before or after defense category!");
+            }
+        }
+    }
+
     private List<DocumentPreviewView> getDocumentPreviews(List<UUID> uuids, User loggedInUser) {
         Session session = entityManager.unwrap(Session.class);
         Filter filter = session.enableFilter("deletedDocumentFilter");
@@ -377,7 +387,7 @@ public class DocumentService {
 
     private void checkDocumentsPermissions(User loggedInUser, List<DocumentPreviewView> documentDownloadViews) {
         Set<Role> roles = loggedInUser.getRoles();
-        List<Long> allowedCategories = categoryService.getAllowedCategoriesIds(roles);
+        List<Long> allowedCategories = categoryService.getAllowedCategoriesIds(loggedInUser);
         List<Long> documentsCategoryIds = documentDownloadViews.parallelStream().map(DocumentPreviewView::getCategoryId).toList();
         if (documentsCategoryIds.parallelStream().anyMatch(n -> !allowedCategories.contains(n))) {
             throw new AccessDeniedException("not authorized to perform action");
@@ -390,7 +400,7 @@ public class DocumentService {
 
     private void checkDocumentPermissions(User loggedInUser, String documentStudentId, Long categoryId, String categoryName) {
         Set<Role> roles = getAndCheckUserRolePermissions(loggedInUser, documentStudentId);
-        List<Long> allowedCategories = categoryService.getAllowedCategoriesIds(roles);
+        List<Long> allowedCategories = categoryService.getAllowedCategoriesIds(loggedInUser);
         if (!allowedCategories.contains(categoryId)) {
             throw new AccessDeniedException(
                     "not authorized to view %s category".formatted(categoryName)

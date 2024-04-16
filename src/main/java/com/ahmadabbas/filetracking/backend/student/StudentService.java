@@ -224,6 +224,7 @@ public class StudentService {
                         .advisor(advisor)
                         .program(studentRegistrationRequest.program())
                         .year(studentRegistrationRequest.year())
+                        .educationStatus(studentRegistrationRequest.educationStatus())
                         .user(savedUser)
                         .build()
         );
@@ -270,29 +271,31 @@ public class StudentService {
         Instant startBuildList = Instant.now();
         List<Student> students = filteredStudents
                 .parallelStream()
-                .map(s -> {
+                .map(csv -> {
                     Advisor advisor = null;
                     User user = User.builder()
-                            .firstName(s.getName())
-                            .lastName(s.getSurname())
-                            .email(s.getEmail())
-                            .password(passwordEncoder.encode(s.getPassword()))
-                            .phoneNumber(s.getPhoneNumber())
+                            .firstName(csv.getFirstName())
+                            .lastName(csv.getLastName())
+                            .email(csv.getEmail())
+                            .password(passwordEncoder.encode(csv.getPassword()))
+                            .phoneNumber(csv.getPhoneNumber())
                             .role(Role.STUDENT)
-                            .picture(s.getPicture())
-                            .isEnabled(s.isEnabled())
+                            .picture(csv.getPicture())
+                            .isEnabled(csv.isEnabled())
                             .isCredentialsNonExpired(true)
                             .build();
-                    if (!s.getAdvisorId().isBlank()) {
-                        advisor = advisorService.getAdvisorByAdvisorId(s.getAdvisorId(), loggedInUser);
+
+                    if (!csv.getAdvisorId().isBlank()) {
+                        advisor = advisorService.getAdvisorByAdvisorId(csv.getAdvisorId(), loggedInUser);
                     }
 
                     return Student.builder()
-                            .id(s.getStudentId())
+                            .id(csv.getStudentId())
                             .advisor(advisor)
-                            .program(s.getProgram())
-                            .year(s.getYear())
+                            .program(csv.getProgram())
+                            .year(csv.getYear())
                             .version(0)
+                            .educationStatus(csv.getEducationStatus())
                             .user(user)
                             .build();
                 }).toList();

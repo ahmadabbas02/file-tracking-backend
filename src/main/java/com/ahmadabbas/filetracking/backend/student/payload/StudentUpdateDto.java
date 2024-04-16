@@ -2,6 +2,7 @@ package com.ahmadabbas.filetracking.backend.student.payload;
 
 import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
+import com.ahmadabbas.filetracking.backend.student.EducationStatus;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
@@ -19,12 +20,13 @@ public class StudentUpdateDto implements Serializable {
     private String advisorId;
     private final DocumentStatus.InternshipCompletionStatus internshipCompletionStatus;
     private final DocumentStatus.InternshipPaymentStatus paymentStatus;
+    private final EducationStatus educationStatus;
 
     public StudentUpdateDto(String program,
                             Short year,
                             String advisorId,
                             DocumentStatus.InternshipCompletionStatus internshipCompletionStatus,
-                            DocumentStatus.InternshipPaymentStatus paymentStatus) {
+                            DocumentStatus.InternshipPaymentStatus paymentStatus, EducationStatus educationStatus) {
         List<String> allowedProgramValues = Arrays.asList("CMSE", "CMPE", "BLGM");
         if (program != null && !allowedProgramValues.contains(program)) {
             throw new APIException(HttpStatus.BAD_REQUEST,
@@ -35,22 +37,19 @@ public class StudentUpdateDto implements Serializable {
         this.advisorId = advisorId;
         this.internshipCompletionStatus = internshipCompletionStatus;
         this.paymentStatus = paymentStatus;
+        this.educationStatus = educationStatus;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof StudentUpdateDto that)) return false;
-        return Objects.equals(getProgram(), that.getProgram())
-               && Objects.equals(getYear(), that.getYear())
-               && Objects.equals(getAdvisorId(), that.getAdvisorId())
-               && getInternshipCompletionStatus() == that.getInternshipCompletionStatus()
-               && getPaymentStatus() == that.getPaymentStatus();
+        return Objects.equals(getProgram(), that.getProgram()) && Objects.equals(getYear(), that.getYear()) && Objects.equals(getAdvisorId(), that.getAdvisorId()) && getInternshipCompletionStatus() == that.getInternshipCompletionStatus() && getPaymentStatus() == that.getPaymentStatus() && getEducationStatus() == that.getEducationStatus();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getProgram(), getYear(), getAdvisorId(), getInternshipCompletionStatus(), getPaymentStatus());
+        return Objects.hash(getProgram(), getYear(), getAdvisorId(), getInternshipCompletionStatus(), getPaymentStatus(), getEducationStatus());
     }
 
     @Override

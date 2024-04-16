@@ -52,10 +52,10 @@ public class Student {
     @Builder.Default
     private DocumentStatus.InternshipPaymentStatus paymentStatus = DocumentStatus.InternshipPaymentStatus.NOT_PAID;
 
-//    @Enumerated(EnumType.STRING)
-//    @Column(nullable = false)
-//    @Builder.Default
-//    private EducationStatus educationStatus = EducationStatus.UNDERGRADUATE;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private EducationStatus educationStatus = EducationStatus.UNDERGRADUATE;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -71,8 +71,6 @@ public class Student {
                "id='" + id + '\'' +
                ", program='" + program + '\'' +
                ", year=" + year +
-               ", user=" + user +
-               ", advisor=" + advisor +
                ", internshipCompletionStatus=" + internshipCompletionStatus +
                ", paymentStatus=" + paymentStatus +
                '}';
@@ -90,7 +88,4 @@ public class Student {
         return Objects.hash(getId(), getProgram(), getYear(), getUser(), getAdvisor(), getInternshipCompletionStatus(), getPaymentStatus(), getCreatedAt());
     }
 
-    enum EducationStatus {
-        UNDERGRADUATE, GRADUATE
-    }
 }

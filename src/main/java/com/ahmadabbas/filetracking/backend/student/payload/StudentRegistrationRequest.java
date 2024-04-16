@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.student.payload;
 
 import com.ahmadabbas.filetracking.backend.exception.APIException;
+import com.ahmadabbas.filetracking.backend.student.EducationStatus;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.payload.UserRegistrationRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -33,6 +34,9 @@ public final class StudentRegistrationRequest extends UserRegistrationRequest im
     @JsonProperty
     @NotEmpty(message = "student's advisor id should not be empty")
     private final String advisorId;
+    @JsonProperty
+    @NotNull
+    private final EducationStatus educationStatus;
 
     public StudentRegistrationRequest(String firstName,
                                       String lastName,
@@ -42,9 +46,11 @@ public final class StudentRegistrationRequest extends UserRegistrationRequest im
                                       String id,
                                       String program,
                                       Short year,
-                                      String advisorId) {
+                                      String advisorId,
+                                      EducationStatus educationStatus) {
         super(firstName, lastName, email, picture, phoneNumber, Role.STUDENT);
         this.id = id;
+        this.educationStatus = educationStatus;
         List<String> allowedProgramValues = Arrays.asList(ALLOWED_PROGRAM_VALUES);
         if (!allowedProgramValues.contains(program)) {
             throw new APIException(HttpStatus.BAD_REQUEST,
@@ -69,5 +75,9 @@ public final class StudentRegistrationRequest extends UserRegistrationRequest im
 
     public String id() {
         return id;
+    }
+
+    public EducationStatus educationStatus() {
+        return educationStatus;
     }
 }

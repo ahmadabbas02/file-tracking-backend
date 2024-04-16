@@ -2,6 +2,7 @@ package com.ahmadabbas.filetracking.backend.student.view;
 
 import com.ahmadabbas.filetracking.backend.advisor.view.AdvisorUserView;
 import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
+import com.ahmadabbas.filetracking.backend.student.EducationStatus;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.blazebit.persistence.view.EntityView;
 import com.blazebit.persistence.view.IdMapping;
@@ -39,4 +40,6 @@ public interface StudentAdvisorView {
     DocumentStatus.InternshipCompletionStatus getInternshipCompletionStatus();
 
     DocumentStatus.InternshipPaymentStatus getPaymentStatus();
+
+    EducationStatus getEducationStatus();
 }

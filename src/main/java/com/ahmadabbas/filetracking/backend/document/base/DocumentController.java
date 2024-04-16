@@ -22,7 +22,6 @@ import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDoc
 import com.ahmadabbas.filetracking.backend.user.UserPrincipal;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedMapResponse;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -217,7 +216,7 @@ public class DocumentController {
             @RequestPart("data") String data,
             @AuthenticationPrincipal UserPrincipal principal
     ) throws IOException {
-        DocumentAddRequest addRequest = new ObjectMapper().readValue(data, DocumentAddRequest.class);
+        DocumentAddRequest addRequest = getObjectMapperWithValidation().readValue(data, DocumentAddRequest.class);
         Document uploadedDocument = documentService.addDocument(file, addRequest, principal.getUserEntity());
         return new ResponseEntity<>(uploadedDocument.toDto(), HttpStatus.CREATED);
     }

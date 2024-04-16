@@ -8,6 +8,8 @@ import com.ahmadabbas.filetracking.backend.category.permission.CategoryPermissio
 import com.ahmadabbas.filetracking.backend.category.permission.CategoryPermissionRepository;
 import com.ahmadabbas.filetracking.backend.exception.DuplicateResourceException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
+import com.ahmadabbas.filetracking.backend.student.EducationStatus;
+import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserService;
@@ -42,7 +44,7 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "category with id %s not found".formatted(categoryId)
                 ));
-        if (!getAllowedCategoriesIds(loggedInUser.getRoles()).contains(category.getCategoryId())) {
+        if (!getAllowedCategoriesIds(loggedInUser).contains(category.getCategoryId())) {
             throw new AccessDeniedException("not authorized");
         }
         return category;
@@ -53,7 +55,7 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "category with id %s and parent_id %s not found".formatted(categoryId, parentCategoryId)
                 ));
-        if (!getAllowedCategoriesIds(loggedInUser.getRoles()).contains(category.getCategoryId())) {
+        if (!getAllowedCategoriesIds(loggedInUser).contains(category.getCategoryId())) {
             throw new AccessDeniedException("not authorized");
         }
         return category;
@@ -87,8 +89,9 @@ public class CategoryService {
         return categories;
     }
 
-    public List<Category> getAllowedCategories(Set<Role> roles) {
+    public List<Category> getAllowedCategories(User user) {
         List<Category> categories = new LinkedList<>();
+        Set<Role> roles = user.getRoles();
         if (roles.contains(Role.ADMINISTRATOR)) {
             return categoryRepository.findAll();
         }
@@ -97,10 +100,12 @@ public class CategoryService {
             categoryPermissions.forEach(permission -> {
                 Category category = permission.getCategory();
                 if (category != null) {
-                    categories.add(category);
-                    if (category.getParentCategoryId() == -1) {
-                        List<Category> childrenCategories = categoryRepository.findAllByParentCategoryId(category.getCategoryId());
-                        categories.addAll(childrenCategories);
+                    if (canAccessCategory(user, category)) {
+                        categories.add(category);
+                        if (category.getParentCategoryId() == -1) {
+                            List<Category> childrenCategories = categoryRepository.findAllByParentCategoryId(category.getCategoryId());
+                            categories.addAll(childrenCategories);
+                        }
                     }
                 }
             });
@@ -127,8 +132,8 @@ public class CategoryService {
         return categories;
     }
 
-    public List<Long> getAllowedCategoriesIds(Set<Role> roles) {
-        List<Category> allCategories = getAllowedCategories(roles);
+    public List<Long> getAllowedCategoriesIds(User user) {
+        List<Category> allCategories = getAllowedCategories(user);
         return allCategories.stream()
                 .map(Category::getCategoryId).toList();
     }
@@ -138,7 +143,7 @@ public class CategoryService {
     }
 
     public List<Category> getAllChildrenCategories(Long parentId, User user) {
-        List<Long> allowedCategoriesIds = getAllowedCategoriesIds(user.getRoles());
+        List<Long> allowedCategoriesIds = getAllowedCategoriesIds(user);
         if (!allowedCategoriesIds.contains(parentId)) {
             throw new AccessDeniedException("not allowed to get children categories of `%s`".formatted(parentId));
         }
@@ -149,23 +154,11 @@ public class CategoryService {
         List<Category> parentCategories = getAllParentCategories(user);
         List<FullCategoryResponse> result = new LinkedList<>();
         for (var parent : parentCategories) {
-            List<Category> childrenCategories = getAllChildrenCategories(parent.getCategoryId());
-            FullCategoryResponse response;
-            if (!childrenCategories.isEmpty()) {
-                response = new FullCategoryResponse(
-                        parent.getCategoryId(),
-                        parent.getParentCategoryId(),
-                        parent.getName(),
-                        childrenCategories
-                );
-            } else {
-                response = new FullCategoryResponse(
-                        parent.getCategoryId(),
-                        parent.getParentCategoryId(),
-                        parent.getName(),
-                        Collections.emptyList()
-                );
+            if (!canAccessCategory(user, parent)) {
+                continue;
             }
+            List<Category> childrenCategories = getAllChildrenCategories(parent.getCategoryId());
+            FullCategoryResponse response = getFullCategoryResponse(parent, childrenCategories);
             result.add(response);
         }
         return result;
@@ -209,6 +202,35 @@ public class CategoryService {
             categoryMap.put(categoryId, categoryResponse);
         }
         return categoryMap.values().stream().toList();
+    }
+
+    private boolean canAccessCategory(User user, Category parent) {
+        Student student = user.getStudent();
+        if (student != null) {
+            return !parent.getName().toLowerCase().contains("defense")
+                   || student.getEducationStatus().equals(EducationStatus.GRADUATE);
+        }
+        return true;
+    }
+
+    private FullCategoryResponse getFullCategoryResponse(Category parent, List<Category> childrenCategories) {
+        FullCategoryResponse response;
+        if (!childrenCategories.isEmpty()) {
+            response = new FullCategoryResponse(
+                    parent.getCategoryId(),
+                    parent.getParentCategoryId(),
+                    parent.getName(),
+                    childrenCategories
+            );
+        } else {
+            response = new FullCategoryResponse(
+                    parent.getCategoryId(),
+                    parent.getParentCategoryId(),
+                    parent.getName(),
+                    Collections.emptyList()
+            );
+        }
+        return response;
     }
 
     private FullCategoryPermissionResponse getCategoryPermissionResponse(Long categoryId, String categoryName, User loggedInUser) {

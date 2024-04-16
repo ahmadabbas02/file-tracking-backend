@@ -2,6 +2,7 @@ package com.ahmadabbas.filetracking.backend.student.payload;
 
 import com.ahmadabbas.filetracking.backend.advisor.payload.AdvisorDto;
 import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
+import com.ahmadabbas.filetracking.backend.student.EducationStatus;
 import com.ahmadabbas.filetracking.backend.student.Student;
 
 import java.io.Serializable;
@@ -21,6 +22,7 @@ public record StudentDto(
         String picture,
         AdvisorDto advisor,
         DocumentStatus.InternshipCompletionStatus internshipCompletionStatus,
-        DocumentStatus.InternshipPaymentStatus paymentStatus
+        DocumentStatus.InternshipPaymentStatus paymentStatus,
+        EducationStatus educationStatus
 ) implements Serializable {
 }

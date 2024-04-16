@@ -1,9 +1,10 @@
 package com.ahmadabbas.filetracking.backend.document.base.payload;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 public class DocumentAddRequest extends BaseDocumentAddRequest {
-    @NotEmpty(message = "categoryId should not be empty")
+    @NotNull(message = "categoryId should not be empty")
     private final Long categoryId;
     @NotEmpty(message = "studentId should not be empty")
     private final String studentId;
