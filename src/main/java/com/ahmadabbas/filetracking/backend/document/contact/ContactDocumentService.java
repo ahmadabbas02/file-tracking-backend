@@ -54,7 +54,12 @@ public class ContactDocumentService {
         }
         log.debug("ContactDocumentService.addContactDocument");
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
-        Category category = categoryService.getCategory(addRequest.categoryId(), loggedInUser, false);
+        Category category;
+        if (addRequest.categoryId() != null) {
+            category = categoryService.getCategory(addRequest.categoryId(), loggedInUser, false);
+        } else {
+            category = categoryService.getCategoryByName("Contact Form");
+        }
         try {
             File filledPdf = generateContactFilledPdf(addRequest, student, loggedInUser.getFullName());
             if (filledPdf == null) {

@@ -46,8 +46,12 @@ public class PetitionDocumentService {
         }
         log.debug("PetitionDocumentService.addPetitionDocument");
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
-        // Category category = categoryService.getCategoryByName("Petition");
-        Category category = categoryService.getCategory(addRequest.categoryId(), loggedInUser, false);
+        Category category;
+        if (addRequest.categoryId() != null) {
+            category = categoryService.getCategory(addRequest.categoryId(), loggedInUser, false);
+        } else {
+            category = categoryService.getCategoryByName("Petition");
+        }
         try {
             File filledPdf = generatedFilledPetition(addRequest,
                     student.getId(),

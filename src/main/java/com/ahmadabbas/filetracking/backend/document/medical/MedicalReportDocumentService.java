@@ -48,8 +48,12 @@ public class MedicalReportDocumentService {
         }
 
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
-//        Category medicalCategory = categoryService.getCategoryByName("Medical Report");
-        Category medicalCategory = categoryService.getCategory(addRequest.categoryId(), loggedInUser, false);
+        Category medicalCategory;
+        if (addRequest.categoryId() != null) {
+            medicalCategory = categoryService.getCategory(addRequest.categoryId(), loggedInUser, false);
+        } else {
+            medicalCategory = categoryService.getCategoryByName("Medical Report");
+        }
         String cloudPath = azureBlobService.upload(file, student.getId(), medicalCategory.getName(), addRequest.title());
         log.debug("cloudPath received from uploading file: %s".formatted(cloudPath));
         MedicalReportDocument document = MedicalReportDocument.builder()
