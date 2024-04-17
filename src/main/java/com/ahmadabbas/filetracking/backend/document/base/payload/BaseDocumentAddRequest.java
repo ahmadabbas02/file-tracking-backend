@@ -2,6 +2,7 @@ package com.ahmadabbas.filetracking.backend.document.base.payload;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 public class BaseDocumentAddRequest {
     @JsonProperty
@@ -9,10 +10,14 @@ public class BaseDocumentAddRequest {
     private final String title;
     @JsonProperty
     private final String description;
+    @JsonProperty
+    @NotNull
+    private final Long categoryId;
 
-    public BaseDocumentAddRequest(String title, String description) {
+    public BaseDocumentAddRequest(String title, String description, Long categoryId) {
         this.title = title;
         this.description = description;
+        this.categoryId = categoryId;
     }
 
     public String title() {
@@ -21,5 +26,9 @@ public class BaseDocumentAddRequest {
 
     public String description() {
         return description != null ? description.trim() : "";
+    }
+
+    public Long categoryId() {
+        return categoryId;
     }
 }

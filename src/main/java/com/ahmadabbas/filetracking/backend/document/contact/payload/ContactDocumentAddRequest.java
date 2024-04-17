@@ -24,12 +24,13 @@ public final class ContactDocumentAddRequest extends BaseDocumentAddRequest {
 
     public ContactDocumentAddRequest(String title,
                                      String description,
+                                     Long categoryId,
                                      String email,
                                      String phoneNumber,
                                      String homeNumber,
                                      String emergencyName,
                                      String emergencyPhoneNumber) {
-        super(title, description);
+        super(title, description, categoryId);
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.homeNumber = homeNumber;

@@ -9,8 +9,8 @@ public final class MedicalReportAddRequest extends BaseDocumentAddRequest {
     @NotEmpty(message = "Medical report dateOfAbsence should not be empty")
     private final String dateOfAbsence;
 
-    public MedicalReportAddRequest(String title, String description, String dateOfAbsence) {
-        super(title, description);
+    public MedicalReportAddRequest(String title, String description, Long categoryId, String dateOfAbsence) {
+        super(title, description, categoryId);
         this.dateOfAbsence = dateOfAbsence;
     }
 

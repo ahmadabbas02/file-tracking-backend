@@ -2,7 +2,6 @@ package com.ahmadabbas.filetracking.backend.document.petition;
 
 import com.ahmadabbas.filetracking.backend.category.Category;
 import com.ahmadabbas.filetracking.backend.category.CategoryService;
-import com.ahmadabbas.filetracking.backend.document.base.DocumentService;
 import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentAddRequest;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
@@ -47,7 +46,8 @@ public class PetitionDocumentService {
         }
         log.debug("PetitionDocumentService.addPetitionDocument");
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
-        Category category = categoryService.getCategoryByName("Petition");
+        // Category category = categoryService.getCategoryByName("Petition");
+        Category category = categoryService.getCategory(addRequest.categoryId(), loggedInUser, false);
         try {
             File filledPdf = generatedFilledPetition(addRequest,
                     student.getId(),

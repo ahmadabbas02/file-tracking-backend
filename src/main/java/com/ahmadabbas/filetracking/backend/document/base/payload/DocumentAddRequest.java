@@ -9,9 +9,9 @@ public class DocumentAddRequest extends BaseDocumentAddRequest {
     @NotEmpty(message = "studentId should not be empty")
     private final String studentId;
 
-    public DocumentAddRequest(String title, String description, Long categoryId, String studentId) {
-        super(title, description);
-        this.categoryId = categoryId;
+    public DocumentAddRequest(String title, String description, Long categoryId, Long categoryId1, String studentId) {
+        super(title, description, categoryId);
+        this.categoryId = categoryId1;
         this.studentId = studentId;
     }
 

@@ -4,6 +4,7 @@ import com.ahmadabbas.filetracking.backend.document.base.payload.BaseDocumentAdd
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 public class PetitionDocumentAddRequest extends BaseDocumentAddRequest {
     @JsonProperty
@@ -19,13 +20,9 @@ public class PetitionDocumentAddRequest extends BaseDocumentAddRequest {
     @NotEmpty(message = "Petition reasoning should not be empty")
     private final String reasoning;
 
-    public PetitionDocumentAddRequest(String title,
-                                      String description,
-                                      String subject,
-                                      String email,
-                                      String phoneNumber,
-                                      String reasoning) {
-        super(title, description);
+
+    public PetitionDocumentAddRequest(String title, String description, Long categoryId, String subject, String email, String phoneNumber, String reasoning) {
+        super(title, description, categoryId);
         this.subject = subject;
         this.email = email;
         this.phoneNumber = phoneNumber;
@@ -47,4 +44,5 @@ public class PetitionDocumentAddRequest extends BaseDocumentAddRequest {
     public String reasoning() {
         return reasoning;
     }
+
 }
