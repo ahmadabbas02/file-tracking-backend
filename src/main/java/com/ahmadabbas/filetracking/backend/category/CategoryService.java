@@ -136,10 +136,9 @@ public class CategoryService {
         List<Category> allParentCategories = getAllowedParentCategories(loggedInUser.getRoles(), isDeleted);
         for (var category : allParentCategories) {
             long categoryId = category.getCategoryId();
-            String categoryName = category.getName();
             FullCategoryPermissionResponse categoryResponse = categoryMap.getOrDefault(
                     categoryId,
-                    getCategoryPermissionResponse(categoryId, categoryName, loggedInUser, isDeleted)
+                    getCategoryPermissionResponse(category, loggedInUser, isDeleted)
             );
             categoryMap.put(categoryId, categoryResponse);
         }
@@ -169,7 +168,7 @@ public class CategoryService {
                     category
             ));
         }
-        return getCategoryPermissionResponse(request.categoryId(), category.getName(), loggedInUser, false);
+        return getCategoryPermissionResponse(category, loggedInUser, false);
     }
 
     public Category getParentCategory(Long categoryId, User loggedInUser) {
@@ -355,14 +354,16 @@ public class CategoryService {
         return response;
     }
 
-    private FullCategoryPermissionResponse getCategoryPermissionResponse(Long categoryId,
-                                                                         String categoryName,
+    private FullCategoryPermissionResponse getCategoryPermissionResponse(Category category,
                                                                          User loggedInUser,
                                                                          boolean isDeleted) {
+        Long categoryId = category.getCategoryId();
+        String categoryName = category.getName();
+        boolean categoryDeleted = category.isDeleted();
         List<CategoryPermission> allPerms = categoryPermissionRepository.findAllByCategoryId(categoryId);
         List<Category> subcategories = getAllChildrenCategories(categoryId, loggedInUser, isDeleted);
         FullCategoryPermissionResponse result =
-                new FullCategoryPermissionResponse(categoryId, categoryName, new ArrayList<>(), new ArrayList<>());
+                new FullCategoryPermissionResponse(categoryId, categoryName, categoryDeleted, new ArrayList<>(), new ArrayList<>());
         if (allPerms.isEmpty()) {
             if (!subcategories.isEmpty() && result.subCategories().isEmpty()) {
                 result.subCategories().addAll(subcategories);
@@ -381,7 +382,7 @@ public class CategoryService {
     private Category getCategoryWithDeletionFilter(boolean isDeleted,
                                                    User loggedInUser,
                                                    Supplier<Category> categorySupplier) {
-        if (isDeleted && loggedInUser != null && !loggedInUser.getRoles().contains(Role.ADMINISTRATOR)) {
+        if (isDeleted && loggedInUser != null && !loggedInUser.isAdmin()) {
             isDeleted = false;
         }
         Session session = entityManager.unwrap(Session.class);
@@ -395,7 +396,7 @@ public class CategoryService {
     private List<Category> getCategoriesWithDeletionFilter(boolean isDeleted,
                                                            User loggedInUser,
                                                            Supplier<List<Category>> categorySupplier) {
-        if (isDeleted && loggedInUser != null && !loggedInUser.getRoles().contains(Role.ADMINISTRATOR)) {
+        if (isDeleted && loggedInUser != null && !loggedInUser.isAdmin()) {
             isDeleted = false;
         }
         Session session = entityManager.unwrap(Session.class);

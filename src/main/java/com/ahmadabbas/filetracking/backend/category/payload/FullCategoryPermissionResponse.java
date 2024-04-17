@@ -8,6 +8,7 @@ import java.util.List;
 public record FullCategoryPermissionResponse(
         Long categoryId,
         String name,
+        boolean deleted,
         List<Category> subCategories,
         List<Role> permittedRoles
 ) {
