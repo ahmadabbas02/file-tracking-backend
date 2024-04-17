@@ -62,7 +62,7 @@ public class CategoryService {
                     if (roles.contains(Role.ADMINISTRATOR)) {
                         categoryList = categoryRepository.findAllByParentCategoryId(-1L);
                     } else {
-                        categoryList = getAllowedParentCategories(roles, isDeleted);
+                        categoryList = getAllowedParentCategories(loggedInUser, isDeleted);
                     }
                     return categoryList;
                 }
@@ -133,7 +133,8 @@ public class CategoryService {
 
     public List<FullCategoryPermissionResponse> getAllCategoryPermissions(User loggedInUser, boolean isDeleted) {
         Map<Long, FullCategoryPermissionResponse> categoryMap = new LinkedHashMap<>();
-        List<Category> allParentCategories = getAllowedParentCategories(loggedInUser.getRoles(), isDeleted);
+        List<Category> allParentCategories = getAllowedParentCategories(loggedInUser, isDeleted);
+        System.out.println("allParentCategories = " + allParentCategories);
         for (var category : allParentCategories) {
             long categoryId = category.getCategoryId();
             FullCategoryPermissionResponse categoryResponse = categoryMap.getOrDefault(
@@ -217,11 +218,26 @@ public class CategoryService {
         return category;
     }
 
-    public List<Category> getAllowedParentCategories(Set<Role> roles, boolean isDeleted) {
+    public List<Category> getAllowedParentCategories(User loggedInUser, boolean isDeleted) {
+        if (isDeleted) {
+            List<FullCategoryResponse> allParents = getAllCategories(loggedInUser, isDeleted);
+            return allParents
+                    .stream()
+                    .filter(fcr -> !fcr.subCategories().isEmpty() || fcr.deleted())
+                    .map(fullCategoryResponse ->
+                            new Category(
+                                    fullCategoryResponse.parentCategoryId(),
+                                    fullCategoryResponse.categoryId(),
+                                    fullCategoryResponse.name(),
+                                    fullCategoryResponse.deleted()
+                            )
+                    )
+                    .toList();
+        }
         return getCategoriesWithDeletionFilter(
-                isDeleted,
-                null,
-                () -> getAllowedParentCategories(roles)
+                false,
+                loggedInUser,
+                () -> getAllowedParentCategories(loggedInUser.getRoles())
         );
     }
 
