@@ -50,7 +50,7 @@ public class MedicalReportDocumentService {
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
         Category medicalCategory;
         if (addRequest.categoryId() != null) {
-            medicalCategory = categoryService.getCategory(addRequest.categoryId(), loggedInUser, false);
+            medicalCategory = categoryService.getCategoryWithDeletionFilter(addRequest.categoryId(), loggedInUser, false);
         } else {
             medicalCategory = categoryService.getCategoryByName("Medical Report");
         }

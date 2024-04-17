@@ -53,7 +53,7 @@ public class CategoryService {
     }
 
     public List<Category> getAllParentCategories(User loggedInUser, boolean isDeleted) {
-        return getCategories(
+        return getCategoriesWithDeletionFilter(
                 isDeleted,
                 loggedInUser,
                 () -> {
@@ -116,17 +116,17 @@ public class CategoryService {
             return getFullCategoryResponse(category);
         } else {
             log.debug("We should undelete categoryId: {}", categoryId);
-            category = getCategory(categoryId, loggedInUser, true);
+            category = getCategoryWithDeletionFilter(categoryId, loggedInUser, true);
             if (category.getParentCategoryId() == -1) {
                 List<Category> children = getAllChildrenCategories(categoryId, loggedInUser, true);
                 var response = getFullCategoryResponse(category, children);
                 if (!children.isEmpty()) {
                     categoryRepository.undeleteAll(children.stream().map(Category::getCategoryId).toList());
                 }
-                categoryRepository.undeleteAll(Collections.singletonList(categoryId));
+                categoryRepository.undeleteAll(Collections.singletonList(category.getCategoryId()));
                 return response;
             }
-            categoryRepository.delete(category);
+            categoryRepository.undeleteAll(Collections.singletonList(category.getCategoryId()));
             return getFullCategoryResponse(category);
         }
     }
@@ -173,11 +173,11 @@ public class CategoryService {
     }
 
     public Category getParentCategory(Long categoryId, User loggedInUser) {
-        return getCategory(categoryId, -1L, loggedInUser);
+        return getCategoryWithDeletionFilter(categoryId, -1L, loggedInUser);
     }
 
     public Category getCategoryByName(String name) {
-        return getCategory(
+        return getCategoryWithDeletionFilter(
                 false,
                 null,
                 () -> categoryRepository.findByNameIgnoreCase(name)
@@ -187,8 +187,8 @@ public class CategoryService {
         );
     }
 
-    public Category getCategory(Long categoryId, User loggedInUser, boolean isDeleted) {
-        Category category = getCategory(
+    public Category getCategoryWithDeletionFilter(Long categoryId, User loggedInUser, boolean isDeleted) {
+        Category category = getCategoryWithDeletionFilter(
                 isDeleted,
                 loggedInUser,
                 () -> categoryRepository.findById(categoryId)
@@ -202,8 +202,8 @@ public class CategoryService {
         return category;
     }
 
-    public Category getCategory(Long categoryId, Long parentCategoryId, User loggedInUser) {
-        Category category = getCategory(
+    public Category getCategoryWithDeletionFilter(Long categoryId, Long parentCategoryId, User loggedInUser) {
+        Category category = getCategoryWithDeletionFilter(
                 false,
                 loggedInUser,
                 () -> categoryRepository.findByCategoryIdAndParentCategoryId(categoryId, parentCategoryId)
@@ -219,29 +219,10 @@ public class CategoryService {
     }
 
     public List<Category> getAllowedParentCategories(Set<Role> roles, boolean isDeleted) {
-        return getCategories(
+        return getCategoriesWithDeletionFilter(
                 isDeleted,
                 null,
-                () -> {
-                    List<Category> categories = new LinkedList<>();
-                    if (roles.contains(Role.ADMINISTRATOR)) {
-                        categories = categoryRepository.findAllParentCategories();
-                    } else {
-                        for (var role : roles) {
-                            Set<CategoryPermission> categoryPermissions =
-                                    categoryPermissionRepository.findAllByRole(role);
-                            for (CategoryPermission permission : categoryPermissions) {
-                                Category category = permission.getCategory();
-                                if (category != null) {
-                                    if (category.getParentCategoryId() == -1) {
-                                        categories.add(category);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    return categories;
-                }
+                () -> getAllowedParentCategories(roles)
         );
     }
 
@@ -251,7 +232,7 @@ public class CategoryService {
 
     public List<Category> getAllowedCategories(User loggedInUser, boolean isDeleted) {
         Set<Role> roles = loggedInUser.getRoles();
-        return getCategories(
+        return getCategoriesWithDeletionFilter(
                 isDeleted,
                 loggedInUser,
                 () -> {
@@ -285,12 +266,12 @@ public class CategoryService {
         if (roles.contains(Role.ADMINISTRATOR)) {
             categoryList = categoryRepository.findAllByParentCategoryId(-1L);
         } else {
-            categoryList = getAllowedParentCategoriesDeletedOrNot(roles);
+            categoryList = getAllowedParentCategories(roles);
         }
         return categoryList;
     }
 
-    private List<Category> getAllowedParentCategoriesDeletedOrNot(Set<Role> roles) {
+    private List<Category> getAllowedParentCategories(Set<Role> roles) {
         List<Category> categories = new LinkedList<>();
         if (roles.contains(Role.ADMINISTRATOR)) {
             categories = categoryRepository.findAllParentCategories();
@@ -316,7 +297,7 @@ public class CategoryService {
         if (!allowedCategoriesIds.contains(categoryId)) {
             throw new AccessDeniedException("not allowed to get children categories of `%s`".formatted(categoryId));
         }
-        return getCategories(isDeleted, loggedInUser, () -> categoryRepository.findAllByParentCategoryId(categoryId));
+        return getCategoriesWithDeletionFilter(isDeleted, loggedInUser, () -> categoryRepository.findAllByParentCategoryId(categoryId));
     }
 
     private List<Long> getAllowedCategoriesIds(User loggedInUser, boolean isDeleted) {
@@ -332,11 +313,11 @@ public class CategoryService {
     }
 
     private Category getCategoryNullable(Long categoryId, User loggedInUser) {
-        return getCategoryNullable(categoryId, loggedInUser, false);
-    }
-
-    private Category getCategoryNullable(Long categoryId, User loggedInUser, boolean isDeleted) {
-        return getCategory(isDeleted, loggedInUser, () -> categoryRepository.findById(categoryId).orElse(null));
+        return getCategoryWithDeletionFilter(
+                false,
+                loggedInUser,
+                () -> categoryRepository.findById(categoryId).orElse(null)
+        );
     }
 
     private boolean canAccessCategory(User user, Category parent) {
@@ -397,7 +378,9 @@ public class CategoryService {
         return result;
     }
 
-    private Category getCategory(boolean isDeleted, User loggedInUser, Supplier<Category> categorySupplier) {
+    private Category getCategoryWithDeletionFilter(boolean isDeleted,
+                                                   User loggedInUser,
+                                                   Supplier<Category> categorySupplier) {
         if (isDeleted && loggedInUser != null && !loggedInUser.getRoles().contains(Role.ADMINISTRATOR)) {
             isDeleted = false;
         }
@@ -409,7 +392,9 @@ public class CategoryService {
         return category;
     }
 
-    private List<Category> getCategories(boolean isDeleted, User loggedInUser, Supplier<List<Category>> categorySupplier) {
+    private List<Category> getCategoriesWithDeletionFilter(boolean isDeleted,
+                                                           User loggedInUser,
+                                                           Supplier<List<Category>> categorySupplier) {
         if (isDeleted && loggedInUser != null && !loggedInUser.getRoles().contains(Role.ADMINISTRATOR)) {
             isDeleted = false;
         }

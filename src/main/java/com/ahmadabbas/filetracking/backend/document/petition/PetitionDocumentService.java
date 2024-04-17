@@ -48,7 +48,7 @@ public class PetitionDocumentService {
         Student student = studentService.getStudentByUserId(loggedInUser.getId());
         Category category;
         if (addRequest.categoryId() != null) {
-            category = categoryService.getCategory(addRequest.categoryId(), loggedInUser, false);
+            category = categoryService.getCategoryWithDeletionFilter(addRequest.categoryId(), loggedInUser, false);
         } else {
             category = categoryService.getCategoryByName("Petition");
         }
