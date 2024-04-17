@@ -6,7 +6,6 @@ import com.ahmadabbas.filetracking.backend.document.medical.payload.MedicalRepor
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
-import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.AzureBlobService;
 import lombok.RequiredArgsConstructor;
