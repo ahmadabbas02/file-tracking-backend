@@ -399,19 +399,13 @@ public class DocumentService {
     }
 
     private void checkDocumentPermissions(User loggedInUser, String documentStudentId, Long categoryId, String categoryName) {
-        Set<Role> roles = getAndCheckUserRolePermissions(loggedInUser, documentStudentId);
+        checkUserSpecificRolePerms(loggedInUser, documentStudentId, loggedInUser.getRoles());
         List<Long> allowedCategories = categoryService.getAllowedCategoriesIds(loggedInUser);
         if (!allowedCategories.contains(categoryId)) {
             throw new AccessDeniedException(
                     "not authorized to view %s category".formatted(categoryName)
             );
         }
-    }
-
-    private Set<Role> getAndCheckUserRolePermissions(User loggedInUser, String documentStudentId) {
-        Set<Role> roles = loggedInUser.getRoles();
-        checkUserSpecificRolePerms(loggedInUser, documentStudentId, roles);
-        return roles;
     }
 
     private boolean checkUserSpecificRolePerms(User loggedInUser, String documentStudentId, Set<Role> roles) {
