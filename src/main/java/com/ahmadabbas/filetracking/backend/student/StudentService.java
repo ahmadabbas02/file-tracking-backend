@@ -64,13 +64,13 @@ public class StudentService {
     private final StudentViewRepository studentViewRepository;
 
     public StudentAdvisorView getStudentView(String studentId, User loggedInUser) {
-        if (loggedInUser.getRoles().contains(Role.STUDENT)) {
+        if (loggedInUser.isStudent()) {
             StudentAdvisorView student = getStudentAdvisorViewByUserId(loggedInUser.getId());
             if (!studentId.equals(student.getId())) {
                 throw new AccessDeniedException("not authorized, you can only get details about your own profile");
             }
             return student;
-        } else if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
+        } else if (loggedInUser.isAdvisor()) {
             StudentAdvisorView student = getStudentAdvisorViewByStudentId(studentId);
             if (student.getAdvisor().getUserId().equals(loggedInUser.getId())) {
                 return student;
@@ -82,13 +82,13 @@ public class StudentService {
     }
 
     public Student getStudent(String studentId, User loggedInUser) {
-        if (loggedInUser.getRoles().contains(Role.STUDENT)) {
+        if (loggedInUser.isStudent()) {
             Student student = getStudentByUserId(loggedInUser.getId());
             if (!studentId.equals(student.getId())) {
                 throw new AccessDeniedException("not authorized, you can only get details about your own profile");
             }
             return student;
-        } else if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
+        } else if (loggedInUser.isAdvisor()) {
             Student student = getStudentByStudentId(studentId);
             if (student.getAdvisor().getUser().getId().equals(loggedInUser.getId())) {
                 return student;
@@ -337,7 +337,7 @@ public class StudentService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "student with id `%s` not found".formatted(studentId)
                 ));
-        if (!loggedInUser.getRoles().contains(Role.ADMINISTRATOR)) {
+        if (!loggedInUser.isAdmin()) {
             updateDto.setAdvisorId(null);
         }
         studentMapper.partialUpdate(updateDto, student);

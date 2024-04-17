@@ -11,6 +11,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ahmadabbas.filetracking.backend.user.Role.ADMINISTRATOR;
+import static com.ahmadabbas.filetracking.backend.user.Role.STUDENT;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -101,6 +104,18 @@ public class User {
     @Deprecated
     public void setFullName(String fullName) {
 
+    }
+
+    public boolean isAdmin() {
+        return getRoles().contains(ADMINISTRATOR);
+    }
+
+    public boolean isAdvisor() {
+        return getRoles().contains(Role.ADVISOR);
+    }
+
+    public boolean isStudent() {
+        return getRoles().contains(STUDENT);
     }
 }
 

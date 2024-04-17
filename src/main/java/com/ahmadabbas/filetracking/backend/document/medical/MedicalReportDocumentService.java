@@ -35,7 +35,7 @@ public class MedicalReportDocumentService {
     public MedicalReportDocument addMedicalReport(MultipartFile file,
                                                   MedicalReportAddRequest addRequest,
                                                   User loggedInUser) throws IOException {
-        if (!loggedInUser.getRoles().contains(Role.STUDENT)) {
+        if (!loggedInUser.isStudent()) {
             throw new AccessDeniedException("not authorized, only students can do this.");
         }
         LocalDate localDate;

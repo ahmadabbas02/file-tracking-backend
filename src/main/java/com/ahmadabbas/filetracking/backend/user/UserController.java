@@ -4,12 +4,15 @@ import com.ahmadabbas.filetracking.backend.user.payload.UserDto;
 import com.ahmadabbas.filetracking.backend.user.payload.UserMapper;
 import com.ahmadabbas.filetracking.backend.user.payload.UserRegistrationRequest;
 import com.ahmadabbas.filetracking.backend.user.payload.UserUpdateDto;
+import com.ahmadabbas.filetracking.backend.util.AuthorizationUtils;
+import com.ahmadabbas.filetracking.backend.util.payload.EndpointAccess;
 import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -64,5 +67,16 @@ public class UserController {
     ) {
         User user = userService.updateUser(userId, updateDto);
         return ResponseEntity.ok(userMapper.toDto(user));
+    }
+
+    @Operation(
+            summary = "Get available endpoints",
+            description = "Update user partially"
+    )
+    @GetMapping("/endpoints")
+    public ResponseEntity<List<EndpointAccess>> getAvailableEndpoints(
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        return ResponseEntity.ok(AuthorizationUtils.getAvailableEndpoints(principal.getUserEntity()));
     }
 }

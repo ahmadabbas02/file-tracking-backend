@@ -174,7 +174,7 @@ public class DocumentService {
     public Document addDocument(MultipartFile file,
                                 DocumentAddRequest addRequest,
                                 User loggedInUser) throws IOException {
-        if (loggedInUser.getRoles().contains(Role.STUDENT)) {
+        if (loggedInUser.isStudent()) {
             throw new AccessDeniedException("not authorized..");
         }
         Category category = categoryService.getCategoryWithDeletionFilter(addRequest.categoryId(), loggedInUser, false);
@@ -266,11 +266,11 @@ public class DocumentService {
         Filter filter = session.enableFilter("deletedDocumentFilter");
         filter.setParameter("isDeleted", false);
         List<String> studentIds = Collections.emptyList();
-        if (loggedInUser.getRoles().contains(Role.STUDENT)) {
+        if (loggedInUser.isStudent()) {
             Student student = studentService.getStudentByUserId(loggedInUser.getId());
             studentId = student.getId();
             log.debug("setting studentId to the logged in student: {}", student.getId());
-        } else if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
+        } else if (loggedInUser.isAdvisor()) {
             if (!studentId.equals("-1")) {
                 StudentAdvisorView student = studentService.getStudentView(studentId, loggedInUser);
                 if (!student.getAdvisor().getUserId().equals(loggedInUser.getId())) {

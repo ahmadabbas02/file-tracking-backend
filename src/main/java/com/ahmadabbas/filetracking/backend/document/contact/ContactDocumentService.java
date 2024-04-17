@@ -6,7 +6,6 @@ import com.ahmadabbas.filetracking.backend.document.contact.payload.ContactDocum
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
-import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.AzureBlobService;
 import com.lowagie.text.pdf.AcroFields;
@@ -49,7 +48,7 @@ public class ContactDocumentService {
 
     @Transactional
     public ContactDocument addContactDocument(ContactDocumentAddRequest addRequest, User loggedInUser) {
-        if (!loggedInUser.getRoles().contains(Role.STUDENT)) {
+        if (!loggedInUser.isStudent()) {
             throw new AccessDeniedException("not authorized, only students can do this.");
         }
         log.debug("ContactDocumentService.addContactDocument");

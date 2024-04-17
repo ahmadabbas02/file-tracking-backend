@@ -5,7 +5,6 @@ import com.ahmadabbas.filetracking.backend.category.CategoryService;
 import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDocumentAddRequest;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
-import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.AzureBlobService;
 import com.lowagie.text.pdf.AcroFields;
@@ -41,7 +40,7 @@ public class PetitionDocumentService {
 
     @Transactional
     public PetitionDocument addPetitionDocument(PetitionDocumentAddRequest addRequest, User loggedInUser) {
-        if (!loggedInUser.getRoles().contains(Role.STUDENT)) {
+        if (!loggedInUser.isStudent()) {
             throw new AccessDeniedException("not authorized, only students can do this.");
         }
         log.debug("PetitionDocumentService.addPetitionDocument");

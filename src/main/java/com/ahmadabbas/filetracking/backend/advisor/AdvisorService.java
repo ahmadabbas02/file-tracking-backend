@@ -111,12 +111,12 @@ public class AdvisorService {
     }
 
     private void checkPermissions(String advisorId, User loggedInUser) {
-        if (loggedInUser.getRoles().contains(Role.ADVISOR)) {
+        if (loggedInUser.isAdvisor()) {
             AdvisorUserView advisor = getAdvisorByUserId(loggedInUser.getId());
             if (!advisorId.equals(advisor.getId())) {
                 throw new AccessDeniedException("not authorized, you can only get details about your own profile");
             }
-        } else if (loggedInUser.getRoles().contains(Role.STUDENT)) {
+        } else if (loggedInUser.isStudent()) {
             Student student = studentRepository.findByUserId(loggedInUser.getId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "student related with user id %s not found".formatted(loggedInUser.getId())
