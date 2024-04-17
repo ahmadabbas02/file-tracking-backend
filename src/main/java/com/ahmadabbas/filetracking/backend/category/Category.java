@@ -2,6 +2,10 @@ package com.ahmadabbas.filetracking.backend.category;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
+import org.hibernate.annotations.SQLDelete;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -13,6 +17,9 @@ import java.util.StringJoiner;
 @Builder
 @Entity
 @IdClass(SubCategoryPK.class)
+@SQLDelete(sql = "UPDATE category SET deleted = true WHERE category_id=? and parent_category_id=?")
+@FilterDef(name = "deletedCategoryFilter", parameters = @ParamDef(name = "isDeleted", type = Boolean.class))
+@Filter(name = "deletedCategoryFilter", condition = "deleted = :isDeleted")
 public class Category {
     @Id
     @Column(updatable = false)
@@ -25,6 +32,9 @@ public class Category {
     private Long categoryId;
     @Column(nullable = false, unique = true)
     private String name;
+
+    @Builder.Default
+    private boolean deleted = Boolean.FALSE;
 
     @Override
     public boolean equals(Object o) {

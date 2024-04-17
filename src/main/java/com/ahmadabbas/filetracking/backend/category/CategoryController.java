@@ -40,13 +40,14 @@ public class CategoryController {
     @GetMapping("")
     public ResponseEntity<List<?>> getAllCategories(
             @RequestParam(value = "parents_only", required = false, defaultValue = "false") boolean parentsOnly,
+            @RequestParam(required = false, defaultValue = "false") boolean isDeleted,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
         if (parentsOnly) {
-            List<Category> allParentCategories = categoryService.getAllParentCategories(principal.getUserEntity());
+            List<Category> allParentCategories = categoryService.getAllParentCategories(principal.getUserEntity(), isDeleted);
             return ResponseEntity.ok(allParentCategories);
         }
-        List<FullCategoryResponse> allCategories = categoryService.getAllCategories(principal.getUserEntity());
+        List<FullCategoryResponse> allCategories = categoryService.getAllCategories(principal.getUserEntity(), isDeleted);
         return ResponseEntity.ok(allCategories);
     }
 
@@ -61,14 +62,27 @@ public class CategoryController {
     }
 
     @Operation(
+            summary = "Toggle category visibility",
+            description = "If the categoryId refers to a category with children, the children categories will be toggled as well."
+    )
+    @PostMapping("/{categoryId}")
+    public ResponseEntity<FullCategoryResponse> toggleHideCategory(
+            @PathVariable Long categoryId,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        return ResponseEntity.ok(categoryService.toggleVisibility(categoryId, principal.getUserEntity()));
+    }
+
+    @Operation(
             summary = "Get all category permissions",
             description = "Returns all the category visibility permissions."
     )
     @GetMapping("/permissions")
     public ResponseEntity<List<FullCategoryPermissionResponse>> getAllCategoryPermissions(
+            @RequestParam(required = false, defaultValue = "false") boolean isDeleted,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
-        return ResponseEntity.ok(categoryService.getAllCategoryPermissions(principal.getUserEntity()));
+        return ResponseEntity.ok(categoryService.getAllCategoryPermissions(principal.getUserEntity(), isDeleted));
     }
 
     @Operation(
@@ -82,4 +96,5 @@ public class CategoryController {
     ) {
         return ResponseEntity.ok(categoryService.updateCategoryPermission(requestDto, principal.getUserEntity()));
     }
+
 }

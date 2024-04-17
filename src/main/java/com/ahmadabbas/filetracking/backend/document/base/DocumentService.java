@@ -144,10 +144,10 @@ public class DocumentService {
 
     @Transactional
     public Document addDocument(MultipartFile file, String data, Long categoryId, User loggedInUser) throws IOException {
-        Category category = categoryService.getCategory(categoryId, loggedInUser);
+        Category category = categoryService.getCategory(categoryId, loggedInUser, false);
         Category parentCategory = null;
         if (category.getParentCategoryId() != -1) {
-            parentCategory = categoryService.getCategory(category.getParentCategoryId(), loggedInUser);
+            parentCategory = categoryService.getCategory(category.getParentCategoryId(), loggedInUser, false);
         }
 
         Map<String, Class<?>> categoryDto = new HashMap<>();
@@ -177,7 +177,7 @@ public class DocumentService {
         if (loggedInUser.getRoles().contains(Role.STUDENT)) {
             throw new AccessDeniedException("not authorized..");
         }
-        Category category = categoryService.getCategory(addRequest.categoryId(), loggedInUser);
+        Category category = categoryService.getCategory(addRequest.categoryId(), loggedInUser, false);
         checkIsDefenseCategory(category);
         Student student = studentService.getStudent(addRequest.studentId(), loggedInUser);
         String cloudPath = azureBlobService.upload(file, addRequest.studentId(), category.getName(), addRequest.title());
@@ -195,7 +195,7 @@ public class DocumentService {
 
     public Document modifyDocumentCategory(DocumentModifyCategoryRequest request, User loggedInUser) {
         Document document = getDocument(request.uuid(), loggedInUser);
-        Category newCategory = categoryService.getCategory(request.categoryId(), loggedInUser);
+        Category newCategory = categoryService.getCategory(request.categoryId(), loggedInUser, false);
         document.setCategory(newCategory);
         documentRepository.save(document);
         return document;

@@ -1,9 +1,12 @@
 package com.ahmadabbas.filetracking.backend.category;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,5 +34,10 @@ public interface CategoryRepository extends JpaRepository<Category, SubCategoryP
 
     @Query("select c from Category c where c.parentCategoryId = ?1 order by c.name")
     List<Category> findAllByParentCategoryId(Long parentCategoryId);
+
+    @Transactional
+    @Modifying
+    @Query("update Category c set c.deleted = FALSE where c.categoryId in ?1")
+    void undeleteAll(Collection<Long> categoryIds);
 
 }

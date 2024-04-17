@@ -13,57 +13,31 @@ import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.user.UserService;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Filter;
+import org.hibernate.Session;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 @Service
 @Transactional(readOnly = true)
+@Slf4j
 @RequiredArgsConstructor
 public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryPermissionRepository categoryPermissionRepository;
     private final UserService userService;
-
-    public Category getParentCategory(Long categoryId, User loggedInUser) {
-        return getCategory(categoryId, -1L, loggedInUser);
-    }
-
-    public Category getCategoryByName(String name) {
-        return categoryRepository.findByNameIgnoreCase(name)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "category with name %s not found".formatted(name)
-                ));
-    }
-
-    public Category getCategory(Long categoryId, User loggedInUser) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "category with id %s not found".formatted(categoryId)
-                ));
-        if (!getAllowedCategoriesIds(loggedInUser).contains(category.getCategoryId())) {
-            throw new AccessDeniedException("not authorized");
-        }
-        return category;
-    }
-
-    public Category getCategory(Long categoryId, Long parentCategoryId, User loggedInUser) {
-        Category category = categoryRepository.findByCategoryIdAndParentCategoryId(categoryId, parentCategoryId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "category with id %s and parent_id %s not found".formatted(categoryId, parentCategoryId)
-                ));
-        if (!getAllowedCategoriesIds(loggedInUser).contains(category.getCategoryId())) {
-            throw new AccessDeniedException("not authorized");
-        }
-        return category;
-    }
+    private final EntityManager entityManager;
 
     @Transactional
-    public Category createCategory(AddCategoryRequest request, User user) {
-        Set<Role> roles = user.getRoles();
+    public Category createCategory(AddCategoryRequest request, User loggedInUser) {
+        Set<Role> roles = loggedInUser.getRoles();
         if (roles.contains(Role.SECRETARY) && request.parentCategoryId() == -1L) {
             throw new AccessDeniedException("only allowed to create sub categories");
         }
@@ -78,90 +52,98 @@ public class CategoryService {
         throw new DuplicateResourceException("category with the name '%s' already exists!".formatted(request.name()));
     }
 
-    public List<Category> getAllParentCategories(User user) {
-        List<Category> categories;
-        Set<Role> roles = userService.getRoles(user);
-        if (roles.contains(Role.ADMINISTRATOR)) {
-            return categoryRepository.findAllByParentCategoryId(-1L);
-        } else {
-            categories = getAllowedParentCategories(roles);
-        }
-        return categories;
-    }
-
-    public List<Category> getAllowedCategories(User user) {
-        List<Category> categories = new LinkedList<>();
-        Set<Role> roles = user.getRoles();
-        if (roles.contains(Role.ADMINISTRATOR)) {
-            return categoryRepository.findAll();
-        }
-        for (var role : roles) {
-            Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findAllByRole(role);
-            categoryPermissions.forEach(permission -> {
-                Category category = permission.getCategory();
-                if (category != null) {
-                    if (canAccessCategory(user, category)) {
-                        categories.add(category);
-                        if (category.getParentCategoryId() == -1) {
-                            List<Category> childrenCategories = categoryRepository.findAllByParentCategoryId(category.getCategoryId());
-                            categories.addAll(childrenCategories);
-                        }
+    public List<Category> getAllParentCategories(User loggedInUser, boolean isDeleted) {
+        return getCategories(
+                isDeleted,
+                loggedInUser,
+                () -> {
+                    List<Category> categoryList;
+                    Set<Role> roles = userService.getRoles(loggedInUser);
+                    if (roles.contains(Role.ADMINISTRATOR)) {
+                        categoryList = categoryRepository.findAllByParentCategoryId(-1L);
+                    } else {
+                        categoryList = getAllowedParentCategories(roles, isDeleted);
                     }
+                    return categoryList;
                 }
-            });
-        }
-        return categories;
+        );
     }
 
-    public List<Category> getAllowedParentCategories(Set<Role> roles) {
-        List<Category> categories = new LinkedList<>();
-        if (roles.stream().anyMatch(role -> role.equals(Role.ADMINISTRATOR))) {
-            return categoryRepository.findAllParentCategories();
-        }
-        for (var role : roles) {
-            Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findAllByRole(role);
-            categoryPermissions.forEach(permission -> {
-                Category category = permission.getCategory();
-                if (category != null) {
-                    if (category.getParentCategoryId() == -1) {
-                        categories.add(category);
-                    }
-                }
-            });
-        }
-        return categories;
-    }
-
-    public List<Long> getAllowedCategoriesIds(User user) {
-        List<Category> allCategories = getAllowedCategories(user);
-        return allCategories.stream()
-                .map(Category::getCategoryId).toList();
-    }
-
-    public List<Category> getAllChildrenCategories(Long parentId) {
-        return categoryRepository.findAllByParentCategoryId(parentId);
-    }
-
-    public List<Category> getAllChildrenCategories(Long parentId, User user) {
-        List<Long> allowedCategoriesIds = getAllowedCategoriesIds(user);
-        if (!allowedCategoriesIds.contains(parentId)) {
-            throw new AccessDeniedException("not allowed to get children categories of `%s`".formatted(parentId));
-        }
-        return categoryRepository.findAllByParentCategoryId(parentId);
-    }
-
-    public List<FullCategoryResponse> getAllCategories(User user) {
-        List<Category> parentCategories = getAllParentCategories(user);
+    public List<FullCategoryResponse> getAllCategories(User loggedInUser, boolean isDeleted) {
+        List<Category> parentCategories = getAllParentCategoriesDeletedOrNot(loggedInUser);
         List<FullCategoryResponse> result = new LinkedList<>();
         for (var parent : parentCategories) {
-            if (!canAccessCategory(user, parent)) {
+            if (!canAccessCategory(loggedInUser, parent)) {
                 continue;
             }
-            List<Category> childrenCategories = getAllChildrenCategories(parent.getCategoryId());
+            List<Category> childrenCategories;
+            try {
+                childrenCategories = getAllChildrenCategories(parent.getCategoryId(), loggedInUser, isDeleted);
+            } catch (AccessDeniedException e) {
+                continue;
+            }
             FullCategoryResponse response = getFullCategoryResponse(parent, childrenCategories);
-            result.add(response);
+            if (isDeleted) {
+                if (response.deleted() || response.subCategories().parallelStream().anyMatch(Category::isDeleted)) {
+                    result.add(response);
+                }
+            } else {
+                result.add(response);
+            }
         }
         return result;
+    }
+
+    public List<Category> getAllChildrenCategories(Long parentId, User loggedInUser) {
+        return getAllChildrenCategories(parentId, loggedInUser, false);
+    }
+
+    @Transactional
+    public FullCategoryResponse toggleVisibility(Long categoryId, User loggedInUser) {
+        Category category = getCategoryNullable(categoryId, loggedInUser);
+        if (category != null) {
+            log.debug("We should delete categoryId: {}", categoryId);
+            if (category.getParentCategoryId() == -1) {
+                List<Category> children = getAllChildrenCategories(categoryId, loggedInUser);
+                var response = getFullCategoryResponse(category, children);
+                if (!children.isEmpty()) {
+                    categoryRepository.deleteAll(children);
+                }
+                categoryRepository.delete(category);
+                return response;
+            }
+            categoryRepository.delete(category);
+            return getFullCategoryResponse(category);
+        } else {
+            log.debug("We should undelete categoryId: {}", categoryId);
+            category = getCategory(categoryId, loggedInUser, true);
+            if (category.getParentCategoryId() == -1) {
+                List<Category> children = getAllChildrenCategories(categoryId, loggedInUser, true);
+                var response = getFullCategoryResponse(category, children);
+                if (!children.isEmpty()) {
+                    categoryRepository.undeleteAll(children.stream().map(Category::getCategoryId).toList());
+                }
+                categoryRepository.undeleteAll(Collections.singletonList(categoryId));
+                return response;
+            }
+            categoryRepository.delete(category);
+            return getFullCategoryResponse(category);
+        }
+    }
+
+    public List<FullCategoryPermissionResponse> getAllCategoryPermissions(User loggedInUser, boolean isDeleted) {
+        Map<Long, FullCategoryPermissionResponse> categoryMap = new LinkedHashMap<>();
+        List<Category> allParentCategories = getAllowedParentCategories(loggedInUser.getRoles(), isDeleted);
+        for (var category : allParentCategories) {
+            long categoryId = category.getCategoryId();
+            String categoryName = category.getName();
+            FullCategoryPermissionResponse categoryResponse = categoryMap.getOrDefault(
+                    categoryId,
+                    getCategoryPermissionResponse(categoryId, categoryName, loggedInUser, isDeleted)
+            );
+            categoryMap.put(categoryId, categoryResponse);
+        }
+        return categoryMap.values().stream().toList();
     }
 
     @Transactional
@@ -172,7 +154,8 @@ public class CategoryService {
             CategoryPermission permission =
                     categoryPermissionRepository.findAllByCategoryIdAndRole(request.categoryId(), request.role())
                             .orElseThrow(() -> new ResourceNotFoundException(
-                                    "category permission related with category_id %s not found".formatted(request.categoryId())
+                                    "category permission related with category_id %s not found"
+                                            .formatted(request.categoryId())
                             ));
             categoryPermissionRepository.delete(permission);
         } else {
@@ -186,22 +169,174 @@ public class CategoryService {
                     category
             ));
         }
-        return getCategoryPermissionResponse(request.categoryId(), category.getName(), loggedInUser);
+        return getCategoryPermissionResponse(request.categoryId(), category.getName(), loggedInUser, false);
     }
 
-    public List<FullCategoryPermissionResponse> getAllCategoryPermissions(User loggedInUser) {
-        Map<Long, FullCategoryPermissionResponse> categoryMap = new LinkedHashMap<>();
-        List<Category> allParentCategories = getAllowedParentCategories(loggedInUser.getRoles());
-        for (var category : allParentCategories) {
-            long categoryId = category.getCategoryId();
-            String categoryName = category.getName();
-            FullCategoryPermissionResponse categoryResponse = categoryMap.getOrDefault(
-                    categoryId,
-                    getCategoryPermissionResponse(categoryId, categoryName, loggedInUser)
-            );
-            categoryMap.put(categoryId, categoryResponse);
+    public Category getParentCategory(Long categoryId, User loggedInUser) {
+        return getCategory(categoryId, -1L, loggedInUser);
+    }
+
+    public Category getCategoryByName(String name) {
+        return getCategory(
+                false,
+                null,
+                () -> categoryRepository.findByNameIgnoreCase(name)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "category with name %s not found".formatted(name)
+                        ))
+        );
+    }
+
+    public Category getCategory(Long categoryId, User loggedInUser, boolean isDeleted) {
+        Category category = getCategory(
+                isDeleted,
+                loggedInUser,
+                () -> categoryRepository.findById(categoryId)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "category with id %s not found".formatted(categoryId)
+                        ))
+        );
+        if (!getAllowedCategoriesIds(loggedInUser, isDeleted).contains(category.getCategoryId())) {
+            throw new AccessDeniedException("not authorized");
         }
-        return categoryMap.values().stream().toList();
+        return category;
+    }
+
+    public Category getCategory(Long categoryId, Long parentCategoryId, User loggedInUser) {
+        Category category = getCategory(
+                false,
+                loggedInUser,
+                () -> categoryRepository.findByCategoryIdAndParentCategoryId(categoryId, parentCategoryId)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "category with id %s and parent_id %s not found"
+                                        .formatted(categoryId, parentCategoryId)
+                        ))
+        );
+        if (!getAllowedCategoriesIds(loggedInUser).contains(category.getCategoryId())) {
+            throw new AccessDeniedException("not authorized");
+        }
+        return category;
+    }
+
+    public List<Category> getAllowedParentCategories(Set<Role> roles, boolean isDeleted) {
+        return getCategories(
+                isDeleted,
+                null,
+                () -> {
+                    List<Category> categories = new LinkedList<>();
+                    if (roles.contains(Role.ADMINISTRATOR)) {
+                        categories = categoryRepository.findAllParentCategories();
+                    } else {
+                        for (var role : roles) {
+                            Set<CategoryPermission> categoryPermissions =
+                                    categoryPermissionRepository.findAllByRole(role);
+                            for (CategoryPermission permission : categoryPermissions) {
+                                Category category = permission.getCategory();
+                                if (category != null) {
+                                    if (category.getParentCategoryId() == -1) {
+                                        categories.add(category);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return categories;
+                }
+        );
+    }
+
+    public List<Long> getAllowedCategoriesIds(User loggedInUser) {
+        return getAllowedCategoriesIds(loggedInUser, false);
+    }
+
+    public List<Category> getAllowedCategories(User loggedInUser, boolean isDeleted) {
+        Set<Role> roles = loggedInUser.getRoles();
+        return getCategories(
+                isDeleted,
+                loggedInUser,
+                () -> {
+                    List<Category> categories = new LinkedList<>();
+                    if (roles.contains(Role.ADMINISTRATOR)) {
+                        return categoryRepository.findAll();
+                    }
+                    for (var role : roles) {
+                        Set<CategoryPermission> categoryPermissions = categoryPermissionRepository.findAllByRole(role);
+                        categoryPermissions.forEach(permission -> {
+                            Category category = permission.getCategory();
+                            if (category != null) {
+                                if (canAccessCategory(loggedInUser, category)) {
+                                    categories.add(category);
+                                    if (category.getParentCategoryId() == -1) {
+                                        List<Category> childrenCategories =
+                                                categoryRepository.findAllByParentCategoryId(category.getCategoryId());
+                                        categories.addAll(childrenCategories);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    return categories;
+                });
+    }
+
+    public List<Category> getAllParentCategoriesDeletedOrNot(User loggedInUser) {
+        List<Category> categoryList;
+        Set<Role> roles = userService.getRoles(loggedInUser);
+        if (roles.contains(Role.ADMINISTRATOR)) {
+            categoryList = categoryRepository.findAllByParentCategoryId(-1L);
+        } else {
+            categoryList = getAllowedParentCategoriesDeletedOrNot(roles);
+        }
+        return categoryList;
+    }
+
+    private List<Category> getAllowedParentCategoriesDeletedOrNot(Set<Role> roles) {
+        List<Category> categories = new LinkedList<>();
+        if (roles.contains(Role.ADMINISTRATOR)) {
+            categories = categoryRepository.findAllParentCategories();
+        } else {
+            for (var role : roles) {
+                Set<CategoryPermission> categoryPermissions =
+                        categoryPermissionRepository.findAllByRole(role);
+                for (CategoryPermission permission : categoryPermissions) {
+                    Category category = permission.getCategory();
+                    if (category != null) {
+                        if (category.getParentCategoryId() == -1) {
+                            categories.add(category);
+                        }
+                    }
+                }
+            }
+        }
+        return categories;
+    }
+
+    private List<Category> getAllChildrenCategories(Long categoryId, User loggedInUser, boolean isDeleted) {
+        List<Long> allowedCategoriesIds = getAllowedCategoriesIds(loggedInUser, isDeleted);
+        if (!allowedCategoriesIds.contains(categoryId)) {
+            throw new AccessDeniedException("not allowed to get children categories of `%s`".formatted(categoryId));
+        }
+        return getCategories(isDeleted, loggedInUser, () -> categoryRepository.findAllByParentCategoryId(categoryId));
+    }
+
+    private List<Long> getAllowedCategoriesIds(User loggedInUser, boolean isDeleted) {
+        if (isDeleted) {
+            List<Category> allCategories = getAllowedCategories(loggedInUser, true);
+            allCategories.addAll(getAllowedCategories(loggedInUser, false));
+            return allCategories.stream()
+                    .map(Category::getCategoryId).distinct().toList();
+        }
+        List<Category> allCategories = getAllowedCategories(loggedInUser, false);
+        return allCategories.stream()
+                .map(Category::getCategoryId).toList();
+    }
+
+    private Category getCategoryNullable(Long categoryId, User loggedInUser) {
+        return getCategoryNullable(categoryId, loggedInUser, false);
+    }
+
+    private Category getCategoryNullable(Long categoryId, User loggedInUser, boolean isDeleted) {
+        return getCategory(isDeleted, loggedInUser, () -> categoryRepository.findById(categoryId).orElse(null));
     }
 
     private boolean canAccessCategory(User user, Category parent) {
@@ -213,6 +348,10 @@ public class CategoryService {
         return true;
     }
 
+    private FullCategoryResponse getFullCategoryResponse(Category parent) {
+        return getFullCategoryResponse(parent, Collections.emptyList());
+    }
+
     private FullCategoryResponse getFullCategoryResponse(Category parent, List<Category> childrenCategories) {
         FullCategoryResponse response;
         if (!childrenCategories.isEmpty()) {
@@ -220,6 +359,7 @@ public class CategoryService {
                     parent.getCategoryId(),
                     parent.getParentCategoryId(),
                     parent.getName(),
+                    parent.isDeleted(),
                     childrenCategories
             );
         } else {
@@ -227,31 +367,58 @@ public class CategoryService {
                     parent.getCategoryId(),
                     parent.getParentCategoryId(),
                     parent.getName(),
+                    parent.isDeleted(),
                     Collections.emptyList()
             );
         }
         return response;
     }
 
-    private FullCategoryPermissionResponse getCategoryPermissionResponse(Long categoryId, String categoryName, User loggedInUser) {
+    private FullCategoryPermissionResponse getCategoryPermissionResponse(Long categoryId,
+                                                                         String categoryName,
+                                                                         User loggedInUser,
+                                                                         boolean isDeleted) {
         List<CategoryPermission> allPerms = categoryPermissionRepository.findAllByCategoryId(categoryId);
-        List<Category> subcategories = getAllChildrenCategories(categoryId, loggedInUser);
+        List<Category> subcategories = getAllChildrenCategories(categoryId, loggedInUser, isDeleted);
+        FullCategoryPermissionResponse result =
+                new FullCategoryPermissionResponse(categoryId, categoryName, new ArrayList<>(), new ArrayList<>());
         if (allPerms.isEmpty()) {
-            FullCategoryPermissionResponse result = new FullCategoryPermissionResponse(categoryId, categoryName, new ArrayList<>(), new ArrayList<>());
             if (!subcategories.isEmpty() && result.subCategories().isEmpty()) {
                 result.subCategories().addAll(subcategories);
             }
-            return result;
         } else {
-            FullCategoryPermissionResponse result = new FullCategoryPermissionResponse(categoryId, categoryName, new ArrayList<>(), new ArrayList<>());
-            allPerms.forEach(perm -> {
+            for (CategoryPermission perm : allPerms) {
                 if (!subcategories.isEmpty() && result.subCategories().isEmpty()) {
                     result.subCategories().addAll(subcategories);
                 }
                 result.permittedRoles().add(perm.getRole());
-            });
-            return result;
+            }
         }
+        return result;
+    }
+
+    private Category getCategory(boolean isDeleted, User loggedInUser, Supplier<Category> categorySupplier) {
+        if (isDeleted && loggedInUser != null && !loggedInUser.getRoles().contains(Role.ADMINISTRATOR)) {
+            isDeleted = false;
+        }
+        Session session = entityManager.unwrap(Session.class);
+        Filter filter = session.enableFilter("deletedCategoryFilter");
+        filter.setParameter("isDeleted", isDeleted);
+        Category category = categorySupplier.get();
+        session.disableFilter("deletedCategoryFilter");
+        return category;
+    }
+
+    private List<Category> getCategories(boolean isDeleted, User loggedInUser, Supplier<List<Category>> categorySupplier) {
+        if (isDeleted && loggedInUser != null && !loggedInUser.getRoles().contains(Role.ADMINISTRATOR)) {
+            isDeleted = false;
+        }
+        Session session = entityManager.unwrap(Session.class);
+        Filter filter = session.enableFilter("deletedCategoryFilter");
+        filter.setParameter("isDeleted", isDeleted);
+        List<Category> categories = categorySupplier.get();
+        session.disableFilter("deletedCategoryFilter");
+        return categories;
     }
 
 }

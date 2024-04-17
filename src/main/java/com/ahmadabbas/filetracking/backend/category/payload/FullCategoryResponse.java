@@ -8,6 +8,7 @@ public record FullCategoryResponse(
         Long categoryId,
         Long parentCategoryId,
         String name,
+        boolean deleted,
         List<Category> subCategories
 ) {
 }
