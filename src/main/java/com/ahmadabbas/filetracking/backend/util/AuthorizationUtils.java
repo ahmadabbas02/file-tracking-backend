@@ -67,7 +67,7 @@ public class AuthorizationUtils {
                 // only admin and secretary can update students
                 new AuthorizationRule(PATCH, new Role[]{ADMINISTRATOR, SECRETARY}, "api/v1/students/{studentId}"),
                 // only secretary can approve documents
-                new AuthorizationRule(new Role[]{SECRETARY}, "api/v1/documents/*/approve"),
+                new AuthorizationRule(new Role[]{SECRETARY, CHAIR}, "api/v1/documents/*/approve"),
                 // all can get their endpoint access
                 new AuthorizationRule(Role.values(), "api/v1/users/endpoints")
         );

@@ -352,10 +352,16 @@ public class DocumentService {
         DocumentStatus.ApprovalStatus newStatus = approveRequest.approvalStatus();
         DocumentStudentView doc = getDocumentStudentView(documentId, loggedInUser);
         if (doc instanceof PetitionDocumentStudentView petitionDocument) {
+            if (!loggedInUser.getRoles().contains(Role.CHAIR)) {
+                throw new AccessDeniedException("you are not allowed to approve petition document");
+            }
             petitionDocument.setApprovalStatus(newStatus);
             evm.save(entityManager, petitionDocument);
             return petitionDocument;
         } else if (doc instanceof MedicalReportDocumentStudentView medicalReportDocument) {
+            if (!loggedInUser.getRoles().contains(Role.SECRETARY)) {
+                throw new AccessDeniedException("you are not allowed to approve medical reports");
+            }
             medicalReportDocument.setApprovalStatus(newStatus);
             evm.save(entityManager, medicalReportDocument);
             return medicalReportDocument;

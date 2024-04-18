@@ -26,6 +26,7 @@ import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
+import com.opencsv.enums.CSVReaderNullFieldIndicator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -295,7 +296,11 @@ public class StudentService {
                             .program(csv.getProgram())
                             .year(csv.getYear())
                             .version(0)
-                            .educationStatus(csv.getEducationStatus())
+                            .educationStatus(
+                                    csv.getEducationStatus() != null
+                                            ? csv.getEducationStatus()
+                                            : EducationStatus.UNDERGRADUATE
+                            )
                             .user(user)
                             .build();
                 }).toList();
@@ -359,6 +364,7 @@ public class StudentService {
                             .withMappingStrategy(strategy)
                             .withIgnoreEmptyLine(true)
                             .withIgnoreLeadingWhiteSpace(true)
+                            .withFieldAsNull(CSVReaderNullFieldIndicator.BOTH)
                             .build();
             return new HashSet<>(csvToBean.parse());
         }
