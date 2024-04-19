@@ -23,6 +23,7 @@ import com.ahmadabbas.filetracking.backend.document.petition.payload.PetitionDoc
 import com.ahmadabbas.filetracking.backend.document.petition.view.PetitionDocumentStudentView;
 import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.exception.ResourceNotFoundException;
+import com.ahmadabbas.filetracking.backend.student.EducationStatus;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
 import com.ahmadabbas.filetracking.backend.student.view.StudentAdvisorView;
@@ -178,8 +179,8 @@ public class DocumentService {
             throw new AccessDeniedException("not authorized..");
         }
         Category category = categoryService.getCategoryWithDeletionFilter(addRequest.categoryId(), loggedInUser, false);
-        checkIsDefenseCategory(category);
         Student student = studentService.getStudent(addRequest.studentId(), loggedInUser);
+        checkIsDefenseCategory(category, student);
         String cloudPath = azureBlobService.upload(file, addRequest.studentId(), category.getName(), addRequest.title());
         log.debug("cloudPath received from uploading file: %s".formatted(cloudPath));
         Document document = Document.builder()
@@ -372,9 +373,12 @@ public class DocumentService {
         );
     }
 
-    private void checkIsDefenseCategory(Category category) {
+    private void checkIsDefenseCategory(Category category, Student student) {
         String name = category.getName().toLowerCase();
         if (name.contains("defense")) {
+            if (!student.getEducationStatus().equals(EducationStatus.GRADUATE)) {
+                throw new APIException(HttpStatus.BAD_REQUEST, "Defense can only be added to graduate students!");
+            }
             if (category.getParentCategoryId() == -1) {
                 throw new APIException(HttpStatus.BAD_REQUEST, "You should select either before or after defense category!");
             }
