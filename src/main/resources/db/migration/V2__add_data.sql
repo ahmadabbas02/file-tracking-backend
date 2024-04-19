@@ -78,13 +78,10 @@ INSERT INTO category_permission (id, role, category_parent_category_id, category
 VALUES (nextval('category_permission_seq'), 'ADVISOR', -1, 1), -- Medical Report
        (nextval('category_permission_seq'), 'ADVISOR', -1, 2), -- Contact Form
        (nextval('category_permission_seq'), 'ADVISOR', -1, 3), -- Internship
-       (nextval('category_permission_seq'), 'ADVISOR', -1, 4), -- Petition
-       (nextval('category_permission_seq'), 'ADVISOR', -1, 5);
--- Defense
+       (nextval('category_permission_seq'), 'ADVISOR', -1, 4); -- Petition
 
 -- Student categories
 INSERT INTO category_permission (id, role, category_parent_category_id, category_category_id)
 VALUES (nextval('category_permission_seq'), 'STUDENT', -1, 1), -- Medical Report
        (nextval('category_permission_seq'), 'STUDENT', -1, 2), -- Contact Form
-       (nextval('category_permission_seq'), 'STUDENT', -1, 4), -- Petition
-       (nextval('category_permission_seq'), 'STUDENT', -1, 5); -- Defense
+       (nextval('category_permission_seq'), 'STUDENT', -1, 4); -- Petition

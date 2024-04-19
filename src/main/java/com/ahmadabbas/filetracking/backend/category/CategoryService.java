@@ -134,7 +134,6 @@ public class CategoryService {
     public List<FullCategoryPermissionResponse> getAllCategoryPermissions(User loggedInUser, boolean isDeleted) {
         Map<Long, FullCategoryPermissionResponse> categoryMap = new LinkedHashMap<>();
         List<Category> allParentCategories = getAllowedParentCategories(loggedInUser, isDeleted);
-        System.out.println("allParentCategories = " + allParentCategories);
         for (var category : allParentCategories) {
             long categoryId = category.getCategoryId();
             FullCategoryPermissionResponse categoryResponse = categoryMap.getOrDefault(
