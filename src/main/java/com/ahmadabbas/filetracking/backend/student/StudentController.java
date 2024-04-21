@@ -1,6 +1,7 @@
 package com.ahmadabbas.filetracking.backend.student;
 
 import com.ahmadabbas.filetracking.backend.document.base.DocumentStatus;
+import com.ahmadabbas.filetracking.backend.exception.APIException;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentDto;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentMapper;
 import com.ahmadabbas.filetracking.backend.student.payload.StudentRegistrationRequest;
@@ -71,6 +72,10 @@ public class StudentController {
     @PostMapping("")
     public ResponseEntity<StudentDto> registerStudent(@RequestBody @Valid StudentRegistrationRequest studentRegistrationRequest,
                                                       @AuthenticationPrincipal UserPrincipal principal) {
+        if (studentRegistrationRequest.id() != null && studentRegistrationRequest.id().length() != 8) {
+            throw new APIException(HttpStatus.BAD_REQUEST,
+                    "id `%s` is not valid, it should be only 8 characters!".formatted(studentRegistrationRequest.id()));
+        }
         Student createdStudent = studentService.addStudent(studentRegistrationRequest, principal.getUserEntity());
         return new ResponseEntity<>(studentMapper.toDto(createdStudent), HttpStatus.CREATED);
     }
