@@ -1,0 +1,61 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    database: postgresql
+    open-in-view: false
+  jackson:
+    deserialization:
+      accept-empty-string-as-null-object: true
+  flyway:
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: ${DB_URL}
+    enabled: true
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          trust: "*"
+        auth: true
+        starttls:
+          enable: true
+        connectiontimeout: 5000
+        timeout: 3000
+        writetimeout: 5000
+springdoc:
+  default-produces-media-type: application/json
+azure:
+  storage:
+    container:
+      name: ${AZURE_CONTAINER}
+    connection:
+      string: ${AZURE_CONNECTION}
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET}
+      expiration: ${JWT_EXPIRATION_DAYS}
+      issuer: EMU File Tracker
+  mailing:
+    frontend:
+      activation-url: ${FRONTEND_ACC_ACTIVATION_URL}
+    from: random@email.com
+server:
+  error:
+    include-binding-errors: always
+    include-message: always
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  allowed-methods: ${CORS_ALLOWED_METHODS}
+  allowed-headers: ${CORS_ALLOWED_HEADERS}
+  exposed-headers: ${CORS_EXPOSED_HEADERS}
