@@ -3,7 +3,6 @@ package com.ahmadabbas.filetracking.backend.auth;
 import com.ahmadabbas.filetracking.backend.auth.payload.*;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.UserPrincipal;
-import com.ahmadabbas.filetracking.backend.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +22,6 @@ import java.util.Set;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
-    private final UserService userService;
 
     @Operation(
             summary = "Login to the system",
@@ -81,7 +79,7 @@ public class AuthenticationController {
     )
     @GetMapping("/roles")
     public ResponseEntity<Set<Role>> roles(@AuthenticationPrincipal UserPrincipal principal) {
-        Set<Role> roles = userService.getRoles(principal.getUserEntity());
+        Set<Role> roles = principal.getUserEntity().getRoles();
         return ResponseEntity.ok(roles);
     }
 }

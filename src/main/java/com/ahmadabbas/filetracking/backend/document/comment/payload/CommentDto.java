@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-
 public record CommentDto(
         Long id,
         String message,

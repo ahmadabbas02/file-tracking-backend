@@ -1,13 +1,8 @@
 package com.ahmadabbas.filetracking.backend.user.payload;
 
-import com.ahmadabbas.filetracking.backend.user.User;
-
 import java.io.Serializable;
 import java.util.Map;
 
-/**
- * DTO for {@link User}
- */
 public record UserDto(
         Long id,
         String firstName,

@@ -18,7 +18,6 @@ import com.ahmadabbas.filetracking.backend.student.view.StudentAdvisorView;
 import com.ahmadabbas.filetracking.backend.student.view.StudentView;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
-import com.ahmadabbas.filetracking.backend.user.UserService;
 import com.ahmadabbas.filetracking.backend.user.repository.UserRepository;
 import com.ahmadabbas.filetracking.backend.util.PagingUtils;
 import com.ahmadabbas.filetracking.backend.util.payload.CsvUploadResponse;
@@ -59,7 +58,6 @@ public class StudentService {
     private final UserRepository userRepository;
     private final AdvisorRepository advisorRepository;
     private final AdvisorService advisorService;
-    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final StudentRepository studentRepository;
     private final StudentViewRepository studentViewRepository;
@@ -147,10 +145,9 @@ public class StudentService {
         Pageable pageable = PagingUtils.getPageable(pageNo, pageSize, sortBy, order);
         Page<StudentAdvisorView> studentPage;
         log.debug("Logged in user = %s".formatted(loggedInUser));
-        Set<Role> roles = userService.getRoles(loggedInUser);
-        log.debug("Roles = %s".formatted(roles));
+        log.debug("Roles = %s".formatted(loggedInUser.getRoles()));
         searchQuery = searchQuery.trim();
-        if (roles.contains(Role.ADVISOR)) {
+        if (loggedInUser.hasRole(Role.ADVISOR)) {
             AdvisorUserView advisor = advisorService.getAdvisorByUserId(loggedInUser.getId());
             studentPage = studentRepository.getAllStudents(searchQuery,
                     advisor.getId(),
@@ -182,9 +179,8 @@ public class StudentService {
 
     public List<String> getAllStudentIds(User loggedInUser) {
         log.debug("Logged in user = %s".formatted(loggedInUser));
-        Set<Role> roles = userService.getRoles(loggedInUser);
-        log.debug("Roles = %s".formatted(roles));
-        if (!roles.contains(Role.ADVISOR)) {
+        log.debug("Roles = %s".formatted(loggedInUser.getRoles()));
+        if (!loggedInUser.hasRole(Role.ADVISOR)) {
             throw new RuntimeException("Unexpected error! report");
         }
         return studentRepository.findAllByAdvisorUserId(loggedInUser.getId());

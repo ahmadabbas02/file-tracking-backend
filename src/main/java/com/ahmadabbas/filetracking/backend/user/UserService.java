@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -49,10 +48,6 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "user with email `%s` not found".formatted(email)
                 ));
-    }
-
-    public Set<Role> getRoles(User user) {
-        return user.getRoles();
     }
 
     public PaginatedResponse<UserDto> getAllUsers(int pageNo,

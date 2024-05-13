@@ -28,7 +28,6 @@ import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.student.StudentService;
 import com.ahmadabbas.filetracking.backend.student.view.StudentAdvisorView;
 import com.ahmadabbas.filetracking.backend.student.view.StudentView;
-import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
 import com.ahmadabbas.filetracking.backend.util.AzureBlobService;
 import com.ahmadabbas.filetracking.backend.util.PagingUtils;
@@ -59,6 +58,7 @@ import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static com.ahmadabbas.filetracking.backend.user.Role.*;
 import static com.ahmadabbas.filetracking.backend.util.ValidationUtils.getObjectMapperWithValidation;
 
 @Service
@@ -353,14 +353,14 @@ public class DocumentService {
         DocumentStatus.ApprovalStatus newStatus = approveRequest.approvalStatus();
         DocumentStudentView doc = getDocumentStudentView(documentId, loggedInUser);
         if (doc instanceof PetitionDocumentStudentView petitionDocument) {
-            if (!loggedInUser.getRoles().contains(Role.CHAIR)) {
+            if (!loggedInUser.hasRole(CHAIR)) {
                 throw new AccessDeniedException("you are not allowed to approve petition document");
             }
             petitionDocument.setApprovalStatus(newStatus);
             evm.save(entityManager, petitionDocument);
             return petitionDocument;
         } else if (doc instanceof MedicalReportDocumentStudentView medicalReportDocument) {
-            if (!loggedInUser.getRoles().contains(Role.SECRETARY)) {
+            if (!loggedInUser.hasRole(SECRETARY)) {
                 throw new AccessDeniedException("you are not allowed to approve medical reports");
             }
             medicalReportDocument.setApprovalStatus(newStatus);
@@ -396,20 +396,19 @@ public class DocumentService {
     }
 
     private void checkDocumentsPermissions(User loggedInUser, List<DocumentPreviewView> documentDownloadViews) {
-        Set<Role> roles = loggedInUser.getRoles();
         List<Long> allowedCategories = categoryService.getAllowedCategoriesIds(loggedInUser);
         List<Long> documentsCategoryIds = documentDownloadViews.parallelStream().map(DocumentPreviewView::getCategoryId).toList();
         if (documentsCategoryIds.parallelStream().anyMatch(n -> !allowedCategories.contains(n))) {
             throw new AccessDeniedException("not authorized to perform action");
         }
         if (documentDownloadViews.parallelStream()
-                .anyMatch(d -> !checkUserSpecificRolePerms(loggedInUser, d.getStudentId(), roles))) {
+                .anyMatch(d -> !checkUserSpecificRolePerms(loggedInUser, d.getStudentId()))) {
             throw new AccessDeniedException("not authorized to perform action");
         }
     }
 
     private void checkDocumentPermissions(User loggedInUser, String documentStudentId, Long categoryId, String categoryName) {
-        checkUserSpecificRolePerms(loggedInUser, documentStudentId, loggedInUser.getRoles());
+        checkUserSpecificRolePerms(loggedInUser, documentStudentId);
         List<Long> allowedCategories = categoryService.getAllowedCategoriesIds(loggedInUser);
         if (!allowedCategories.contains(categoryId)) {
             throw new AccessDeniedException(
@@ -418,10 +417,10 @@ public class DocumentService {
         }
     }
 
-    private boolean checkUserSpecificRolePerms(User loggedInUser, String documentStudentId, Set<Role> roles) {
-        if (roles.contains(Role.STUDENT)) {
+    private boolean checkUserSpecificRolePerms(User loggedInUser, String documentStudentId) {
+        if (loggedInUser.hasRole(STUDENT)) {
             checkStudentDocumentPermissions(loggedInUser, documentStudentId);
-        } else if (roles.contains(Role.ADVISOR)) {
+        } else if (loggedInUser.hasRole(ADVISOR)) {
             checkAdvisorDocumentPermissions(loggedInUser);
         }
         return true;

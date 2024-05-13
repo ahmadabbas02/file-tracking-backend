@@ -24,12 +24,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // we only access normal user_id logins through jwt
         if (username.startsWith("jwt:")) {
             username = username.replace("jwt:", "");
             if (username.length() < 8) {
-                // handle cases of login for admin, chair, secretary etc
-                Optional<User> user = userRepository.findById(Long.valueOf(username));
+                Optional<User> user = userRepository.findUserById(Long.valueOf(username));
                 if (user.isPresent()) {
                     return new UserPrincipal(user.get());
                 }

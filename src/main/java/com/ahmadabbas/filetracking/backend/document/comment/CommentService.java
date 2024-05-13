@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -31,10 +30,9 @@ public class CommentService {
 
     @Transactional
     public Comment addComment(CommentAddRequest addRequest, UUID documentId, User loggedInUser) {
-        Set<Role> roles = loggedInUser.getRoles();
         Document doc = documentService.getDocument(documentId, loggedInUser);
         String categoryName = doc.getCategory().getName().toLowerCase();
-        if (roles.contains(Role.STUDENT)) {
+        if (loggedInUser.hasRole(Role.STUDENT)) {
             if (!doc.getStudent().getUser().getId().equals(loggedInUser.getId())) {
                 throw new AccessDeniedException("not authorized..");
             }

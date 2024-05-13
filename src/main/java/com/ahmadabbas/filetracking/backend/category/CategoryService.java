@@ -12,7 +12,6 @@ import com.ahmadabbas.filetracking.backend.student.EducationStatus;
 import com.ahmadabbas.filetracking.backend.student.Student;
 import com.ahmadabbas.filetracking.backend.user.Role;
 import com.ahmadabbas.filetracking.backend.user.User;
-import com.ahmadabbas.filetracking.backend.user.UserService;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,13 +31,11 @@ import java.util.function.Supplier;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryPermissionRepository categoryPermissionRepository;
-    private final UserService userService;
     private final EntityManager entityManager;
 
     @Transactional
     public Category createCategory(AddCategoryRequest request, User loggedInUser) {
-        Set<Role> roles = loggedInUser.getRoles();
-        if (roles.contains(Role.SECRETARY) && request.parentCategoryId() == -1L) {
+        if (loggedInUser.hasRole(Role.SECRETARY) && request.parentCategoryId() == -1L) {
             throw new AccessDeniedException("only allowed to create sub categories");
         }
         if (!categoryRepository.existsByName(request.name())) {
@@ -58,8 +55,7 @@ public class CategoryService {
                 loggedInUser,
                 () -> {
                     List<Category> categoryList;
-                    Set<Role> roles = userService.getRoles(loggedInUser);
-                    if (roles.contains(Role.ADMINISTRATOR)) {
+                    if (loggedInUser.hasRole(Role.ADMINISTRATOR)) {
                         categoryList = categoryRepository.findAllByParentCategoryId(-1L);
                     } else {
                         categoryList = getAllowedParentCategories(loggedInUser, isDeleted);
@@ -113,7 +109,6 @@ public class CategoryService {
                 return response;
             }
             categoryRepository.delete(category);
-            return getFullCategoryResponse(category);
         } else {
             log.debug("We should undelete categoryId: {}", categoryId);
             category = getCategoryWithDeletionFilter(categoryId, loggedInUser, true);
@@ -127,8 +122,8 @@ public class CategoryService {
                 return response;
             }
             categoryRepository.undeleteAll(Collections.singletonList(category.getCategoryId()));
-            return getFullCategoryResponse(category);
         }
+        return getFullCategoryResponse(category);
     }
 
     public List<FullCategoryPermissionResponse> getAllCategoryPermissions(User loggedInUser, boolean isDeleted) {
@@ -251,7 +246,7 @@ public class CategoryService {
                 loggedInUser,
                 () -> {
                     List<Category> categories = new LinkedList<>();
-                    if (roles.contains(Role.ADMINISTRATOR)) {
+                    if (loggedInUser.hasRole(Role.ADMINISTRATOR)) {
                         return categoryRepository.findAll();
                     }
                     for (var role : roles) {
@@ -276,11 +271,10 @@ public class CategoryService {
 
     public List<Category> getAllParentCategoriesDeletedOrNot(User loggedInUser) {
         List<Category> categoryList;
-        Set<Role> roles = userService.getRoles(loggedInUser);
-        if (roles.contains(Role.ADMINISTRATOR)) {
+        if (loggedInUser.hasRole(Role.ADMINISTRATOR)) {
             categoryList = categoryRepository.findAllByParentCategoryId(-1L);
         } else {
-            categoryList = getAllowedParentCategories(roles);
+            categoryList = getAllowedParentCategories(loggedInUser.getRoles());
         }
         return categoryList;
     }

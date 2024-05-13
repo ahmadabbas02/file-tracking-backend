@@ -7,9 +7,6 @@ import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
-/**
- * DTO for {@link com.ahmadabbas.filetracking.backend.document.petition.PetitionDocument}
- */
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class PetitionDocumentDto extends DocumentDto implements Serializable {

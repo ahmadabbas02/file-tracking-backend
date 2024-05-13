@@ -1,13 +1,9 @@
 package com.ahmadabbas.filetracking.backend.advisor.payload;
 
-import com.ahmadabbas.filetracking.backend.advisor.Advisor;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.io.Serializable;
 
-/**
- * DTO for {@link Advisor}
- */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record AdvisorDto(
         String id,

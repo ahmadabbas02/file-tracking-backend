@@ -64,7 +64,7 @@ public class User {
     @Column(nullable = false)
     private boolean isCredentialsNonExpired;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private Set<Token> tokens;
 
     @OneToOne(mappedBy = "user")
@@ -106,16 +106,20 @@ public class User {
 
     }
 
+    public boolean hasRole(Role role) {
+        return getRoles().contains(role);
+    }
+
     public boolean isAdmin() {
-        return getRoles().contains(ADMINISTRATOR);
+        return hasRole(ADMINISTRATOR);
     }
 
     public boolean isAdvisor() {
-        return getRoles().contains(Role.ADVISOR);
+        return hasRole(Role.ADVISOR);
     }
 
     public boolean isStudent() {
-        return getRoles().contains(STUDENT);
+        return hasRole(STUDENT);
     }
 }
 
