@@ -34,3 +34,4 @@ build/
 .vscode/
 
 /.fastRequest/**
+/run.bat

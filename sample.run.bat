@@ -1,0 +1,22 @@
+@echo off
+
+REM configuration variables
+set DB_URL=
+set DB_USERNAME=
+set DB_PASSWORD=
+set JWT_SECRET=
+set JWT_EXPIRATION_DAYS=
+set MAIL_HOST=
+set MAIL_PORT=
+set MAIL_USERNAME=
+set MAIL_PASSWORD=
+set AZURE_CONTAINER=
+set AZURE_CONNECTION=DefaultEndpointsProtocol=
+set FRONTEND_ACC_ACTIVATION_URL=
+set CORS_ALLOWED_ORIGINS=
+set CORS_ALLOWED_METHODS=
+set CORS_ALLOWED_HEADERS=
+set CORS_EXPOSED_HEADERS=
+
+java -jar ./target/backend-0.0.1-SNAPSHOT.jar
+pause
