@@ -1,7 +1,6 @@
 package com.ahmadabbas.filetracking.backend.document.contact.payload;
 
 import com.ahmadabbas.filetracking.backend.document.contact.ContactDocument;
-import com.ahmadabbas.filetracking.backend.user.User;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 

@@ -74,10 +74,6 @@ public class AuthenticationService {
         if (user.isCredentialsNonExpired()) {
             throw new APIException(HttpStatus.BAD_REQUEST, "Account is already activated!");
         }
-        // TODO: enable later
-        /*if (activationCodeRepository.existsByEmailNotExpired(activationRequest.email(), LocalDateTime.now())) {
-            throw new APIException(HttpStatus.BAD_REQUEST, "Code already sent! Please try again later.");
-        }*/
         sendCodeEmail(user);
         return new ActivationEmailResponse("Please allow up to 5 minutes for the email to be received" +
                                            "and don't forget to check the spam folder!");
