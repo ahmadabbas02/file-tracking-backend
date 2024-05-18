@@ -421,13 +421,13 @@ public class DocumentService {
         if (loggedInUser.hasRole(STUDENT)) {
             checkStudentDocumentPermissions(loggedInUser, documentStudentId);
         } else if (loggedInUser.hasRole(ADVISOR)) {
-            checkAdvisorDocumentPermissions(loggedInUser);
+            checkAdvisorDocumentPermissions(loggedInUser, documentStudentId);
         }
         return true;
     }
 
-    private void checkAdvisorDocumentPermissions(User loggedInUser) {
-        StudentAdvisorView studentAdvisorView = studentService.getStudentAdvisorViewByUserId(loggedInUser.getId());
+    private void checkAdvisorDocumentPermissions(User loggedInUser, String documentStudentId) {
+        StudentAdvisorView studentAdvisorView = studentService.getStudentAdvisorViewByStudentId(documentStudentId);
         if (!studentAdvisorView.getAdvisor().getUserId().equals(loggedInUser.getId())) {
             throw new AccessDeniedException("not authorized to get not own students documents.");
         }
