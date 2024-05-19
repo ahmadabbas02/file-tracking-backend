@@ -25,7 +25,6 @@ import com.ahmadabbas.filetracking.backend.util.payload.PaginatedResponse;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
-import com.opencsv.enums.CSVReaderNullFieldIndicator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -43,10 +42,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -311,6 +307,12 @@ public class StudentService {
             throw new APIException(HttpStatus.INTERNAL_SERVER_ERROR, "failed to save users");
         }
 
+        Map<User, User> userMapping = new HashMap<>();
+        for (int i = 0; i < users.size(); i++) {
+            userMapping.put(users.get(i), savedUsers.get(i));
+        }
+        students.forEach(student -> student.setUser(userMapping.get(student.getUser())));
+
         Instant startSaveStudents = Instant.now();
         List<Student> savedStudents = studentRepository.saveAll(students);
         Instant endSaveStudents = Instant.now();
@@ -360,7 +362,6 @@ public class StudentService {
                             .withMappingStrategy(strategy)
                             .withIgnoreEmptyLine(true)
                             .withIgnoreLeadingWhiteSpace(true)
-                            .withFieldAsNull(CSVReaderNullFieldIndicator.BOTH)
                             .build();
             return new HashSet<>(csvToBean.parse());
         }
